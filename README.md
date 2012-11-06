@@ -4,8 +4,9 @@ OpenSEO
 About
 -----
 
-Open source SEO tool built with [WebSharper](http://www.websharper.com/ "WebSharper") using functionality provided by this [SEO library](https://github.com/TahaHachana/SEOLib).
+http://openseo.apphb.com/
 
+Open source SEO tool built with [WebSharper](http://www.websharper.com/ "WebSharper") using functionality provided by this [SEO library](https://github.com/TahaHachana/SEOLib).
 
 MIT License
 -----------
