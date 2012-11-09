@@ -39,6 +39,7 @@
     <Compile Include="Mongo.fs" />
     <Compile Include="Utilities.fs" />
     <Compile Include="Details.fs" />
+    <Compile Include="Keywords.fs" />
     <Compile Include="UrlForm.fs" />
     <Compile Include="SiteContent.fs" />
     <Compile Include="Model.fs" />
@@ -58,8 +59,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="SEOLib">
-      <HintPath>..\..\packages\SEOLib.0.3.43\lib\Net45\SEOLib.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\SEOLib.0.3.48\lib\Net45\SEOLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />

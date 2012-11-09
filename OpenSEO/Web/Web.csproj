@@ -40,6 +40,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="*.aspx" />
+    <Content Include="Images\Loader.gif" />
     <Content Include="robots.txt" />
     <Content Include="Scripts\*.js" />
     <Content Include="Content\**\*.*" />

@@ -1,4 +1,4 @@
-﻿namespace FSEO
+﻿namespace OpenSEO
 
 open IntelliFactory.Html
 open SiteContent
@@ -13,6 +13,9 @@ module View =
                 SharedContent.forkme
                 Div [Class "container"] -< [
                     new UrlForm.Client.FormViewer () :> INode<_>
+                    Div [
+                        Img [Src "/Images/Loader.gif"; Id "loader"; Class "offset2"]
+                    ] :> _
                 ]
             ]
 
@@ -21,7 +24,7 @@ module View =
             [
                 AboutContent.navigation
                 SharedContent.forkme
-                Div [Class "container"] -< [
+                Div [Class "container"; Id "about"] -< [
                     AboutContent.description
                 ]
             ]
@@ -31,9 +34,10 @@ module View =
             [
                 ReportContent.navigation
                 SharedContent.forkme
-                Div [Class "container"] -< [
+                Div [Class "container"; Id "report"] -< [
                     ReportContent.tabs reportId
                 ]
                 Script [Src "http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"]
                 Script [Src "../Scripts/BootstrapTabs.min.js"]
+                Script [Src "../Scripts/BootstrapTransitions.min.js"]
             ]

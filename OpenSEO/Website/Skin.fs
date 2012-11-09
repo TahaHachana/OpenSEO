@@ -1,4 +1,4 @@
-﻿namespace FSEO
+﻿namespace OpenSEO
 
 open System.Web
 open IntelliFactory.WebSharper.Sitelets

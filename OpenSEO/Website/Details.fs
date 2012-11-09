@@ -1,4 +1,4 @@
-﻿namespace FSEO
+﻿namespace OpenSEO
 
 open System
 open IntelliFactory.WebSharper
@@ -11,50 +11,52 @@ module Details =
         
         type Details =
             {
-                RequestUri : string
-                Size : string
-                Server : string
-                ElapsedTime : string
-                Title : string
-                TitleLength : string
-                Description : string
+                RequestUri        : string
+                Size              : string
+                Server            : string
+                ElapsedTime       : string
+                Title             : string
+                TitleLength       : string
+                Description       : string
                 DescriptionLength : string
-                Headings : (string * string list) []
+                Headings          : (string * string list) []
             }
         
-        let makeDetails requestUri size server elapsedTime title titleLength description descriptionLength headings =
+        let makeDetails requestUri size server elapsedTime title titLen description descLen headings =
             {
-                RequestUri = requestUri
-                Size = size
-                Server = server
-                ElapsedTime = elapsedTime
-                Title = title
-                TitleLength = titleLength
-                Description = description
-                DescriptionLength = descriptionLength
-                Headings = headings
+                RequestUri        = requestUri
+                Size              = size
+                Server            = server
+                ElapsedTime       = elapsedTime
+                Title             = title
+                TitleLength       = titLen
+                Description       = description
+                DescriptionLength = descLen
+                Headings          = headings
             }
+        
+        let processHeadings (headings : string []) =
+            headings
+            |> Array.map (fun x -> x.Split([|"|||"|], StringSplitOptions.None))
+            |> Seq.groupBy (fun x -> x.[0])
+            |> Seq.map (fun (x, y) -> x, y |> Seq.map (fun z -> z.[1]) |> Seq.toList)
+            |> Seq.sortBy fst
+            |> Seq.toArray
 
         [<RpcAttribute>]
         let details id =
             async {
-                let uriDetails = Mongo.uriDetailsById id
+                let uriDetails = Mongo.Details.uriDetailsById id
                 let requestUri = uriDetails.RequestUri
                 let size = uriDetails.Size
                 let server = uriDetails.Server
                 let elapsedTime = uriDetails.ElapsedTime
                 let title = uriDetails.Title
-                let titleLength = uriDetails.TitleLength
-                let descritpion = uriDetails.Description
-                let descriptionLength = uriDetails.DescriptionLength
-                let headings =
-                    uriDetails.Headings
-                    |> Array.map (fun x -> x.Split([|"|||"|], StringSplitOptions.None))
-                    |> Seq.groupBy (fun x -> x.[0])
-                    |> Seq.map (fun (x, y) -> x, y |> Seq.map (fun z -> z.[1]) |> Seq.toList)
-                    |> Seq.sortBy fst
-                    |> Seq.toArray
-                let details = makeDetails requestUri size server elapsedTime title titleLength descritpion descriptionLength headings
+                let titLen = uriDetails.TitleLength
+                let desc = uriDetails.Description
+                let descLen = uriDetails.DescriptionLength
+                let headings = processHeadings uriDetails.Headings
+                let details = makeDetails requestUri size server elapsedTime title titLen desc descLen headings
                 return details
             }
 
@@ -77,7 +79,7 @@ module Details =
         [<JavaScriptAttribute>]
         let detailsSection id =
             let tabsDiv = Div []
-            HTML5.Tags.Section [Attr.Class "tab-pane active"; Id "details"] -< [
+            HTML5.Tags.Section [Attr.Class "tab-pane fade active in reportSection"; Id "details"] -< [
                 makeDiv "URL" "url"
                 Hr []
                 makeDiv "Size" "size"
@@ -115,8 +117,8 @@ module Details =
                 } |> Async.Start)
                 
         type DetailsViewer(id) =
+
             inherit Web.Control()
 
             [<JavaScript>]
             override this.Body = detailsSection id :> _
-

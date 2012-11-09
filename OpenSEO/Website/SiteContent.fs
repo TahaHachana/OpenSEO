@@ -1,4 +1,4 @@
-﻿namespace FSEO
+﻿namespace OpenSEO
 
 open IntelliFactory.WebSharper.Sitelets
 open IntelliFactory.Html
@@ -21,7 +21,7 @@ module SiteContent =
         
         let title = "Open Source SEO Tool"
 
-        let metaDesc = "Open source search engine optimization tool that provides HTML auditing, keywords analysis and speed testing functionality."
+        let metaDesc = "Open source search engine optimization tool offering HTML auditing, keywords analysis and speed testing functionality."
 
     module AboutContent =
         
@@ -52,9 +52,11 @@ module SiteContent =
                 UL [Class "nav nav-tabs"] -< [
                     LI [Class "active"] -< [A [HRef "#details"; HTML5.Data "toggle" "tab"] -< [Text "Details"]]
                     LI [A [HRef "#keywords"; HTML5.Data "toggle" "tab"] -< [Text "Keywords"]]
+                    LI [A [HRef "#links"; HTML5.Data "toggle" "tab"] -< [Text "Links"]]
                 ]
                 Div [Class "tab-content"] -< [
-                    new Details.Client.DetailsViewer(id) :> INode<_>
-                    Div [Class "tab-pane"; Id "keywords"] -< [] :> _
+                    new Details.Client.DetailsViewer(id)   :> INode<_>
+                    new Keywords.Client.KeywordsViewer(id) :> _
+                    Div [Class "tab-pane fade"; Id "links"] -< [] :> _
                 ]
             ]
