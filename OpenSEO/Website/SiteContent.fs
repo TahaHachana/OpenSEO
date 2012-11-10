@@ -41,11 +41,21 @@ module SiteContent =
 
     module ReportContent =
         
-        let navigation : Content.HtmlElement = Utilities.Server.makeNavigation None
+        let navigation : Content.HtmlElement =
+            Utilities.Server.makeNavigation None //-< [
+//                Div [Class "progress progress-striped active container"; Id "progressDiv"] -< [
+//                    Div [Class "bar"]
+//                ]
+//            ]
 
         let title = "SEO Report"
 
         let metaDesc = ""
+
+        let progressBar : Content.HtmlElement =
+            Div [Class "progress progress-striped active"; Id "progressDiv"] -< [
+                Div [Class "bar"; Id "progressBar"; HTML5.Data "width" "0"]
+            ]
 
         let tabs id =
             Div [Class "tabbable tabs-left"] -< [

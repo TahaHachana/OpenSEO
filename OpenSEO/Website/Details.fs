@@ -19,7 +19,7 @@ module Details =
                 TitleLength       : string
                 Description       : string
                 DescriptionLength : string
-                Headings          : (string * string list) []
+                Headings          : (string * string list) [] option
             }
         
         let makeDetails requestUri size server elapsedTime title titLen description descLen headings =
@@ -36,12 +36,16 @@ module Details =
             }
         
         let processHeadings (headings : string []) =
-            headings
-            |> Array.map (fun x -> x.Split([|"|||"|], StringSplitOptions.None))
-            |> Seq.groupBy (fun x -> x.[0])
-            |> Seq.map (fun (x, y) -> x, y |> Seq.map (fun z -> z.[1]) |> Seq.toList)
-            |> Seq.sortBy fst
-            |> Seq.toArray
+            match headings with
+                | [||] -> None
+                | _    ->
+                    headings
+                    |> Array.map (fun x -> x.Split([|"|||"|], StringSplitOptions.None))
+                    |> Seq.groupBy (fun x -> x.[0])
+                    |> Seq.map (fun (x, y) -> x, y |> Seq.map (fun z -> z.[1]) |> Seq.toList)
+                    |> Seq.sortBy fst
+                    |> Seq.toArray
+                    |> Some
 
         [<RpcAttribute>]
         let details id =
@@ -68,8 +72,8 @@ module Details =
         [<JavaScriptAttribute>]
         let makeDiv txt id =
             Div [Attr.Class "row-fluid"] -< [
-                Div [Attr.Class "span4"] -< [H4 [Attr.Class "h4"] -< [Text txt]]
-                Div [Attr.Class "span8"] -< [P [Id id]]
+                Div [Attr.Class "span3"] -< [H4 [Attr.Class "h4"] -< [Text txt]]
+                Div [Attr.Class "span9"] -< [P [Id id]]
             ]
         
         [<JavaScriptAttribute>]
@@ -95,8 +99,8 @@ module Details =
                 makeDiv "Length" "descriptionLength"
                 Hr []
                 Div [Attr.Class "row-fluid"] -< [
-                    Div [Attr.Class "span4"] -< [H4 [Attr.Class "h4"] -< [Text "Headings"]]
-                    Div [Attr.Class "span8"] -< [tabsDiv]
+                    Div [Attr.Class "span3"] -< [H4 [Attr.Class "h4"] -< [Text "Headings"]]
+                    Div [Attr.Class "span9"] -< [tabsDiv]
                 ]
             ]
             |>! OnAfterRender (fun _ ->
@@ -112,8 +116,12 @@ module Details =
                         "#description"      , details.Description
                         "#descriptionLength", details.DescriptionLength
                     ] |> List.iter (fun x -> x ||> setPText)
-                    let tabs = Utilities.Client.makeTabsDiv details.Headings
-                    tabsDiv.Append tabs
+                    match details.Headings with
+                        | None -> ()
+                        | Some headings ->
+                            let tabs = Utilities.Client.makeTabsDiv headings
+                            tabsDiv.Append tabs
+                    Utilities.Client.updateProgressBar ()
                 } |> Async.Start)
                 
         type DetailsViewer(id) =

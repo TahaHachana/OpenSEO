@@ -17,8 +17,6 @@
 #report, #about
 {
     margin-top: 100px;
-    /*height: 600px;
-    overflow: scroll;*/
 }
 
 .reportSection
@@ -32,4 +30,9 @@
     visibility: hidden;
     margin-top: 12px;
 }
-    
+
+#progressDiv {
+    margin-left: 30%;
+    width: 40%;
+    margin-top: 20px;
+}

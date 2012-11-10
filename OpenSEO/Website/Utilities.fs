@@ -32,6 +32,7 @@ module Utilities =
     module Client =
 
         open IntelliFactory.WebSharper.Html
+        open IntelliFactory.WebSharper.JQuery
 
         [<JavaScriptAttribute>]
         let makeList lst =
@@ -78,6 +79,21 @@ module Utilities =
                 tabsContent
                 |> Array.mapi (fun idx (x, y) -> makeDiv idx x y)
             Div [Attr.Class "tabbable"] -< [
-                UL [Attr.Class "nav nav-tabs"] -< lis
+                UL [Attr.Class "nav nav-pills"] -< lis
                 Div [Attr.Class "tab-content"] -< divs
             ]
+
+        [<JavaScriptAttribute>]
+        let updateProgressBar () =
+            let progressBarJquery = JQuery.Of("#progressBar")
+            let dataWidth = progressBarJquery.Data("width").ToString() |> int
+            match dataWidth with
+                | 50 ->
+                    progressBarJquery.Css("width", "100%").Ignore
+                    JQuery.Of("#progressDiv").FadeOut(10000.).Ignore
+                | _ ->
+                    let width = dataWidth + 50
+                    let width' = width |> string |> fun x -> x + "%"
+                    progressBarJquery.Css("width", width').Ignore
+                    progressBarJquery.Data("width", width).Ignore
+                    JQuery.Of("#progressDiv").FadeOut(10000.).Ignore

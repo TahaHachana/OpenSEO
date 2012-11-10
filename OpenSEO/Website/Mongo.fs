@@ -108,6 +108,8 @@ module Mongo =
 
         let uriDetailsCollection = Utilities.collectionByName<UriDetails> Utilities.database "uridetails"
 
+//        uriDetailsCollection.RemoveAll()
+
         let queryable = uriDetailsCollection.FindAll().AsQueryable()
     
         let insertUriDetails (httpData : HttpData) =
@@ -150,12 +152,12 @@ module Mongo =
 
         let keywordsCollection = Utilities.collectionByName<Keyword> Utilities.database "keywords"
 
+//        keywordsCollection.RemoveAll()
+
         let queryable = keywordsCollection.FindAll().AsQueryable()
     
         let  insertKeywords (keywords : Keyword []) =
             try
-//                let id = ObjectId.GenerateNewId()
-//                let uriDetails = makeUriDetails httpData id
                 keywordsCollection.InsertBatch keywords |> ignore
             with _ -> ()
 

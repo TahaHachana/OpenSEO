@@ -84,6 +84,7 @@ module Keywords =
                     displayKeywords keywordsData.[0] "#table1"
                     displayKeywords keywordsData.[1] "#table2"
                     displayKeywords keywordsData.[2] "#table3"
+                    Utilities.Client.updateProgressBar ()
                 } |> Async.Start )
             
         type KeywordsViewer(id) =

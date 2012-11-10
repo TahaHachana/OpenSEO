@@ -36,6 +36,7 @@ module View =
                 SharedContent.forkme
                 Div [Class "container"; Id "report"] -< [
                     ReportContent.tabs reportId
+                    ReportContent.progressBar
                 ]
                 Script [Src "http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"]
                 Script [Src "../Scripts/BootstrapTabs.min.js"]

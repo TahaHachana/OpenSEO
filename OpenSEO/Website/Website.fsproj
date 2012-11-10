@@ -59,7 +59,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="SEOLib">
-      <HintPath>..\..\packages\SEOLib.0.3.48\lib\Net45\SEOLib.dll</HintPath>
+      <HintPath>..\..\packages\SEOLib.0.3.52\lib\Net45\SEOLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />

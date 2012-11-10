@@ -66,6 +66,7 @@ module UrlForm =
                     Attr.Type "text"
                     HTML5.Attr.PlaceHolder "http://www.example.com/"
                     HTML5.Attr.AutoFocus "autofocus"
+                    HTML5.Attr.SpellCheck "false"
                 ]
                 |>! OnKeyDown (fun _ key ->
                     let key' = key.KeyCode
@@ -74,7 +75,7 @@ module UrlForm =
                         | _  -> ())
 
             let submitBtn =
-                Button [Id "submitButton"; Attr.Class "btn btn-primary"; Text "Submit"; Attr.Type "button"]
+                Button [Id "submitButton"; Attr.Class "btn btn-primary"; Text "Submit"]
                 |>! OnClick (fun x _ ->
                     async {
                         x.AddClass "disabled"

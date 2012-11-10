@@ -1,6 +1,6 @@
 (function()
 {
- var Global=this,Runtime=this.IntelliFactory.Runtime,OpenSEO,Details,Client,WebSharper,Html,Default,List,T,Operators,HTML5,Remoting,Seq,Utilities,Client1,Concurrency,jQuery,Keywords,Client2,Arrays,UrlForm,Client3,EventsPervasives,window,alert;
+ var Global=this,Runtime=this.IntelliFactory.Runtime,OpenSEO,Details,Client,WebSharper,Html,Default,List,T,Operators,HTML5,Remoting,Seq,Utilities,Client1,Concurrency,jQuery,Keywords,Client2,Arrays,UrlForm,Client3,EventsPervasives,window,alert,String;
  Runtime.Define(Global,{
   OpenSEO:{
    Details:{
@@ -29,17 +29,17 @@
        $:0
       })),Client.makeDiv("Description","description"),Client.makeDiv("Length","descriptionLength"),Default.Hr(Runtime.New(T,{
        $:0
-      })),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span4")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text("Headings")]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span8")])),List.ofArray([tabsDiv]))]))]));
+      })),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text("Headings")]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([tabsDiv]))]))]));
       f=(f1=function()
       {
-       var x2,f2,f6;
+       var x2,f2,f8;
        x2=(f2=function()
        {
         var x3,f3;
         x3=Remoting.Async("Website:2",[id]);
         f3=function(_arg11)
         {
-         var x4,f4,action,tabs;
+         var x4,f4,action,a,matchValue,headings,tabs,b,f6,f7;
          x4=List.ofArray([["#url",_arg11.RequestUri],["#size",_arg11.Size],["#server",_arg11.Server],["#elapsedTime",_arg11.ElapsedTime],["#title",_arg11.Title],["#titleLength",_arg11.TitleLength],["#description",_arg11.Description],["#descriptionLength",_arg11.DescriptionLength]]);
          f4=(action=Runtime.Tupled(function(x5)
          {
@@ -59,13 +59,21 @@
           return Seq.iter(action,list);
          });
          f4(x4);
-         tabs=Client1.makeTabsDiv(_arg11.Headings);
-         tabsDiv.AppendI(tabs);
-         return Concurrency.Return(null);
+         a=(matchValue=_arg11.Headings,matchValue.$==1?(headings=matchValue.$0,(tabs=Client1.makeTabsDiv(headings),(tabsDiv.AppendI(tabs),Concurrency.Return(null)))):(null,Concurrency.Return(null)));
+         b=(f6=function()
+         {
+          Client1.updateProgressBar();
+          return Concurrency.Return(null);
+         },Concurrency.Delay(f6));
+         f7=function()
+         {
+          return b;
+         };
+         return Concurrency.Bind(a,f7);
         };
         return Concurrency.Bind(x3,f3);
        },Concurrency.Delay(f2));
-       f6=function(arg00)
+       f8=function(arg00)
        {
         var t;
         t={
@@ -73,7 +81,7 @@
         };
         return Concurrency.Start(arg00);
        };
-       return f6(x2);
+       return f8(x2);
       },function(w)
       {
        return Operators.OnAfterRender(f1,w);
@@ -83,7 +91,7 @@
      },
      makeDiv:function(txt,id)
      {
-      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span4")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text(txt)]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span8")])),List.ofArray([Default.P(List.ofArray([Default.Id(id)]))]))]));
+      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text(txt)]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([Default.P(List.ofArray([Default.Id(id)]))]))]));
      },
      setPText:function(selector,txt)
      {
@@ -142,6 +150,7 @@
          Client2.displayKeywords(_arg11.get_Item(0),"#table1");
          Client2.displayKeywords(_arg11.get_Item(1),"#table2");
          Client2.displayKeywords(_arg11.get_Item(2),"#table3");
+         Client1.updateProgressBar();
          return Concurrency.Return(null);
         };
         return Concurrency.Bind(x3,f3);
@@ -198,10 +207,10 @@
      }),
      urlForm:function()
      {
-      var legend,x,_this,label,x1,_this1,urlInput,x2,_this2,_this3,_this4,f,x3,submitBtn,x4,_this5,f1,x5;
+      var legend,x,_this,label,x1,_this1,urlInput,x2,_this2,_this3,_this4,_this5,f,x3,submitBtn,x4,f1,x5;
       legend=(x=List.ofArray([Default.Text("Enter the URL you want to analyze.")]),(_this=Default.Tags(),_this.NewTag("legend",x)));
       label=(x1=List.ofArray([Default.Text("URL")]),(_this1=Default.Tags(),_this1.NewTag("label",x1)));
-      urlInput=(x2=Default.Input(List.ofArray([Default.Attr().Class("input-xxlarge"),(_this2=Default.Attr(),_this2.NewAttr("type","text")),(_this3=HTML5.Attr(),_this3.NewAttr("placeholder","http://www.example.com/")),(_this4=HTML5.Attr(),_this4.NewAttr("autofocus","autofocus"))])),(f=(x3=function()
+      urlInput=(x2=Default.Input(List.ofArray([Default.Attr().Class("input-xxlarge"),(_this2=Default.Attr(),_this2.NewAttr("type","text")),(_this3=HTML5.Attr(),_this3.NewAttr("placeholder","http://www.example.com/")),(_this4=HTML5.Attr(),_this4.NewAttr("autofocus","autofocus")),(_this5=HTML5.Attr(),_this5.NewAttr("spellcheck","false"))])),(f=(x3=function()
       {
        return function(key)
        {
@@ -220,7 +229,7 @@
       {
        return EventsPervasives.Events().OnKeyDown(x3,arg10);
       }),(f(x2),x2)));
-      submitBtn=(x4=Default.Button(List.ofArray([Default.Id("submitButton"),Default.Attr().Class("btn btn-primary"),Default.Text("Submit"),(_this5=Default.Attr(),_this5.NewAttr("type","button"))])),(f1=(x5=function(x6)
+      submitBtn=(x4=Default.Button(List.ofArray([Default.Id("submitButton"),Default.Attr().Class("btn btn-primary"),Default.Text("Submit")])),(f1=(x5=function(x6)
       {
        return function()
        {
@@ -344,7 +353,35 @@
       {
        return Arrays.mapi(mapping2,array);
       }),f2(tabsContent));
-      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-tabs")])),lis),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),divs)]));
+      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),lis),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),divs)]));
+     },
+     updateProgressBar:function()
+     {
+      var progressBarJquery,dataWidth,x,f,width,_width_,x1,f1,f2;
+      progressBarJquery=jQuery("#progressBar");
+      dataWidth=(x=String(progressBarJquery.data("width")),(f=function(value)
+      {
+       return value<<0;
+      },f(x)));
+      if(dataWidth===50)
+       {
+        progressBarJquery.css("width","100%");
+        return jQuery("#progressDiv").fadeOut(10000);
+       }
+      else
+       {
+        width=dataWidth+50;
+        _width_=(x1=(f1=function(value)
+        {
+         return Global.String(value);
+        },f1(width)),(f2=function(x2)
+        {
+         return x2+"%";
+        },f2(x1)));
+        progressBarJquery.css("width",_width_);
+        progressBarJquery.data("width",width);
+        return jQuery("#progressDiv").fadeOut(10000);
+       }
      }
     }
    }
@@ -375,7 +412,8 @@
   Client3=Runtime.Safe(UrlForm.Client);
   EventsPervasives=Runtime.Safe(Html.EventsPervasives);
   window=Runtime.Safe(Global.window);
-  return alert=Runtime.Safe(Global.alert);
+  alert=Runtime.Safe(Global.alert);
+  return String=Runtime.Safe(Global.String);
  });
  Runtime.OnLoad(function()
  {
