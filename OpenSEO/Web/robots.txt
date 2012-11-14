@@ -1,2 +1,2 @@
 ﻿User-Agent: *
-Disallow: /
+Disallow: /Report

@@ -51,6 +51,31 @@ module Mongo =
                 TitleLength       : string
                 DescriptionLength : string
                 Headings          : string []
+                InsertDate        : DateTime
+            }
+
+        [<CLIMutableAttribute>]
+        type Keyword =
+            {
+                _id : ObjectId
+                ObjectId : string
+                WordsCount : int
+                Combination : string
+                Occurrence : int
+                Density : float
+                InsertDate        : DateTime
+            }
+
+        [<CLIMutableAttribute>]
+        type Link =
+            {
+                _id        : ObjectId
+                ObjectId   : string
+                URL        : string
+                Anchor     : string
+                Type       : string
+                Follow     : string
+                InsertDate : DateTime
             }
 
     [<AutoOpenAttribute>]
@@ -104,6 +129,7 @@ module Mongo =
                 Description       = description
                 DescriptionLength = descriptionLength
                 Headings          = headings
+                InsertDate        = DateTime.Now
             }
 
         let uriDetailsCollection = Utilities.collectionByName<UriDetails> Utilities.database "uridetails"
@@ -121,33 +147,25 @@ module Mongo =
             with _ -> None
 
         let uriDetailsById id =
-            query {
-                for x in queryable do
-                    find (x._id.ToString() = id)
-            }
+            try
+                query {
+                    for x in queryable do
+                        find (x._id.ToString() = id)
+                } |> Some
+            with _ -> None
 
     [<AutoOpenAttribute>]
     module Keywords =
 
-        [<CLIMutableAttribute>]
-        type Keyword =
-            {
-                _id : ObjectId
-                ObjectId : string
-                WordsCount : int
-                Combination : string
-                Occurrence : int
-                Density : float
-            }
-
         let makeKeyword objectId wordsCount combination occurrence density =
             {
-                _id = ObjectId.GenerateNewId()
-                ObjectId = objectId
-                WordsCount = wordsCount
+                _id         = ObjectId.GenerateNewId()
+                ObjectId    = objectId
+                WordsCount  = wordsCount
                 Combination = combination
-                Occurrence = occurrence
-                Density = density
+                Occurrence  = occurrence
+                Density     = density
+                InsertDate  = DateTime.Now
             }
 
         let keywordsCollection = Utilities.collectionByName<Keyword> Utilities.database "keywords"
@@ -162,10 +180,46 @@ module Mongo =
             with _ -> ()
 
         let keywordsById id =
-            query {
-                for x in queryable do
-                    where (x.ObjectId = id)
-                    select x
-            }
-            |> Seq.toArray
+            try
+                query {
+                    for x in queryable do
+                        where (x.ObjectId = id)
+                        select x
+                }
+                |> Seq.toArray
+                |> Some
+            with _ -> None
 
+    [<AutoOpenAttribute>]
+    module Links =
+        
+        let makeLink objectId url anchor linkType follow =
+            {
+                _id        = ObjectId.GenerateNewId()
+                ObjectId   = objectId
+                URL        = url
+                Anchor     = anchor
+                Type       = linkType
+                Follow     = follow
+                InsertDate = DateTime.Now
+            }
+
+        let linksCollection = Utilities.collectionByName<Link> Utilities.database "links"
+    
+        let queryable = linksCollection.FindAll().AsQueryable()
+    
+        let  insertLinks (links : Link list) =
+            try
+                linksCollection.InsertBatch links |> ignore
+            with _ -> ()
+
+        let linksById id =
+            try
+                query {
+                    for x in queryable do
+                        where (x.ObjectId = id)
+                        select x
+                }
+                |> Seq.toArray
+                |> Some
+            with _ -> None

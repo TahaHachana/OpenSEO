@@ -10,6 +10,7 @@ module UrlForm =
 
         open Mongo
         open SEOLib
+        open SEOLib.Types
 
         let fetch' url =
             async {
@@ -46,6 +47,13 @@ module UrlForm =
                                         Keywords.analyzeKeywords html
                                         |> Array.map (fun x -> Mongo.Keywords.makeKeyword id' x.WordsCount x.Combination x.Occurrence x.Density)
                                         |> Mongo.Keywords.insertKeywords
+
+                                        Links.collectLinks html httpData.RequestUri
+                                        |> List.map (fun x ->
+                                            let linkType = x.Type |> function Internal -> "Internal" | _ -> "External"
+                                            let follow = x.Follow |> function DoFollow -> "Follow" | _ -> "NoFollow"
+                                            Mongo.Links.makeLink id' x.URL x.Anchor linkType follow)
+                                        |> Mongo.Links.insertLinks
                                 return Some id'
             }
 

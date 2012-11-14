@@ -17,6 +17,7 @@ module View =
                         Img [Src "/Images/Loader.gif"; Id "loader"; Class "offset2"]
                     ] :> _
                 ]
+                SharedContent.analyticsScript
             ]
 
     let aboutView =
@@ -27,6 +28,7 @@ module View =
                 Div [Class "container"; Id "about"] -< [
                     AboutContent.description
                 ]
+                SharedContent.analyticsScript
             ]
 
     let reportView reportId =
@@ -38,7 +40,8 @@ module View =
                     ReportContent.tabs reportId
                     ReportContent.progressBar
                 ]
-                Script [Src "http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"]
+//                Script [Src "http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"]
                 Script [Src "../Scripts/BootstrapTabs.min.js"]
                 Script [Src "../Scripts/BootstrapTransitions.min.js"]
+                SharedContent.analyticsScript
             ]

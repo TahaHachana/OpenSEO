@@ -33,7 +33,7 @@ module Details =
                 Description       = description
                 DescriptionLength = descLen
                 Headings          = headings
-            }
+            } |> Some
         
         let processHeadings (headings : string []) =
             match headings with
@@ -50,18 +50,21 @@ module Details =
         [<RpcAttribute>]
         let details id =
             async {
-                let uriDetails = Mongo.Details.uriDetailsById id
-                let requestUri = uriDetails.RequestUri
-                let size = uriDetails.Size
-                let server = uriDetails.Server
-                let elapsedTime = uriDetails.ElapsedTime
-                let title = uriDetails.Title
-                let titLen = uriDetails.TitleLength
-                let desc = uriDetails.Description
-                let descLen = uriDetails.DescriptionLength
-                let headings = processHeadings uriDetails.Headings
-                let details = makeDetails requestUri size server elapsedTime title titLen desc descLen headings
-                return details
+                let uriDetailsOption = Mongo.Details.uriDetailsById id
+                match uriDetailsOption with
+                    | None -> return None
+                    | Some uriDetails ->
+                        let requestUri = uriDetails.RequestUri
+                        let size = uriDetails.Size
+                        let server = uriDetails.Server
+                        let elapsedTime = uriDetails.ElapsedTime
+                        let title = uriDetails.Title
+                        let titLen = uriDetails.TitleLength
+                        let desc = uriDetails.Description
+                        let descLen = uriDetails.DescriptionLength
+                        let headings = processHeadings uriDetails.Headings
+                        let details = makeDetails requestUri size server elapsedTime title titLen desc descLen headings
+                        return details
             }
 
     module Client =
@@ -105,23 +108,26 @@ module Details =
             ]
             |>! OnAfterRender (fun _ ->
                 async {
-                    let! details = Server.details id
-                    [
-                        "#url"              , details.RequestUri
-                        "#size"             , details.Size
-                        "#server"           , details.Server
-                        "#elapsedTime"      , details.ElapsedTime
-                        "#title"            , details.Title
-                        "#titleLength"      , details.TitleLength
-                        "#description"      , details.Description
-                        "#descriptionLength", details.DescriptionLength
-                    ] |> List.iter (fun x -> x ||> setPText)
-                    match details.Headings with
+                    let! detailsOption = Server.details id
+                    match detailsOption with
                         | None -> ()
-                        | Some headings ->
-                            let tabs = Utilities.Client.makeTabsDiv headings
-                            tabsDiv.Append tabs
-                    Utilities.Client.updateProgressBar ()
+                        | Some details ->
+                            [
+                                "#url"              , details.RequestUri
+                                "#size"             , details.Size
+                                "#server"           , details.Server
+                                "#elapsedTime"      , details.ElapsedTime
+                                "#title"            , details.Title
+                                "#titleLength"      , details.TitleLength
+                                "#description"      , details.Description
+                                "#descriptionLength", details.DescriptionLength
+                            ] |> List.iter (fun x -> x ||> setPText)
+                            match details.Headings with
+                                | None -> ()
+                                | Some headings ->
+                                    let tabs = Utilities.Client.makeTabsDiv headings
+                                    tabsDiv.Append tabs
+                            Utilities.Client.updateProgressBar ()
                 } |> Async.Start)
                 
         type DetailsViewer(id) =

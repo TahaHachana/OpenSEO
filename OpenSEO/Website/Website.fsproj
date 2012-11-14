@@ -40,6 +40,7 @@
     <Compile Include="Utilities.fs" />
     <Compile Include="Details.fs" />
     <Compile Include="Keywords.fs" />
+    <Compile Include="Links.fs" />
     <Compile Include="UrlForm.fs" />
     <Compile Include="SiteContent.fs" />
     <Compile Include="Model.fs" />
@@ -50,6 +51,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="IntelliFactory.WebSharper.KendoUI">
+      <HintPath>..\..\packages\WebSharper.KendoUI.2.4.44.47\lib\IntelliFactory.WebSharper.KendoUI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="MongoDB.Bson">
       <HintPath>..\..\packages\mongocsharpdriver.1.6.1\lib\net35\MongoDB.Bson.dll</HintPath>
     </Reference>
@@ -59,7 +64,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="SEOLib">
-      <HintPath>..\..\packages\SEOLib.0.3.52\lib\Net45\SEOLib.dll</HintPath>
+      <HintPath>..\..\packages\SEOLib.0.3.58\lib\Net45\SEOLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />

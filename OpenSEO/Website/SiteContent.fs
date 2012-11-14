@@ -15,13 +15,15 @@ module SiteContent =
                     Id "forkme"]
             ]
 
+        let analyticsScript : Content.HtmlElement = Script [Src "../Scripts/GoogleAnalytics.js"]
+
     module HomeContent =
         
         let navigation : Content.HtmlElement = Utilities.Server.makeNavigation <| Some "Home"
         
         let title = "Open Source SEO Tool"
 
-        let metaDesc = "Open source search engine optimization tool offering HTML auditing, keywords analysis and speed testing functionality."
+        let metaDesc = "Open source SEO (search engine optimization) tool offering HTML auditing, keywords analysis and speed testing functionality."
 
     module AboutContent =
         
@@ -53,7 +55,7 @@ module SiteContent =
         let metaDesc = ""
 
         let progressBar : Content.HtmlElement =
-            Div [Class "progress progress-striped active"; Id "progressDiv"] -< [
+            Div [Class "progress"; Id "progressDiv"] -< [
                 Div [Class "bar"; Id "progressBar"; HTML5.Data "width" "0"]
             ]
 
@@ -63,10 +65,12 @@ module SiteContent =
                     LI [Class "active"] -< [A [HRef "#details"; HTML5.Data "toggle" "tab"] -< [Text "Details"]]
                     LI [A [HRef "#keywords"; HTML5.Data "toggle" "tab"] -< [Text "Keywords"]]
                     LI [A [HRef "#links"; HTML5.Data "toggle" "tab"] -< [Text "Links"]]
+                    LI [A [HRef "#html"; HTML5.Data "toggle" "tab"] -< [Text "HTML"]]
                 ]
                 Div [Class "tab-content"] -< [
                     new Details.Client.DetailsViewer(id)   :> INode<_>
                     new Keywords.Client.KeywordsViewer(id) :> _
-                    Div [Class "tab-pane fade"; Id "links"] -< [] :> _
+                    new Links.Client.LinksViewer(id) :> _
+                    Div [Class "tab-pane fade"; Id "html"] -< [] :> _
                 ]
             ]

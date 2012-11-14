@@ -22,7 +22,7 @@
 .reportSection
 {
     height: 600px;
-    overflow: auto;
+    overflow-y: scroll;
 }
 
 #loader
@@ -35,4 +35,9 @@
     margin-left: 30%;
     width: 40%;
     margin-top: 20px;
+}
+
+th, td {
+    word-wrap: break-word;
+    max-width: 150px;
 }

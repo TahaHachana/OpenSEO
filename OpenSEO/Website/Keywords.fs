@@ -6,7 +6,7 @@ module Keywords =
 
     module Server =
 
-        let filterByWordsCount (keywords : Mongo.Keywords.Keyword []) wordsCount =
+        let filterByWordsCount (keywords : Mongo.Types.Keyword []) wordsCount =
             keywords
             |> Array.filter (fun x -> x.WordsCount = wordsCount)
             |> Array.map (fun x -> x.Combination, x.Occurrence.ToString(), x.Density.ToString())
@@ -14,12 +14,15 @@ module Keywords =
         [<RpcAttribute>]
         let keywordsById id =
             async {
-                let keywords = Mongo.Keywords.keywordsById id
-                let filterByWordsCount' = filterByWordsCount keywords
-                let oneKeyword = filterByWordsCount' 1
-                let twoKeywords = filterByWordsCount' 2
-                let threeKeywords = filterByWordsCount' 3
-                return [oneKeyword; twoKeywords; threeKeywords]            
+                let keywordsOption = Mongo.Keywords.keywordsById id
+                match keywordsOption with
+                    | None -> return None
+                    | Some keywords ->
+                        let filterByWordsCount' = filterByWordsCount keywords
+                        let oneKeyword = filterByWordsCount' 1
+                        let twoKeywords = filterByWordsCount' 2
+                        let threeKeywords = filterByWordsCount' 3
+                        return Some [oneKeyword; twoKeywords; threeKeywords]            
             }
 
     module Client =
@@ -80,10 +83,13 @@ module Keywords =
             ]
             |>! OnAfterRender (fun _ ->
                 async {
-                    let! keywordsData = Server.keywordsById id
-                    displayKeywords keywordsData.[0] "#table1"
-                    displayKeywords keywordsData.[1] "#table2"
-                    displayKeywords keywordsData.[2] "#table3"
+                    let! keywordsOption = Server.keywordsById id
+                    match keywordsOption with
+                        | None -> ()
+                        | Some keywords ->
+                            displayKeywords keywords.[0] "#table1"
+                            displayKeywords keywords.[1] "#table2"
+                            displayKeywords keywords.[2] "#table3"
                     Utilities.Client.updateProgressBar ()
                 } |> Async.Start )
             
