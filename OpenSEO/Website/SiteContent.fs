@@ -2,6 +2,7 @@
 
 open IntelliFactory.WebSharper.Sitelets
 open IntelliFactory.Html
+open Model
 
 module SiteContent =
 
@@ -17,6 +18,25 @@ module SiteContent =
 
         let analyticsScript : Content.HtmlElement = Script [Src "../Scripts/GoogleAnalytics.js"]
 
+        let ( => ) title href =
+            A [HRef href] -< [Text title]
+    
+        let randomizeUrl url =
+            url + "?d=" + System.Uri.EscapeUriString (System.DateTime.Now.ToString())
+
+        let loginInfo (ctx: Context<Action>) =
+            let user = UserSession.GetLoggedInUser ()
+            Div [Class "pull-right"] -< [
+                (
+                    match user with
+                    | Some username ->
+                        "Log Out (" + username + ")" => 
+                            (randomizeUrl <| ctx.Link Action.Logout)
+                    | None ->
+                        "Login" => (ctx.Link <| Action.Login None)
+                )
+            ]
+
     module HomeContent =
         
         let navigation : Content.HtmlElement = Utilities.Server.makeNavigation <| Some "Home"
@@ -29,26 +49,24 @@ module SiteContent =
         
         let navigation : Content.HtmlElement = Utilities.Server.makeNavigation <| Some "About"
 
-        let title = "About OpenSEO - Open Source SEO Tool"
+        let title = "About OpenSEO | Open Source SEO Tool"
 
-        let metaDesc = "Learn more about OpenSEO"
+        let metaDesc = "Learn more about OpenSEO, an open source search engine optimization app offering HTML, keywords and speed auditing features."
 
         let description : Content.HtmlElement =
             P [Text "OpenSEO is an open source SEO tool built with "] -< [
                 A [HRef "http://www.websharper.com/"; Target "_blank"] -< [Text "WebSharper"]
-                Text " and uses functionality provided by a "
+                Text " that uses functionality provided by a "
                 A [HRef "https://github.com/TahaHachana/SEOLib"; Target "_blank"] -< [Text "SEO library"]
-                Text " developed in F#."
+                Text " developed in F#. The code source of the application and the SEO component is maintained by "
+                A [HRef "https://github.com/TahaHachana"; Target "_blank"] -< [Text "Taha Hachana"]
+                Text " on GitHub."
             ]
 
     module ReportContent =
         
         let navigation : Content.HtmlElement =
-            Utilities.Server.makeNavigation None //-< [
-//                Div [Class "progress progress-striped active container"; Id "progressDiv"] -< [
-//                    Div [Class "bar"]
-//                ]
-//            ]
+            Utilities.Server.makeNavigation None
 
         let title = "SEO Report"
 
@@ -65,12 +83,14 @@ module SiteContent =
                     LI [Class "active"] -< [A [HRef "#details"; HTML5.Data "toggle" "tab"] -< [Text "Details"]]
                     LI [A [HRef "#keywords"; HTML5.Data "toggle" "tab"] -< [Text "Keywords"]]
                     LI [A [HRef "#links"; HTML5.Data "toggle" "tab"] -< [Text "Links"]]
+                    LI [A [HRef "#violations"; HTML5.Data "toggle" "tab"] -< [Text "Violations"]]
                     LI [A [HRef "#html"; HTML5.Data "toggle" "tab"] -< [Text "HTML"]]
                 ]
                 Div [Class "tab-content"] -< [
-                    new Details.Client.DetailsViewer(id)   :> INode<_>
-                    new Keywords.Client.KeywordsViewer(id) :> _
-                    new Links.Client.LinksViewer(id) :> _
+                    new Details.DetailsControl(id)               :> INode<_>
+                    new Keywords.KeywordsControl(id)             :> _
+                    new Links.LinksControl(id)                   :> _
+                    new Violations.ViolationsControl(id)         :> _
                     Div [Class "tab-pane fade"; Id "html"] -< [] :> _
                 ]
             ]

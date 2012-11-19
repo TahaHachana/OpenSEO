@@ -34,14 +34,14 @@ module Utilities =
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let makeList lst =
             UL [
                 for x in lst do
                     yield LI [Text x]
             ]
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let makeLi idx id =
             match idx with
                 | 0 ->
@@ -57,7 +57,7 @@ module Utilities =
                         ]
                     ]
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let makeDiv idx x y =
             match idx with
                | 0 ->
@@ -69,7 +69,7 @@ module Utilities =
                         makeList y
                     ]
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let makeTabsDiv (tabsContent : (string * string list) []) =
             let lis =
                 tabsContent
@@ -83,17 +83,16 @@ module Utilities =
                 Div [Attr.Class "tab-content"] -< divs
             ]
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let updateProgressBar () =
-            let progressBarJquery = JQuery.Of("#progressBar")
+            let progressBarJquery = JQuery.Of "#progressBar"
             let dataWidth = progressBarJquery.Data("width").ToString() |> int
             match dataWidth with
-                | 66 ->
+                | 75 ->
                     progressBarJquery.Css("width", "100%").Ignore
                     JQuery.Of("#progressDiv").FadeOut(3000.).Ignore
                 | _ ->
-                    let width = dataWidth + 33
+                    let width = dataWidth + 25
                     let width' = width |> string |> fun x -> x + "%"
-                    progressBarJquery.Css("width", width').Ignore
                     progressBarJquery.Data("width", width).Ignore
-//                    JQuery.Of("#progressDiv").FadeOut(5000.).Ignore
+                    progressBarJquery.Css("width", width').Ignore

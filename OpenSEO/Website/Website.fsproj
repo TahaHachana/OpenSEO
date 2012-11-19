@@ -35,15 +35,20 @@
   <Import Project="$(WEBSHARPER_HOME)/IntelliFactory.WebSharper.Sitelets.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Secure.fs" />
     <Compile Include="Mongo.fs" />
     <Compile Include="Utilities.fs" />
+    <Compile Include="LatestReports.fs" />
+    <Compile Include="DBCleanup.fs" />
     <Compile Include="Details.fs" />
     <Compile Include="Keywords.fs" />
     <Compile Include="Links.fs" />
+    <Compile Include="Violations.fs" />
+    <Compile Include="Login.fs" />
     <Compile Include="UrlForm.fs" />
-    <Compile Include="SiteContent.fs" />
     <Compile Include="Model.fs" />
+    <Compile Include="SiteContent.fs" />
     <Compile Include="Skin.fs" />
     <Compile Include="View.fs" />
     <Compile Include="Controller.fs" />
@@ -64,7 +69,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="SEOLib">
-      <HintPath>..\..\packages\SEOLib.0.3.58\lib\Net45\SEOLib.dll</HintPath>
+      <HintPath>..\..\packages\SEOLib.0.3.78\lib\Net45\SEOLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />

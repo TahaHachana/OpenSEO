@@ -7,54 +7,55 @@ module Links =
 
     module Server =
 
+        open Mongo
+
         type LinksData =
             {
-                InternalLinks : (string * string * string) []
-                ExternalLinks : (string * string * string) []
-                InternalCount : int
-                ExternalCount : int
+                InternalLinks   : (string * string * string) []
+                ExternalLinks   : (string * string * string) []
+                InternalCount   : int
+                ExternalCount   : int
                 InternalPercent : float
                 ExternalPercent : float
-                FollowCount : int
-                NofollowCount : int
-                FollowPercent : float
-                NofollowPercent: float
+                FollowCount     : int
+                NofollowCount   : int
+                FollowPercent   : float
+                NofollowPercent : float
             }
 
-        let linkToTuple (link : Mongo.Types.Link) = link.URL, link.Anchor, link.Follow
+        let linkToTuple (link : Types.Link) = link.URL, link.Anchor, link.Follow
+        
+        let round (x : float) = Math.Round(x, 2)
+
+        let percentage y x = float x / float y * 100. |> round
             
-        [<RpcAttribute>]
+        [<Rpc>]
         let linksById id =
             async {
                 let linksOption = Mongo.Links.linksById id
                 match linksOption with
                     | None -> return None
                     | Some links ->
-                        let internalLinks, externalLinks = links |> Array.partition (fun x -> x.Type = "Internal")
-                        let linksCount = links.Length
+                        let internalLinks, externalLinks = links |> Array.partition (fun x -> x.Type   = "Internal")
+                        let followLinks  , nofollowLinks = links |> Array.partition (fun x -> x.Follow = "Follow")
+                        let percentage' = percentage links.Length
                         let internalCount = internalLinks.Length
                         let externalCount = externalLinks.Length
-                        let internalPercent = float internalCount / float linksCount * 100. |> fun x -> Math.Round(x, 2)
-                        let externalPercent = float externalCount / float linksCount * 100. |> fun x -> Math.Round(x, 2)
-                        let followLinks, nofollowLinks = links |> Array.partition (fun x -> x.Follow = "Follow")
                         let followCount = followLinks.Length
                         let nofollowCount = nofollowLinks.Length
-                        let followPercent = float followCount / float linksCount * 100. |> fun x -> Math.Round(x, 2)
-                        let nofollowPercent = float nofollowCount / float linksCount * 100. |> fun x -> Math.Round(x, 2)
-                        let linksData =
+                        return
                             {
-                                InternalLinks = internalLinks |> Array.map linkToTuple
-                                ExternalLinks = externalLinks |> Array.map linkToTuple
-                                InternalCount = internalCount
-                                ExternalCount = externalCount
-                                InternalPercent = internalPercent
-                                ExternalPercent = externalPercent
-                                FollowCount = followCount
-                                NofollowCount = nofollowCount
-                                FollowPercent = followPercent
-                                NofollowPercent = nofollowPercent
+                                InternalLinks   = internalLinks |> Array.map linkToTuple
+                                ExternalLinks   = externalLinks |> Array.map linkToTuple
+                                InternalCount   = internalCount
+                                ExternalCount   = externalCount
+                                InternalPercent = percentage' internalCount
+                                ExternalPercent = percentage' externalCount
+                                FollowCount     = followCount
+                                NofollowCount   = nofollowCount
+                                FollowPercent   = percentage' followCount
+                                NofollowPercent = percentage' nofollowCount
                             } |> Some
-                        return linksData
             }
 
     module Client =
@@ -63,16 +64,9 @@ module Links =
         open IntelliFactory.WebSharper.JQuery
         open IntelliFactory.WebSharper.KendoUI
 
-//        [<JavaScriptAttribute>]
-//        let makeTh id =
-//            match id with
-//                | "table1" -> TH [Text "Keyword"]
-//                | _         -> TH [Text "Keywords Combination"]
-
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let makeTable id =
             Table [Id id; Attr.Class "table table-bordered table-striped span10"] -< [
-//                Caption [Text caption]
                 TR [
                     TH [Text "URL"]
                     TH [Text "Anchor"]
@@ -80,16 +74,16 @@ module Links =
                 ]
             ]
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let appendTd text (tableRow : JQuery) =
             JQuery.Of("<td/>").Text(text).AppendTo(tableRow).Ignore
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let appendTd' text (tableRow : JQuery) =
             let aTag = A [HRef text; Attr.Target "_blank"] -< [Text text]
             JQuery.Of("<td/>").Append(aTag.Dom).AppendTo(tableRow).Ignore
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let tableRow url anchor rel =
             let tr  = JQuery.Of("<tr/>")
             appendTd' url tr
@@ -97,13 +91,13 @@ module Links =
             appendTd rel tr
             tr
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let displayLinks links (selector : string) =
             links
             |> Array.map (fun (x, y, z) -> tableRow x y z)
             |> Array.iter (fun x -> x.AppendTo(JQuery.Of(selector)).Ignore)
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let pieChart title category category' x y =
             Div []
             |>! OnAfterRender (fun el ->
@@ -154,18 +148,18 @@ module Links =
                     )
                 ) |> ignore)
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let makeDiv txt id =
             Div [Attr.Class "row-fluid"] -< [
                 Div [Attr.Class "span3"] -< [H4 [Attr.Class "h4"] -< [Text txt]]
                 Div [Attr.Class "span2"] -< [P [Id id]]
             ]
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let setPText (selector : string) txt =
             JQuery.Of(selector).Text(txt).Ignore
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let linksSection id =
             let div =
                 Div [
@@ -201,18 +195,18 @@ module Links =
                             displayLinks links.ExternalLinks "#linksTable2"
                             setPText "#internalLinksCount" <| links.InternalCount.ToString()
                             setPText "#externalLinksCount" <| links.ExternalCount.ToString()
-                            let pie = pieChart "Internal vs. External" "Internal" "External" (float links.InternalPercent) (float links.ExternalPercent)
-                            div.Append pie
-                            setPText "#followLinksCount" <| links.FollowCount.ToString()
+                            setPText "#followLinksCount"   <| links.FollowCount.ToString()
                             setPText "#nofollowLinksCount" <| links.NofollowCount.ToString()
+                            let pie  = pieChart "Internal vs. External" "Internal" "External" (float links.InternalPercent) (float links.ExternalPercent)
                             let pie' = pieChart "Follow vs. NoFollow" "Follow" "NoFollow" (float links.FollowPercent) (float links.NofollowPercent)
+                            div.Append  pie
                             div'.Append pie'
                     Utilities.Client.updateProgressBar ()
                 } |> Async.Start)
             
-        type LinksViewer(id) =
+    type LinksControl(id) =
             
-            inherit Web.Control ()
+        inherit Web.Control ()
 
-            [<JavaScriptAttribute>]
-            override x.Body = linksSection id :> _
+        [<JavaScript>]
+        override __.Body = Client.linksSection id :> _

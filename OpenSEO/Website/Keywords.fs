@@ -5,23 +5,28 @@ open IntelliFactory.WebSharper
 module Keywords =
 
     module Server =
+        
+        open Mongo
 
-        let filterByWordsCount (keywords : Mongo.Types.Keyword []) wordsCount =
+        let filterWordsCount (keywords : Types.Keyword []) wordsCount =
             keywords
             |> Array.filter (fun x -> x.WordsCount = wordsCount)
-            |> Array.map (fun x -> x.Combination, x.Occurrence.ToString(), x.Density.ToString())
+            |> Array.map (fun x ->
+                x.Combination,
+                x.Occurrence.ToString(),
+                x.Density.ToString())
 
-        [<RpcAttribute>]
+        [<Rpc>]
         let keywordsById id =
             async {
-                let keywordsOption = Mongo.Keywords.keywordsById id
+                let keywordsOption = Keywords.keywordsById id
                 match keywordsOption with
                     | None -> return None
                     | Some keywords ->
-                        let filterByWordsCount' = filterByWordsCount keywords
-                        let oneKeyword = filterByWordsCount' 1
-                        let twoKeywords = filterByWordsCount' 2
-                        let threeKeywords = filterByWordsCount' 3
+                        let filterWordsCount' = filterWordsCount keywords
+                        let oneKeyword    = filterWordsCount' 1
+                        let twoKeywords   = filterWordsCount' 2
+                        let threeKeywords = filterWordsCount' 3
                         return Some [oneKeyword; twoKeywords; threeKeywords]            
             }
 
@@ -30,16 +35,15 @@ module Keywords =
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let makeTh id =
             match id with
                 | "table1" -> TH [Text "Keyword"]
-                | _         -> TH [Text "Keywords Combination"]
+                | _        -> TH [Text "Keywords Combination"]
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let makeTable id =
             Table [Id id; Attr.Class "table table-bordered table-striped span10"] -< [
-//                Caption [Text caption]
                 TR [
                     makeTh id
                     TH [Text "Occurrence"]
@@ -47,11 +51,11 @@ module Keywords =
                 ]
             ]
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let appendTd text (tableRow : JQuery) =
             JQuery.Of("<td/>").Text(text).AppendTo(tableRow).Ignore
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let tableRow keyword occurrence density =
             let tr  = JQuery.Of("<tr/>")
             appendTd keyword tr
@@ -59,13 +63,13 @@ module Keywords =
             appendTd density tr
             tr
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let displayKeywords keywords (selector : string) =
             keywords
             |> Array.map (fun (x, y, z) -> tableRow x y z)
             |> Array.iter (fun x -> x.AppendTo(JQuery.Of(selector)).Ignore)
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let keywordsSection id =
             HTML5.Tags.Section [Attr.Class "tab-pane fade in reportSection"; Id "keywords"] -< [
                 Div [Attr.Class "tabbable"] -< [
@@ -93,9 +97,9 @@ module Keywords =
                     Utilities.Client.updateProgressBar ()
                 } |> Async.Start )
             
-        type KeywordsViewer(id) =
+    type KeywordsControl(id) =
             
-            inherit Web.Control ()
+        inherit Web.Control ()
 
-            [<JavaScriptAttribute>]
-            override x.Body = keywordsSection id :> _
+        [<JavaScriptAttribute>]
+        override __.Body = Client.keywordsSection id :> _

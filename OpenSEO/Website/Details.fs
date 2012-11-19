@@ -2,13 +2,13 @@
 
 open System
 open IntelliFactory.WebSharper
-open SEOLib
-open SEOLib.Types
 
 module Details =
 
     module Server =
         
+        open Mongo
+
         type Details =
             {
                 RequestUri        : string
@@ -47,10 +47,10 @@ module Details =
                     |> Seq.toArray
                     |> Some
 
-        [<RpcAttribute>]
+        [<Rpc>]
         let details id =
             async {
-                let uriDetailsOption = Mongo.Details.uriDetailsById id
+                let uriDetailsOption = Details.uriDetailsById id
                 match uriDetailsOption with
                     | None -> return None
                     | Some uriDetails ->
@@ -72,18 +72,18 @@ module Details =
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let makeDiv txt id =
             Div [Attr.Class "row-fluid"] -< [
                 Div [Attr.Class "span3"] -< [H4 [Attr.Class "h4"] -< [Text txt]]
                 Div [Attr.Class "span9"] -< [P [Id id]]
             ]
         
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let setPText (selector : string) txt =
             JQuery.Of(selector).Text(txt).Ignore
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
         let detailsSection id =
             let tabsDiv = Div []
             HTML5.Tags.Section [Attr.Class "tab-pane fade active in reportSection"; Id "details"] -< [
@@ -130,9 +130,9 @@ module Details =
                             Utilities.Client.updateProgressBar ()
                 } |> Async.Start)
                 
-        type DetailsViewer(id) =
+    type DetailsControl(id) =
 
-            inherit Web.Control()
+        inherit Web.Control()
 
-            [<JavaScript>]
-            override this.Body = detailsSection id :> _
+        [<JavaScript>]
+        override __.Body = Client.detailsSection id :> _

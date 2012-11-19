@@ -6,14 +6,11 @@
 #endif
 
 open System
+open System.Globalization
 open System.Linq
-open System.Net
 open MongoDB.Bson
 open MongoDB.Driver
 open MongoDB.Driver.Builders
-open System.Globalization
-open SEOLib.Http
-open SEOLib.Types
 open SEOLib
 
 module Mongo =
@@ -32,10 +29,11 @@ module Mongo =
         /// Gets the database collection with the specified name.
         let collectionByName<'T> (db : MongoDatabase) (name : string) = db.GetCollection<'T> name
 
+        let makeLtQuery datetime = Query.LT("InsertDate", BsonValue.Create datetime)
+
         let server = createServer Secure.mongoConnectionString
         let database = databaseByName server "OpenSEODB"
 
-    [<AutoOpenAttribute>]
     module Types =
         
         [<CLIMutableAttribute>]
@@ -57,13 +55,13 @@ module Mongo =
         [<CLIMutableAttribute>]
         type Keyword =
             {
-                _id : ObjectId
-                ObjectId : string
-                WordsCount : int
+                _id         : ObjectId
+                ObjectId    : string
+                WordsCount  : int
                 Combination : string
-                Occurrence : int
-                Density : float
-                InsertDate        : DateTime
+                Occurrence  : int
+                Density     : float
+                InsertDate  : DateTime
             }
 
         [<CLIMutableAttribute>]
@@ -78,7 +76,24 @@ module Mongo =
                 InsertDate : DateTime
             }
 
-    [<AutoOpenAttribute>]
+        [<CLIMutableAttribute>]
+        type Violation =
+            {
+                _id            : ObjectId
+                ObjectId       : string
+                Category       : string
+                Code           : string
+                Column         : string
+                Description    : string
+                Heading        : string
+                Level          : string
+                Line           : string
+                Recommendation : string
+                InsertDate     : DateTime
+            }
+    
+    open Types
+
     module Details =
 
         let stringHeading (heading : Heading) =
@@ -102,12 +117,12 @@ module Mongo =
             headers
             |> List.tryFind (fun x -> x.Key = "Server")
             |> function
-                | None        -> ""
+                | None        -> "NA"
                 | Some header -> header.Value.Head
 
         let makeUriDetails (httpData : HttpData) id =
             let requestUri = httpData.RequestUri.ToString()
-            let size = httpData.Size |> function None -> "" | Some x -> string x + " KB"
+            let size = httpData.Size |> function None -> "NA" | Some x -> string x + " KB"
             let server = serverHeader httpData.Headers
             let elapsedTime = httpData.ElapsedTime.ToString() + " milliseconds"
             let htmlOption = httpData.Html
@@ -132,9 +147,14 @@ module Mongo =
                 InsertDate        = DateTime.Now
             }
 
-        let uriDetailsCollection = Utilities.collectionByName<UriDetails> Utilities.database "uridetails"
-
-//        uriDetailsCollection.RemoveAll()
+        let uriDetailsCollection =
+            Utilities.collectionByName<UriDetails> Utilities.database "uridetails"
+        
+        let cleanCollection datetime =
+            try
+                let query = Utilities.makeLtQuery datetime
+                uriDetailsCollection.Remove query |> ignore
+            with _ -> ()
 
         let queryable = uriDetailsCollection.FindAll().AsQueryable()
     
@@ -148,11 +168,21 @@ module Mongo =
 
         let uriDetailsById id =
             try
+                let id' = ObjectId.Parse id
                 query {
                     for x in queryable do
-                        find (x._id.ToString() = id)
+                        find (x._id = id')
                 } |> Some
             with _ -> None
+        
+        let latestReports () =
+            try
+                query {
+                    for x in queryable do
+                        sortByDescending x.InsertDate
+                        take 10
+                } |> Seq.toArray
+            with _ -> [||]
 
     [<AutoOpenAttribute>]
     module Keywords =
@@ -168,13 +198,18 @@ module Mongo =
                 InsertDate  = DateTime.Now
             }
 
-        let keywordsCollection = Utilities.collectionByName<Keyword> Utilities.database "keywords"
+        let keywordsCollection =
+            Utilities.collectionByName<Keyword> Utilities.database "keywords"
 
-//        keywordsCollection.RemoveAll()
+        let cleanCollection datetime =
+            try
+                let query = Utilities.makeLtQuery datetime
+                keywordsCollection.Remove query |> ignore
+            with _ -> ()
 
         let queryable = keywordsCollection.FindAll().AsQueryable()
     
-        let  insertKeywords (keywords : Keyword []) =
+        let  insertKeywords keywords =
             try
                 keywordsCollection.InsertBatch keywords |> ignore
             with _ -> ()
@@ -205,15 +240,66 @@ module Mongo =
             }
 
         let linksCollection = Utilities.collectionByName<Link> Utilities.database "links"
-    
+
+        let cleanCollection datetime =
+            try
+                let query = Utilities.makeLtQuery datetime
+                linksCollection.Remove query |> ignore
+            with _ -> ()
+             
         let queryable = linksCollection.FindAll().AsQueryable()
     
-        let  insertLinks (links : Link list) =
+        let  insertLinks links =
             try
                 linksCollection.InsertBatch links |> ignore
             with _ -> ()
 
         let linksById id =
+            try
+                query {
+                    for x in queryable do
+                        where (x.ObjectId = id)
+                        select x
+                }
+                |> Seq.toArray
+                |> Some
+            with _ -> None
+
+    [<AutoOpenAttribute>]
+    module Violations =
+
+        let makeViolation objectId category code column description heading level line recommendation =
+            {
+                _id            = ObjectId.GenerateNewId()
+                ObjectId       = objectId
+                Category       = category
+                Code           = code
+                Column         = column
+                Description    = description
+                Heading        = heading
+                Level          = level
+                Line           = line
+                Recommendation = recommendation
+                InsertDate     = DateTime.Now
+            }
+
+        let violationsCollection =
+            Utilities.collectionByName<Violation> Utilities.database "violations"
+
+        let cleanCollection datetime =
+            try
+                let query = Utilities.makeLtQuery datetime
+                linksCollection.Remove query |> ignore
+            with _ -> ()
+             
+        let queryable = violationsCollection.FindAll().AsQueryable()
+    
+        let  insertViolations violations =
+            try
+                violationsCollection.InsertBatch violations |> ignore
+            with _ -> ()
+
+        let violationsById id =
             try
                 query {
                     for x in queryable do

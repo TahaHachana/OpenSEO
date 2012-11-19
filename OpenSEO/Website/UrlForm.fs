@@ -2,9 +2,17 @@
 
 open IntelliFactory.WebSharper
 open System
-open System.Web
 
 module UrlForm =
+
+    type MongoObjectId = string
+
+    type Result =
+        | MongoError
+        | InvalidUri
+        | NotHtml
+        | RequestFailed
+        | Success of MongoObjectId
 
     module Server =
 
@@ -12,58 +20,101 @@ module UrlForm =
         open SEOLib
         open SEOLib.Types
 
-        let fetch' url =
+        let tryCreateUri uriString =
+            Uri.TryCreate(uriString, UriKind.Absolute)
+            |> function
+                | false, _ ->
+                    Uri.TryCreate(("http://" + uriString), UriKind.Absolute)
+                    |> function
+                        | false, _ -> None
+                        | true , x -> Some x
+                | true, x -> Some x
+
+        let rec getLineCol idx len index (lines : string []) =
+            let l = lines.[idx].Length + 1
+            let len' = l + len
+            if len' > index then
+                idx + 1, l - (len' - index) + 1
+            else
+                getLineCol (idx + 1) len' index lines
+
+        let processKeywords html id =
+            Keywords.analyzeKeywords html
+            |> Array.map (fun x -> Keywords.makeKeyword id x.WordsCount x.Combination x.Occurrence x.Density)
+            |> Keywords.insertKeywords
+
+        let processLinks html requestUri id =
+            Links.collectLinks html requestUri
+            |> List.map (fun x ->
+                let linkType = x.Type |> function Internal -> "Internal" | _ -> "External"
+                let follow = x.Follow |> function DoFollow -> "Follow" | _ -> "NoFollow"
+                Mongo.Links.makeLink id x.URL x.Anchor linkType follow)
+            |> Mongo.Links.insertLinks
+
+        let processViolations html requestUri id =
             async {
-            let uriOption =
-                Uri.TryCreate(url, UriKind.Absolute) |> function
-                    | false, _ ->
-                        Uri.TryCreate(("http://" + url), UriKind.Absolute) |> function
-                            | false, _ -> None
-                            | true , x -> Some x
-                    | true, x -> Some x
-            match uriOption with
-                | None -> return None
-                | Some uri ->
-                    let! httpData = Http.fetch uri
-                    return httpData
+                let! violations = Violations.auditHtml html requestUri
+                let lines = html.Split '\n'
+                violations
+                |> Array.concat
+                |> Array.map (fun x ->
+                    let category' = x.Category |> function Content -> "Content" | Performance -> "Performance" | SEO -> "SEO" | Standards -> "Standards"
+                    let code' = x.Code |> function AltEmpty -> "AltEmpty" | _ -> "AltMissing"
+                    let line, column =
+                        match x.Index with
+                            | None -> "NA", "NA"
+                            | Some index ->
+                                let x, y = getLineCol 0 0 index lines
+                                string x, string y
+                    let level' = x.Level |> function Error -> "Error" | Warning -> "Warning"
+                    Violations.makeViolation id category' code' column x.Description x.Heading level' line x.Recommendation)
+                |> Violations.insertViolations  
             }
-
-        [<RpcAttribute>]
-        let fetchInsert url =
+        
+        [<Rpc>]
+        let fetchInsert uriString =
             async {
-                let! httpDataOption = fetch' url
-                match httpDataOption with
-                    | None -> return None
-                    | Some httpData ->
-                        let idOption = Mongo.Details.insertUriDetails httpData
-                        match idOption with
-                            | None -> return None
-                            | Some id ->
-                                let htmlOption = httpData.Html
-                                let id' = id.ToString()
-                                match htmlOption with
-                                    | None -> ()
-                                    | Some html ->
-                                        Keywords.analyzeKeywords html
-                                        |> Array.map (fun x -> Mongo.Keywords.makeKeyword id' x.WordsCount x.Combination x.Occurrence x.Density)
-                                        |> Mongo.Keywords.insertKeywords
-
-                                        Links.collectLinks html httpData.RequestUri
-                                        |> List.map (fun x ->
-                                            let linkType = x.Type |> function Internal -> "Internal" | _ -> "External"
-                                            let follow = x.Follow |> function DoFollow -> "Follow" | _ -> "NoFollow"
-                                            Mongo.Links.makeLink id' x.URL x.Anchor linkType follow)
-                                        |> Mongo.Links.insertLinks
-                                return Some id'
+                let uriOption = tryCreateUri uriString
+                match uriOption with
+                    | None -> return InvalidUri
+                    | Some uri ->
+                        let! httpDataOption = Http.fetch uri
+                        match httpDataOption with
+                            | None -> return RequestFailed
+                            | Some httpData ->
+                                let idOption = Details.insertUriDetails httpData
+                                match idOption with
+                                    | None -> return MongoError
+                                    | Some id ->
+                                        let htmlOption = httpData.Html
+                                        match htmlOption with
+                                            | None -> return NotHtml
+                                            | Some html ->
+                                                let id' = id.ToString()
+                                                let requestUri = httpData.RequestUri
+                                                processKeywords html id'
+                                                processLinks html requestUri id'
+                                                do! processViolations html requestUri id'
+                                                return Success id'
             }
 
     module Client =
         
-        open IntelliFactory.WebSharper.Formlet
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
 
-        [<JavaScriptAttribute>]
+        [<JavaScript>]
+        let alertHideLoader (element : Element) (jquery : JQuery) msg =
+            jquery.Css("visibility", "hidden").Ignore
+            element.RemoveClass "disabled"
+            JavaScript.Alert msg
+
+        [<JavaScript>]
+        let showLoader (jquery : JQuery) (element : Element) =
+            element.AddClass "disabled"
+            jquery.Css("visibility", "visible").Ignore
+
+        [<JavaScript>]
         let urlForm () =
             
             let legend = Legend [Text "Enter the URL you want to analyze."]
@@ -83,34 +134,21 @@ module UrlForm =
                         | _  -> ())
 
             let submitBtn =
-                Button [Id "submitButton"; Attr.Class "btn btn-primary"; Text "Submit"]
+                Button [Id "submitButton"; Attr.Class "btn btn-primary"; Text "Submit"; Attr.Type "button"]
                 |>! OnClick (fun x _ ->
                     async {
-                        x.AddClass "disabled"
                         let loaderJquery = JQuery.Of("#loader")
-                        loaderJquery.Css("visibility", "visible").Ignore
+                        showLoader loaderJquery x
                         let! idOption = Server.fetchInsert urlInput.Value
+                        let alertHideLoader' = alertHideLoader x loaderJquery
                         match idOption with
-                            | None ->
-                                loaderJquery.Css("visibility", "hidden").Ignore
-                                JavaScript.Alert "Requesting the specified URL failed."
-                                x.RemoveClass "disabled"
-                            | Some id -> Html5.Window.Self.Location.Href <- ("/Report/" + id)
+                            | MongoError         -> alertHideLoader' "An error occured."
+                            | InvalidUri         -> alertHideLoader' "The specified URL is invalid."
+                            | NotHtml            -> alertHideLoader' "The specified URL doesn't point to a HTML document. The application can only process HTML pages."
+                            | RequestFailed      -> alertHideLoader' "Downloading the specified URL failed."
+                            | Success mongoObjId -> Html5.Window.Self.Location.Href <- ("/Report/" + mongoObjId)
                     } |> Async.Start)
 
-//            let legendFormlet    = Formlet.OfElement (fun _ -> legend)
-//            let labelFormlet     = Formlet.OfElement (fun _ -> label)
-//            let urlInputFormlet  = Formlet.OfElement (fun _ -> urlInput)
-//            let submitBtnFormlet = Formlet.OfElement (fun _ -> submitBtn)
-//            
-//            let form =
-//                Formlet.Yield (fun _ _ _ _ -> ())
-//                <*> legendFormlet
-//                <*> labelFormlet
-//                <*> urlInputFormlet
-//                <*> submitBtnFormlet
-//
-//            Formlet.Run (fun _ -> ()) form
             Div [Id "urlForm"; Attr.Class "offset2"] -< [
                 legend
                 label
@@ -118,8 +156,8 @@ module UrlForm =
                 Div [submitBtn]
             ]
 
-        type FormViewer () =
-            inherit Web.Control ()
+    type UrlFormControl () =
+        inherit Web.Control ()
 
-            [<JavaScriptAttribute>]
-            override this.Body = urlForm() :> _
+        [<JavaScript>]
+        override __.Body = Client.urlForm () :> _

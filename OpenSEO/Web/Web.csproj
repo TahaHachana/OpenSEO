@@ -41,9 +41,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="*.aspx" />
     <Content Include="Images\Loader.gif" />
+    <Content Include="Report.html" />
     <Content Include="robots.txt" />
     <Content Include="Scripts\*.js" />
     <Content Include="Content\**\*.*" />
+    <Content Include="Sitemap.xml" />
     <Content Include="StyleSheets\bootstrap.css" />
     <Content Include="StyleSheets\StyleSheet1.css" />
     <Content Include="Themes\**\*.*" />

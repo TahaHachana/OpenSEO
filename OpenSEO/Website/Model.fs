@@ -10,6 +10,9 @@ module Model =
         | Home
         | About
         | Report of ReportId
+        | Admin
+        | Login of Action option
+        | Logout
 
     type Page =
         {
