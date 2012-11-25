@@ -121,9 +121,9 @@ module UrlForm =
             let label = Label [Text "URL"]
             let urlInput =
                 Input [
-                    Attr.Class "input-xxlarge"
+                    Attr.Class "span6"
                     Attr.Type "text"
-                    HTML5.Attr.PlaceHolder "http://www.example.com/"
+                    HTML5.Attr.PlaceHolder "http://www.YourWebsite.com/"
                     HTML5.Attr.AutoFocus "autofocus"
                     HTML5.Attr.SpellCheck "false"
                 ]
@@ -134,7 +134,7 @@ module UrlForm =
                         | _  -> ())
 
             let submitBtn =
-                Button [Id "submitButton"; Attr.Class "btn btn-primary"; Text "Submit"; Attr.Type "button"]
+                Button [Id "submitButton"; Attr.Class "btn btn-success"; Text "URL Review"; Attr.Type "button"]
                 |>! OnClick (fun x _ ->
                     async {
                         let loaderJquery = JQuery.Of("#loader")
@@ -149,11 +149,9 @@ module UrlForm =
                             | Success mongoObjId -> Html5.Window.Self.Location.Href <- ("/Report/" + mongoObjId)
                     } |> Async.Start)
 
-            Div [Id "urlForm"; Attr.Class "offset2"] -< [
-                legend
-                label
+            Div [Id "urlForm"; Attr.Class "input-append offset2"] -< [
                 urlInput
-                Div [submitBtn]
+                submitBtn
             ]
 
     type UrlFormControl () =

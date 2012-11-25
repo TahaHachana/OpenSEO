@@ -12,7 +12,11 @@
     border: 0;    
 }
 
-#urlForm { margin-top: 250px; }
+#header { margin-top: 150px; }
+
+#urlForm {
+    margin-top: 100px;
+}
 
 #report, #about, #login, #admin
 {

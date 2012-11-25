@@ -127,6 +127,8 @@ module Details =
                                 | Some headings ->
                                     let tabs = Utilities.Client.makeTabsDiv headings
                                     tabsDiv.Append tabs
+                            JQuery.Of("#validatorUri").Val(details.RequestUri).Trigger("change").Ignore //Ignore
+                            JQuery.Of("#pagespeedUri").Val(details.RequestUri).Trigger("change").Ignore //Ignore
                             Utilities.Client.updateProgressBar ()
                 } |> Async.Start)
                 

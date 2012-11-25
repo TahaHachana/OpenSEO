@@ -13,10 +13,13 @@ module View =
                 HomeContent.navigation
                 SharedContent.forkme
                 Div [Class "container"] -< [
-                    new UrlForm.UrlFormControl () :> INode<_>
+                    HomeContent.intro :> INode<_>
+                    new UrlForm.UrlFormControl () :> _
                     Div [
                         Img [Src "/Images/Loader.gif"; Id "loader"; Class "offset2"]
                     ] :> _
+                    HR [] :> _
+                    new AddThis.AddThisControl () :> _
                 ]
                 SharedContent.analyticsScript
             ]

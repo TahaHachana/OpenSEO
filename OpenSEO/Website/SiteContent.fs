@@ -45,6 +45,18 @@ module SiteContent =
 
         let metaDesc = "Open source SEO (search engine optimization) tool offering HTML auditing, keywords analysis and speed testing functionality."
 
+        let intro : Content.HtmlElement =
+            HTML5.Header [Id "header"] -< [
+                P [
+                    Strong [Text "OpenSEO"]
+                    Text " is an open source Web-based SEO tool that allows you to run a quick review of a URL to gather SEO data and get some optimization tips. Both the "
+                    A [HRef "https://github.com/TahaHachana/OpenSEO"; Target "_blank"] -< [Text "application"]
+                    Text " and the "
+                    A [HRef "https://github.com/TahaHachana/SEOLib"; Target "_blank"] -< [Text ".NET component"]
+                    Text " that exposes the main functionality are open source on GitHub."
+                ]
+            ]
+
     module AboutContent =
         
         let navigation : Content.HtmlElement = Utilities.Server.makeNavigation <| Some "About"
@@ -84,13 +96,15 @@ module SiteContent =
                     LI [A [HRef "#keywords"; HTML5.Data "toggle" "tab"] -< [Text "Keywords"]]
                     LI [A [HRef "#links"; HTML5.Data "toggle" "tab"] -< [Text "Links"]]
                     LI [A [HRef "#violations"; HTML5.Data "toggle" "tab"] -< [Text "Violations"]]
-                    LI [A [HRef "#html"; HTML5.Data "toggle" "tab"] -< [Text "HTML"]]
+                    LI [A [HRef "#validator"; HTML5.Data "toggle" "tab"] -< [Text "HTML"]]
+                    LI [A [HRef "#speed"; HTML5.Data "toggle" "tab"] -< [Text "Speed"]]
                 ]
                 Div [Class "tab-content"] -< [
-                    new Details.DetailsControl(id)               :> INode<_>
-                    new Keywords.KeywordsControl(id)             :> _
-                    new Links.LinksControl(id)                   :> _
-                    new Violations.ViolationsControl(id)         :> _
-                    Div [Class "tab-pane fade"; Id "html"] -< [] :> _
+                    new Details.DetailsControl(id)       :> INode<_>
+                    new Keywords.KeywordsControl(id)     :> _
+                    new Links.LinksControl(id)           :> _
+                    new Violations.ViolationsControl(id) :> _
+                    new Validator.ValidatorControl ()    :> _
+                    new Pagespeed.PagespeedControl ()    :> _
                 ]
             ]

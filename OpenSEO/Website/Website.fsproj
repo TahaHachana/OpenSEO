@@ -45,8 +45,11 @@
     <Compile Include="Keywords.fs" />
     <Compile Include="Links.fs" />
     <Compile Include="Violations.fs" />
+    <Compile Include="Validator.fs" />
+    <Compile Include="Pagespeed.fs" />
     <Compile Include="Login.fs" />
     <Compile Include="UrlForm.fs" />
+    <Compile Include="AddThis.fs" />
     <Compile Include="Model.fs" />
     <Compile Include="SiteContent.fs" />
     <Compile Include="Skin.fs" />
@@ -56,6 +59,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Google.Apis">
+      <HintPath>..\..\..\..\..\Desktop\google-api-dotnet-client-1.2.4696-beta.binary\Lib\Google.Apis.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Apis.Pagespeedonline.v1">
+      <HintPath>..\..\..\..\..\Desktop\google-api-dotnet-client-1.2.4696-beta.binary\Services\PagespeedonlineService\Google.Apis.Pagespeedonline.v1.dll</HintPath>
+    </Reference>
     <Reference Include="IntelliFactory.WebSharper.KendoUI">
       <HintPath>..\..\packages\WebSharper.KendoUI.2.4.44.47\lib\IntelliFactory.WebSharper.KendoUI.dll</HintPath>
       <Private>True</Private>
@@ -69,7 +78,8 @@
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="SEOLib">
-      <HintPath>..\..\packages\SEOLib.0.3.78\lib\Net45\SEOLib.dll</HintPath>
+      <HintPath>..\..\packages\SEOLib.0.5.98\lib\Net45\SEOLib.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />

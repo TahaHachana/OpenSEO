@@ -68,19 +68,19 @@ module Violations =
             jquery.Text(String.concat "" [text; " ("; count; ")"]).Ignore 
 
         [<JavaScript>]
-        let displayAccordions arr accordionId (div : Element) =
+        let displayAccordions id arr accordionId (div : Element) =
             arr
             |> Array.mapi (fun idx x ->
-                let id = "accordion" + string idx
+                let id' = id + string idx
                 let level, heading, line, column, description, recommendation = x
-                makeAccordionGroup accordionId id heading line column description recommendation)
+                makeAccordionGroup accordionId id' heading line column description recommendation)
             |> Array.iter div.Append
 
         [<JavaScript>]
-        let displayViolations violations level selector accordionId div =
+        let displayViolations violations id level selector accordionId div =
             let violations' = filterLevel violations level
             updateTabHeader violations' selector
-            displayAccordions violations' accordionId div
+            displayAccordions id violations' accordionId div
 
         [<JavaScript>]
         let violationsSection id =
@@ -106,8 +106,8 @@ module Violations =
                         | None -> ()
                         | Some violations ->
                             let displayViolations' = displayViolations violations
-                            displayViolations' "Error" "#errorsTab" "errorsAccordion" div
-                            displayViolations' "Warning" "#warningsTab" "warningsAccordion" div'
+                            displayViolations' "errorAccordion" "Error" "#errorsTab" "errorsAccordion" div
+                            displayViolations' "WarningAccordion" "Warning" "#warningsTab" "warningsAccordion" div'
                     Utilities.Client.updateProgressBar ()
                 } |> Async.Start)
             
