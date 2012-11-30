@@ -88,11 +88,14 @@ module Utilities =
             let progressBarJquery = JQuery.Of "#progressBar"
             let dataWidth = progressBarJquery.Data("width").ToString() |> int
             match dataWidth with
-                | 75 ->
+                | 80 ->
                     progressBarJquery.Css("width", "100%").Ignore
                     JQuery.Of("#progressDiv").FadeOut(3000.).Ignore
                 | _ ->
-                    let width = dataWidth + 25
+                    let width = dataWidth + 20
                     let width' = width |> string |> fun x -> x + "%"
                     progressBarJquery.Data("width", width).Ignore
                     progressBarJquery.Css("width", width').Ignore
+
+        [<JavaScript>]
+        let hRule () = Hr [Attr.Class "span6 hrule"]

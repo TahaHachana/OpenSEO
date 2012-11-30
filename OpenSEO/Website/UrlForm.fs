@@ -71,6 +71,16 @@ module UrlForm =
                 |> Violations.insertViolations  
             }
         
+        let processHeaders (httpData : HttpData) id =
+            httpData.Headers
+            |> List.map (fun header ->
+                header.Value |> List.map (fun x -> header.Key, x))
+            |> List.concat
+            |> List.map (fun (key, value) ->
+                Headers.makeHttpHeader id key value)
+            |> List.toArray
+            |> Headers.insertHeaders
+
         [<Rpc>]
         let fetchInsert uriString =
             async {
@@ -95,6 +105,7 @@ module UrlForm =
                                                 processKeywords html id'
                                                 processLinks html requestUri id'
                                                 do! processViolations html requestUri id'
+                                                processHeaders httpData id'
                                                 return Success id'
             }
 

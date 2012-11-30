@@ -96,6 +96,7 @@ module SiteContent =
                     LI [A [HRef "#keywords"; HTML5.Data "toggle" "tab"] -< [Text "Keywords"]]
                     LI [A [HRef "#links"; HTML5.Data "toggle" "tab"] -< [Text "Links"]]
                     LI [A [HRef "#violations"; HTML5.Data "toggle" "tab"] -< [Text "Violations"]]
+                    LI [A [HRef "#headers"; HTML5.Data "toggle" "tab"] -< [Text "Headers"]]
                     LI [A [HRef "#validator"; HTML5.Data "toggle" "tab"] -< [Text "HTML"]]
                     LI [A [HRef "#speed"; HTML5.Data "toggle" "tab"] -< [Text "Speed"]]
                 ]
@@ -104,6 +105,7 @@ module SiteContent =
                     new Keywords.KeywordsControl(id)     :> _
                     new Links.LinksControl(id)           :> _
                     new Violations.ViolationsControl(id) :> _
+                    new Headers.HeadersControl(id)       :> _
                     new Validator.ValidatorControl ()    :> _
                     new Pagespeed.PagespeedControl ()    :> _
                 ]

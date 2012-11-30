@@ -1,6 +1,6 @@
 (function()
 {
- var Global=this,Runtime=this.IntelliFactory.Runtime,OpenSEO,AddThis,Client,WebSharper,Html,Default,HTML5,List,T,DBCleanup,Client1,Remoting,alert,Concurrency,EventsPervasives,Operators,Details,Client2,Seq,Utilities,Client3,jQuery,Keywords,Client4,Arrays,LatestReports,Client5,Links,Client6,String,Number,kendo,Formlet,Controls,Enhance,Data,Formlet1,window,Login,Client7,Pagespeed,Client8,Strings,UrlForm,Client9,Validator,Clienta,Violations,Clientb;
+ var Global=this,Runtime=this.IntelliFactory.Runtime,OpenSEO,AddThis,Client,WebSharper,Html,Default,HTML5,List,T,DBCleanup,Client1,Remoting,alert,Concurrency,EventsPervasives,Operators,Details,Client2,Utilities,Client3,jQuery,Headers,Client4,Arrays,Keywords,Client5,LatestReports,Client6,Links,Client7,String,Number,kendo,Formlet,Controls,Enhance,Data,Formlet1,window,Login,Client8,Pagespeed,Client9,Seq,Strings,UrlForm,Clienta,Validator,Clientb,Violations,Clientc;
  Runtime.Define(Global,{
   OpenSEO:{
    AddThis:{
@@ -47,7 +47,7 @@
          {
           return objectArg.AddClass(arg00,arg10);
          })("disabled");
-         x4=Remoting.Async("Website:8",[]);
+         x4=Remoting.Async("Website:9",[]);
          f2=function()
          {
           var objectArg1,arg001;
@@ -88,64 +88,26 @@
       tabsDiv=Default.Div(Runtime.New(T,{
        $:0
       }));
-      x=Operators.add((_this=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade active in reportSection"),Default.Id("details")]),_this.NewTag("section",x1))),List.ofArray([Client2.makeDiv("URL","url"),Default.Hr(Runtime.New(T,{
-       $:0
-      })),Client2.makeDiv("Size","size"),Default.Hr(Runtime.New(T,{
-       $:0
-      })),Client2.makeDiv("Server","server"),Default.Hr(Runtime.New(T,{
-       $:0
-      })),Client2.makeDiv("Elapsed Time","elapsedTime"),Default.Hr(Runtime.New(T,{
-       $:0
-      })),Client2.makeDiv("Title","title"),Client2.makeDiv("Length","titleLength"),Default.Hr(Runtime.New(T,{
-       $:0
-      })),Client2.makeDiv("Description","description"),Client2.makeDiv("Length","descriptionLength"),Default.Hr(Runtime.New(T,{
-       $:0
-      })),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text("Headings")]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([tabsDiv]))]))]));
+      x=Operators.add((_this=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade active in reportSection"),Default.Id("details")]),_this.NewTag("section",x1))),List.ofArray([Client2.makeDiv("urlDiv","URL","url"),Client3.hRule(),Client2.makeDiv("timeDiv","Elapsed Time","elapsedTime"),Client3.hRule(),Client2.makeDiv("textRatioDiv","Text/HTML Ratio","textRatio"),Client3.hRule(),Client2.makeDiv("titleDiv","Title","title"),Client3.hRule(),Client2.makeDiv("descDiv","Description","description"),Client3.hRule(),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text("Headings")]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([tabsDiv]))]))]));
       f=(f1=function()
       {
-       var x2,f2,f8;
+       var x2,f2,f4;
        x2=(f2=function()
        {
         var x3,f3;
-        x3=Remoting.Async("Website:7",[id]);
+        x3=Remoting.Async("Website:8",[id]);
         f3=function(_arg11)
         {
-         var details,x4,f4,action,a,matchValue,headings,tabs,b,f6,f7;
+         var details,requestUri;
          if(_arg11.$==1)
           {
            details=_arg11.$0;
-           x4=List.ofArray([["#url",details.RequestUri],["#size",details.Size],["#server",details.Server],["#elapsedTime",details.ElapsedTime],["#title",details.Title],["#titleLength",details.TitleLength],["#description",details.Description],["#descriptionLength",details.DescriptionLength]]);
-           f4=(action=Runtime.Tupled(function(x5)
-           {
-            var arg1,arg2,f5;
-            arg1=x5[0];
-            arg2=x5[1];
-            f5=function(selector)
-            {
-             return function(txt)
-             {
-              return Client2.setPText(selector,txt);
-             };
-            };
-            return(f5(arg1))(arg2);
-           }),function(list)
-           {
-            return Seq.iter(action,list);
-           });
-           f4(x4);
-           a=(matchValue=details.Headings,matchValue.$==1?(headings=matchValue.$0,(tabs=Client3.makeTabsDiv(headings),(tabsDiv.AppendI(tabs),Concurrency.Return(null)))):(null,Concurrency.Return(null)));
-           b=(f6=function()
-           {
-            jQuery("#validatorUri").val(details.RequestUri).trigger("change");
-            jQuery("#pagespeedUri").val(details.RequestUri).trigger("change");
-            Client3.updateProgressBar();
-            return Concurrency.Return(null);
-           },Concurrency.Delay(f6));
-           f7=function()
-           {
-            return b;
-           };
-           return Concurrency.Bind(a,f7);
+           Client2.displayDetails(details,tabsDiv);
+           requestUri=details.RequestUri;
+           Client2.setInputVal("#validatorUri",requestUri);
+           Client2.setInputVal("#pagespeedUri",requestUri);
+           Client3.updateProgressBar();
+           return Concurrency.Return(null);
           }
          else
           {
@@ -154,7 +116,7 @@
         };
         return Concurrency.Bind(x3,f3);
        },Concurrency.Delay(f2));
-       f8=function(arg00)
+       f4=function(arg00)
        {
         var t;
         t={
@@ -162,7 +124,7 @@
         };
         return Concurrency.Start(arg00);
        };
-       return f8(x2);
+       return f4(x2);
       },function(w)
       {
        return Operators.OnAfterRender(f1,w);
@@ -170,9 +132,58 @@
       f(x);
       return x;
      },
-     makeDiv:function(txt,id)
+     displayDetails:function(details,tabsDiv)
      {
-      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text(txt)]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([Default.P(List.ofArray([Default.Id(id)]))]))]));
+      var title,description,txt,txt1,headings,matchValue,tabs;
+      title=details.Title;
+      description=details.Description;
+      Client2.setPText("#url",details.RequestUri);
+      txt=details.ElapsedTime+" milliseconds";
+      Client2.setPText("#elapsedTime",txt);
+      txt1=Global.String(details.TextRatio)+" %";
+      Client2.setPText("#textRatio",txt1);
+      Client2.setPText("#title",title);
+      Client2.displayLength(title,"#titleDiv");
+      Client2.setPText("#description",description);
+      Client2.displayLength(description,"#descDiv");
+      headings=details.Headings;
+      matchValue=headings.length;
+      if(matchValue===0)
+       {
+        return null;
+       }
+      else
+       {
+        tabs=Client3.makeTabsDiv(headings);
+        return tabsDiv.AppendI(tabs);
+       }
+     },
+     displayLength:function(str,selector)
+     {
+      var strLength,x;
+      strLength=str==="MISSING"?{
+       $:0
+      }:{
+       $:1,
+       $0:"("+Global.String(str.length)+" characters)"
+      };
+      if(strLength.$==1)
+       {
+        x=strLength.$0;
+        return jQuery(selector).append(jQuery("<small/>").text(x));
+       }
+      else
+       {
+        return null;
+       }
+     },
+     makeDiv:function(divId,h4Text,pId)
+     {
+      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3"),Default.Id(divId)])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text(h4Text)]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([Default.P(List.ofArray([Default.Id(pId)]))]))]));
+     },
+     setInputVal:function(selector,requestUri)
+     {
+      return jQuery(selector).val(requestUri).trigger("change");
      },
      setPText:function(selector,txt)
      {
@@ -183,6 +194,101 @@
      get_Body:function()
      {
       return Client2.detailsSection(this.id);
+     }
+    })
+   },
+   Headers:{
+    Client:{
+     appendTd:function(text,tableRow)
+     {
+      return jQuery("<td/>").text(text).appendTo(tableRow);
+     },
+     displayHeaders:function(headers,selector)
+     {
+      var x,f,mapping,f1,action;
+      x=(f=(mapping=Runtime.Tupled(function(tupledArg)
+      {
+       var x1,y;
+       x1=tupledArg[0];
+       y=tupledArg[1];
+       return Client4.tableRow(x1,y);
+      }),function(array)
+      {
+       return Arrays.map(mapping,array);
+      }),f(headers));
+      f1=(action=function(x1)
+      {
+       return x1.appendTo(jQuery(selector));
+      },function(array)
+      {
+       return Arrays.iter(action,array);
+      });
+      return f1(x);
+     },
+     headersSection:function(id)
+     {
+      var tabsDiv,x,_this,x1,f,f1;
+      tabsDiv=Default.Div(Runtime.New(T,{
+       $:0
+      }));
+      x=Operators.add((_this=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("headers")]),_this.NewTag("section",x1))),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span8")])),List.ofArray([Operators.add(Default.Table(List.ofArray([Default.Id("headersTable"),Default.Attr().Class("table table-bordered table-striped span8")])),List.ofArray([Default.TR(List.ofArray([Default.TH(List.ofArray([Default.Text("Key")])),Default.TH(List.ofArray([Default.Text("Value")]))]))]))]))]));
+      f=(f1=function()
+      {
+       var x2,f2,f4;
+       x2=(f2=function()
+       {
+        var x3,f3;
+        x3=Remoting.Async("Website:4",[id]);
+        f3=function(_arg11)
+        {
+         var headers;
+         if(_arg11.$==1)
+          {
+           headers=_arg11.$0;
+           Client4.displayHeaders(headers,"#headersTable");
+           Client3.updateProgressBar();
+           return Concurrency.Return(null);
+          }
+         else
+          {
+           return Concurrency.Return(null);
+          }
+        };
+        return Concurrency.Bind(x3,f3);
+       },Concurrency.Delay(f2));
+       f4=function(arg00)
+       {
+        var t;
+        t={
+         $:0
+        };
+        return Concurrency.Start(arg00);
+       };
+       return f4(x2);
+      },function(w)
+      {
+       return Operators.OnAfterRender(f1,w);
+      });
+      f(x);
+      return x;
+     },
+     makeTable:function(id)
+     {
+      return Operators.add(Default.Table(List.ofArray([Default.Id(id),Default.Attr().Class("table table-bordered table-striped span10")])),List.ofArray([Default.TR(List.ofArray([Default.TH(List.ofArray([Default.Text("Key")])),Default.TH(List.ofArray([Default.Text("Value")]))]))]));
+     },
+     tableRow:function(key,value)
+     {
+      var tr;
+      tr=jQuery("<tr/>");
+      Client4.appendTd(key,tr);
+      Client4.appendTd(value,tr);
+      return tr;
+     }
+    },
+    HeadersControl:Runtime.Class({
+     get_Body:function()
+     {
+      return Client4.headersSection(this.id);
      }
     })
    },
@@ -201,7 +307,7 @@
        x1=tupledArg[0];
        y=tupledArg[1];
        z=tupledArg[2];
-       return Client4.tableRow(x1,y,z);
+       return Client5.tableRow(x1,y,z);
       }),function(array)
       {
        return Arrays.map(mapping,array);
@@ -218,18 +324,18 @@
      keywordsSection:function(id)
      {
       var x,_this,x1,_this1,arg00,_this2,arg001,_this3,arg002,f,f1;
-      x=Operators.add((_this=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("keywords")]),_this.NewTag("section",x1))),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#keywords1"),(_this1=HTML5.Attr(),(arg00="data-"+"toggle",_this1.NewAttr(arg00,"tab")))])),List.ofArray([Default.Text("1 Keyword")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#keywords2"),(_this2=HTML5.Attr(),(arg001="data-"+"toggle",_this2.NewAttr(arg001,"tab")))])),List.ofArray([Default.Text("2 Keywords")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#keywords3"),(_this3=HTML5.Attr(),(arg002="data-"+"toggle",_this3.NewAttr(arg002,"tab")))])),List.ofArray([Default.Text("3 Keywords")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("keywords1")])),List.ofArray([Client4.makeTable("table1")])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("keywords2")])),List.ofArray([Client4.makeTable("table2")])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("keywords3")])),List.ofArray([Client4.makeTable("table3")]))]))]))]));
+      x=Operators.add((_this=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("keywords")]),_this.NewTag("section",x1))),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#keywords1"),(_this1=HTML5.Attr(),(arg00="data-"+"toggle",_this1.NewAttr(arg00,"tab")))])),List.ofArray([Default.Text("1 Keyword")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#keywords2"),(_this2=HTML5.Attr(),(arg001="data-"+"toggle",_this2.NewAttr(arg001,"tab")))])),List.ofArray([Default.Text("2 Keywords")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#keywords3"),(_this3=HTML5.Attr(),(arg002="data-"+"toggle",_this3.NewAttr(arg002,"tab")))])),List.ofArray([Default.Text("3 Keywords")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("keywords1")])),List.ofArray([Client5.makeTable("table1")])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("keywords2")])),List.ofArray([Client5.makeTable("table2")])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("keywords3")])),List.ofArray([Client5.makeTable("table3")]))]))]))]));
       f=(f1=function()
       {
        var x2,f2,f6;
        x2=(f2=function()
        {
         var x3,f3;
-        x3=Remoting.Async("Website:6",[id]);
+        x3=Remoting.Async("Website:7",[id]);
         f3=function(_arg11)
         {
          var a,keywords,b,f4,f5;
-         a=_arg11.$==1?(keywords=_arg11.$0,(Client4.displayKeywords(keywords.get_Item(0),"#table1"),(Client4.displayKeywords(keywords.get_Item(1),"#table2"),(Client4.displayKeywords(keywords.get_Item(2),"#table3"),Concurrency.Return(null))))):(null,Concurrency.Return(null));
+         a=_arg11.$==1?(keywords=_arg11.$0,(Client5.displayKeywords(keywords.get_Item(0),"#table1"),(Client5.displayKeywords(keywords.get_Item(1),"#table2"),(Client5.displayKeywords(keywords.get_Item(2),"#table3"),Concurrency.Return(null))))):(null,Concurrency.Return(null));
          b=(f4=function()
          {
           Client3.updateProgressBar();
@@ -261,7 +367,7 @@
      },
      makeTable:function(id)
      {
-      return Operators.add(Default.Table(List.ofArray([Default.Id(id),Default.Attr().Class("table table-bordered table-striped span10")])),List.ofArray([Default.TR(List.ofArray([Client4.makeTh(id),Default.TH(List.ofArray([Default.Text("Occurrence")])),Default.TH(List.ofArray([Default.Text("Density %")]))]))]));
+      return Operators.add(Default.Table(List.ofArray([Default.Id(id),Default.Attr().Class("table table-bordered table-striped span10")])),List.ofArray([Default.TR(List.ofArray([Client5.makeTh(id),Default.TH(List.ofArray([Default.Text("Occurrence")])),Default.TH(List.ofArray([Default.Text("Density %")]))]))]));
      },
      makeTh:function(id)
      {
@@ -278,16 +384,16 @@
      {
       var tr;
       tr=jQuery("<tr/>");
-      Client4.appendTd(keyword,tr);
-      Client4.appendTd(occurrence,tr);
-      Client4.appendTd(density,tr);
+      Client5.appendTd(keyword,tr);
+      Client5.appendTd(occurrence,tr);
+      Client5.appendTd(density,tr);
       return tr;
      }
     },
     KeywordsControl:Runtime.Class({
      get_Body:function()
      {
-      return Client4.keywordsSection(this.id);
+      return Client5.keywordsSection(this.id);
      }
     })
    },
@@ -303,7 +409,7 @@
        x2=(f2=function()
        {
         var x3,f3;
-        x3=Remoting.Async("Website:9",[]);
+        x3=Remoting.Async("Website:10",[]);
         f3=function(_arg1)
         {
          var arr,x4,f4,f5,action;
@@ -314,7 +420,7 @@
            {
             return Arrays.map(function(url)
             {
-             return Client5.makeLi(url);
+             return Client6.makeLi(url);
             },array);
            },f4(arr));
            f5=(action=function(arg00)
@@ -359,7 +465,7 @@
     LatestReportsControl:Runtime.Class({
      get_Body:function()
      {
-      return Client5.latestReportsList();
+      return Client6.latestReportsList();
      }
     })
    },
@@ -384,7 +490,7 @@
        x1=tupledArg[0];
        y=tupledArg[1];
        z=tupledArg[2];
-       return Client6.tableRow(x1,y,z);
+       return Client7.tableRow(x1,y,z);
       }),function(array)
       {
        return Arrays.map(mapping,array);
@@ -401,9 +507,9 @@
      linksSection:function(id)
      {
       var div,_div_,x,_this,x1,_this1,arg00,_this2,arg001,_this3,arg002,f,f1;
-      div=Default.Div(List.ofArray([Client6.makeDiv("Internal Links","internalLinksCount"),Client6.makeDiv("External Links","externalLinksCount")]));
-      _div_=Default.Div(List.ofArray([Client6.makeDiv("Follow Links","followLinksCount"),Client6.makeDiv("Nofollow Links","nofollowLinksCount")]));
-      x=Operators.add((_this=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("links")]),_this.NewTag("section",x1))),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#links1"),(_this1=HTML5.Attr(),(arg00="data-"+"toggle",_this1.NewAttr(arg00,"tab")))])),List.ofArray([Default.Text("Internal")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#links2"),(_this2=HTML5.Attr(),(arg001="data-"+"toggle",_this2.NewAttr(arg001,"tab")))])),List.ofArray([Default.Text("External")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#linksStats"),(_this3=HTML5.Attr(),(arg002="data-"+"toggle",_this3.NewAttr(arg002,"tab")))])),List.ofArray([Default.Text("Stats")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("links1")])),List.ofArray([Client6.makeTable("linksTable1")])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("links2")])),List.ofArray([Client6.makeTable("linksTable2")])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("linksStats")])),List.ofArray([div,Default.Hr(Runtime.New(T,{
+      div=Default.Div(List.ofArray([Client7.makeDiv("Internal Links","internalLinksCount"),Client7.makeDiv("External Links","externalLinksCount")]));
+      _div_=Default.Div(List.ofArray([Client7.makeDiv("Follow Links","followLinksCount"),Client7.makeDiv("Nofollow Links","nofollowLinksCount")]));
+      x=Operators.add((_this=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("links")]),_this.NewTag("section",x1))),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#links1"),(_this1=HTML5.Attr(),(arg00="data-"+"toggle",_this1.NewAttr(arg00,"tab")))])),List.ofArray([Default.Text("Internal")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#links2"),(_this2=HTML5.Attr(),(arg001="data-"+"toggle",_this2.NewAttr(arg001,"tab")))])),List.ofArray([Default.Text("External")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#linksStats"),(_this3=HTML5.Attr(),(arg002="data-"+"toggle",_this3.NewAttr(arg002,"tab")))])),List.ofArray([Default.Text("Stats")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("links1")])),List.ofArray([Client7.makeTable("linksTable1")])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("links2")])),List.ofArray([Client7.makeTable("linksTable2")])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("linksStats")])),List.ofArray([div,Default.Hr(Runtime.New(T,{
        $:0
       })),_div_]))]))]))]));
       f=(f1=function()
@@ -412,11 +518,11 @@
        x2=(f2=function()
        {
         var x3,f3;
-        x3=Remoting.Async("Website:5",[id]);
+        x3=Remoting.Async("Website:6",[id]);
         f3=function(_arg11)
         {
          var a,links,txt,txt1,txt2,txt3,pie,_pie_,b,f4,f5;
-         a=_arg11.$==1?(links=_arg11.$0,(Client6.displayLinks(links.InternalLinks,"#linksTable1"),(Client6.displayLinks(links.ExternalLinks,"#linksTable2"),(txt=String(links.InternalCount),Client6.setPText("#internalLinksCount",txt),(txt1=String(links.ExternalCount),Client6.setPText("#externalLinksCount",txt1),(txt2=String(links.FollowCount),Client6.setPText("#followLinksCount",txt2),(txt3=String(links.NofollowCount),Client6.setPText("#nofollowLinksCount",txt3),(pie=Client6.pieChart("Internal vs. External","Internal","External",Number(links.InternalPercent),Number(links.ExternalPercent)),(_pie_=Client6.pieChart("Follow vs. NoFollow","Follow","NoFollow",Number(links.FollowPercent),Number(links.NofollowPercent)),(div.AppendI(pie),(_div_.AppendI(_pie_),Concurrency.Return(null)))))))))))):(null,Concurrency.Return(null));
+         a=_arg11.$==1?(links=_arg11.$0,(Client7.displayLinks(links.InternalLinks,"#linksTable1"),(Client7.displayLinks(links.ExternalLinks,"#linksTable2"),(txt=String(links.InternalCount),Client7.setPText("#internalLinksCount",txt),(txt1=String(links.ExternalCount),Client7.setPText("#externalLinksCount",txt1),(txt2=String(links.FollowCount),Client7.setPText("#followLinksCount",txt2),(txt3=String(links.NofollowCount),Client7.setPText("#nofollowLinksCount",txt3),(pie=Client7.pieChart("Internal vs. External","Internal","External",Number(links.InternalPercent),Number(links.ExternalPercent)),(_pie_=Client7.pieChart("Follow vs. NoFollow","Follow","NoFollow",Number(links.FollowPercent),Number(links.NofollowPercent)),(div.AppendI(pie),(_div_.AppendI(_pie_),Concurrency.Return(null)))))))))))):(null,Concurrency.Return(null));
          b=(f4=function()
          {
           Client3.updateProgressBar();
@@ -489,16 +595,16 @@
      {
       var tr;
       tr=jQuery("<tr/>");
-      Client6["appendTd'"](url,tr);
-      Client6.appendTd(anchor,tr);
-      Client6.appendTd(rel,tr);
+      Client7["appendTd'"](url,tr);
+      Client7.appendTd(anchor,tr);
+      Client7.appendTd(rel,tr);
       return tr;
      }
     },
     LinksControl:Runtime.Class({
      get_Body:function()
      {
-      return Client6.linksSection(this.id);
+      return Client7.linksSection(this.id);
      }
     })
    },
@@ -568,7 +674,7 @@
     LoginControl:Runtime.Class({
      get_Body:function()
      {
-      return Client7.loginForm(this.redirectUrl);
+      return Client8.loginForm(this.redirectUrl);
      }
     })
    },
@@ -585,7 +691,7 @@
         _id_=id+Global.String(idx);
         suggestions=x1[1];
         ruleName=x1[0];
-        return Client8.makeAccordionGroup(accordionId,_id_,ruleName,suggestions);
+        return Client9.makeAccordionGroup(accordionId,_id_,ruleName,suggestions);
        });
       },function(list)
       {
@@ -600,7 +706,7 @@
       });
       f1(x);
       length=Global.String(lst.get_Length());
-      return Client8.updateTabHeader(length,"#speedSuggestionsTab");
+      return Client9.updateTabHeader(length,"#speedSuggestionsTab");
      },
      displaySpeedData:function(uriString,div,_div_)
      {
@@ -617,21 +723,21 @@
           speedData=_arg1.$0;
           score=Global.String(speedData.Score)+" / 100";
           sizeBreakdown=speedData.ResourceBreakdown;
-          Client8.setPText("#speedScore",score);
+          Client9.setPText("#speedScore",score);
           txt=sizeBreakdown.Css+" KB";
-          Client8.setPText("#cssSize",txt);
+          Client9.setPText("#cssSize",txt);
           txt1=sizeBreakdown.Html+" KB";
-          Client8.setPText("#htmlSize",txt1);
+          Client9.setPText("#htmlSize",txt1);
           txt2=sizeBreakdown.Images+" KB";
-          Client8.setPText("#imagesSize",txt2);
+          Client9.setPText("#imagesSize",txt2);
           txt3=sizeBreakdown.Javascript+" KB";
-          Client8.setPText("#jsSize",txt3);
+          Client9.setPText("#jsSize",txt3);
           txt4=sizeBreakdown.Other+" KB";
-          Client8.setPText("#otherSize",txt4);
+          Client9.setPText("#otherSize",txt4);
           txt5=sizeBreakdown.Total+" KB";
-          Client8.setPText("#totalSize",txt5);
-          Client8.displayAccordions("speedSuggestion","speedSuggestionsAccordion",div,speedData.Rules);
-          chart=Client8.pieChart(speedData.ResourceStats);
+          Client9.setPText("#totalSize",txt5);
+          Client9.displayAccordions("speedSuggestion","speedSuggestionsAccordion",div,speedData.Rules);
+          chart=Client9.pieChart(speedData.ResourceStats);
           _div_.AppendI(chart);
           return Concurrency.Return(null);
          }
@@ -662,7 +768,7 @@
        {
         return List.map(function(suggestion)
         {
-         return Client8["makeDiv'"](suggestion);
+         return Client9["makeDiv'"](suggestion);
         },list);
        };
        return f(x);
@@ -685,7 +791,7 @@
        {
         return List.map(function(text)
         {
-         return Client8.makeLi(text);
+         return Client9.makeLi(text);
         },list);
        };
        return f(x);
@@ -701,16 +807,16 @@
       input=Default.Input(List.ofArray([(_this=Default.Attr(),_this.NewAttr("type","hidden")),(_this1=Default.Attr(),_this1.NewAttr("value","")),Default.Id("pagespeedUri")]));
       div=Default.Div(List.ofArray([Default.Attr().Class("accordion"),Default.Id("speedSuggestionsAccordion")]));
       _div_=Default.Div(List.ofArray([Default.Id("resourceSizeDiv")]));
-      x=Operators.add((_this2=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("speed")]),_this2.NewTag("section",x1))),List.ofArray([input,Client8.makeDiv("Score","speedScore"),Default.Hr(Runtime.New(T,{
+      x=Operators.add((_this2=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("speed")]),_this2.NewTag("section",x1))),List.ofArray([input,Client9.makeDiv("Score","speedScore"),Default.Hr(Runtime.New(T,{
        $:0
-      })),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#speedSuggestions"),(_this3=HTML5.Attr(),(arg00="data-"+"toggle",_this3.NewAttr(arg00,"tab"))),Default.Id("speedSuggestionsTab")])),List.ofArray([Default.Text("Suggestions")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#resourceBreakdown"),(_this4=HTML5.Attr(),(arg001="data-"+"toggle",_this4.NewAttr(arg001,"tab"))),Default.Id("sizeBreakdownTab")])),List.ofArray([Default.Text("Resource Breakdown")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("speedSuggestions")])),List.ofArray([div])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("resourceBreakdown")])),List.ofArray([Client8.makeDiv("CSS","cssSize"),Client8.makeDiv("HTML","htmlSize"),Client8.makeDiv("Images","imagesSize"),Client8.makeDiv("JavaScript","jsSize"),Client8.makeDiv("Other","otherSize"),Client8.makeDiv("Total","totalSize"),_div_]))]))]))]));
+      })),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#speedSuggestions"),(_this3=HTML5.Attr(),(arg00="data-"+"toggle",_this3.NewAttr(arg00,"tab"))),Default.Id("speedSuggestionsTab")])),List.ofArray([Default.Text("Suggestions")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#resourceBreakdown"),(_this4=HTML5.Attr(),(arg001="data-"+"toggle",_this4.NewAttr(arg001,"tab"))),Default.Id("sizeBreakdownTab")])),List.ofArray([Default.Text("Resource Breakdown")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("speedSuggestions")])),List.ofArray([div])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("resourceBreakdown")])),List.ofArray([Client9.makeDiv("CSS","cssSize"),Client9.makeDiv("HTML","htmlSize"),Client9.makeDiv("Images","imagesSize"),Client9.makeDiv("JavaScript","jsSize"),Client9.makeDiv("Other","otherSize"),Client9.makeDiv("Total","totalSize"),_div_]))]))]))]));
       f=(f1=function()
       {
        return jQuery("#pagespeedUri").change(function()
        {
         var uriString;
         uriString=this.getAttribute("value");
-        return Client8.displaySpeedData(uriString,div,_div_);
+        return Client9.displaySpeedData(uriString,div,_div_);
        });
       },function(w)
       {
@@ -761,7 +867,7 @@
     PagespeedControl:Runtime.Class({
      get_Body:function()
      {
-      return Client8.pagespeedSection(function(x)
+      return Client9.pagespeedSection(function(x)
       {
        return x;
       });
@@ -824,14 +930,14 @@
         {
          var loaderJquery,x8,f3;
          loaderJquery=jQuery("#loader");
-         Client9.showLoader(loaderJquery,x6);
+         Clienta.showLoader(loaderJquery,x6);
          x8=Remoting.Async("Website:0",[urlInput.get_Value()]);
          f3=function(_arg1)
          {
           var _alertHideLoader_,mongoObjId;
           _alertHideLoader_=function(msg)
           {
-           return Client9.alertHideLoader(x6,loaderJquery,msg);
+           return Clienta.alertHideLoader(x6,loaderJquery,msg);
           };
           if(_arg1.$==1)
            {
@@ -891,12 +997,16 @@
     UrlFormControl:Runtime.Class({
      get_Body:function()
      {
-      return Client9.urlForm();
+      return Clienta.urlForm();
      }
     })
    },
    Utilities:{
     Client:{
+     hRule:function()
+     {
+      return Default.Hr(List.ofArray([Default.Attr().Class("span6 hrule")]));
+     },
      makeDiv:function(idx,x,y)
      {
       if(idx===0)
@@ -972,14 +1082,14 @@
       {
        return value<<0;
       },f(x)));
-      if(dataWidth===75)
+      if(dataWidth===80)
        {
         progressBarJquery.css("width","100%");
         return jQuery("#progressDiv").fadeOut(3000);
        }
       else
        {
-        width=dataWidth+25;
+        width=dataWidth+20;
         _width_=(x1=(f1=function(value)
         {
          return Global.String(value);
@@ -1007,7 +1117,7 @@
         message=x1[2];
         line=x1[0];
         column=x1[1];
-        return Clienta.makeAccordionGroup(accordionId,_id_,message,line,column);
+        return Clientb.makeAccordionGroup(accordionId,_id_,message,line,column);
        });
       },function(list)
       {
@@ -1024,8 +1134,8 @@
      },
      displayMarkupErrors:function(count,id,lst,selector,accordionId,div)
      {
-      Clienta.updateTabHeader(count,selector);
-      return Clienta.displayAccordions(id,lst,accordionId,div);
+      Clientb.updateTabHeader(count,selector);
+      return Clientb.displayAccordions(id,lst,accordionId,div);
      },
      displayMarkupValidation:function(uriString,div,_div_)
      {
@@ -1043,11 +1153,11 @@
           doctype=validationResult.Doctype;
           charset=validationResult.Charset;
           validity=validationResult.Status;
-          Clienta.setPText("#doctype",doctype);
-          Clienta.setPText("#charset",charset);
-          Clienta.setPText("#validity",validity);
-          Clienta.displayMarkupErrors(validationResult.ErrorCount,"htmlErrorAccordion",validationResult.Errors,"#htmlErrorsTab","htmlErrorsAccordion",div);
-          Clienta.displayMarkupErrors(validationResult.WarningCount,"htmlWarningAccordion",validationResult.Warnings,"#htmlWarningsTab","htmlWarningsAccordion",_div_);
+          Clientb.setPText("#doctype",doctype);
+          Clientb.setPText("#charset",charset);
+          Clientb.setPText("#validity",validity);
+          Clientb.displayMarkupErrors(validationResult.ErrorCount,"htmlErrorAccordion",validationResult.Errors,"#htmlErrorsTab","htmlErrorsAccordion",div);
+          Clientb.displayMarkupErrors(validationResult.WarningCount,"htmlWarningAccordion",validationResult.Warnings,"#htmlWarningsTab","htmlWarningsAccordion",_div_);
           return Concurrency.Return(null);
          }
         else
@@ -1070,7 +1180,7 @@
      makeAccordionGroup:function(parent,id,message,line,column)
      {
       var _this,arg00,_this1,arg001,x;
-      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-group")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-heading")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.Attr().Class("accordion-toggle"),(_this=HTML5.Attr(),(arg00="data-"+"toggle",_this.NewAttr(arg00,"collapse"))),(_this1=HTML5.Attr(),(arg001="data-"+"parent",_this1.NewAttr(arg001,parent))),(x="#"+id,Default.HRef(x))])),List.ofArray([Default.Text(message)]))])),Operators.add(Default.Div(List.ofArray([Default.Id(id),Default.Attr().Class("accordion-body collapse")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-inner")])),List.ofArray([Clienta["makeDiv'"]("Line",line),Clienta["makeDiv'"]("Column",column)]))]))]));
+      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-group")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-heading")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.Attr().Class("accordion-toggle"),(_this=HTML5.Attr(),(arg00="data-"+"toggle",_this.NewAttr(arg00,"collapse"))),(_this1=HTML5.Attr(),(arg001="data-"+"parent",_this1.NewAttr(arg001,parent))),(x="#"+id,Default.HRef(x))])),List.ofArray([Default.Text(message)]))])),Operators.add(Default.Div(List.ofArray([Default.Id(id),Default.Attr().Class("accordion-body collapse")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-inner")])),List.ofArray([Clientb["makeDiv'"]("Line",line),Clientb["makeDiv'"]("Column",column)]))]))]));
      },
      makeDiv:function(txt,id)
      {
@@ -1097,11 +1207,11 @@
       input=Default.Input(List.ofArray([(_this=Default.Attr(),_this.NewAttr("type","hidden")),(_this1=Default.Attr(),_this1.NewAttr("value","")),Default.Id("validatorUri")]));
       div=Default.Div(List.ofArray([Default.Attr().Class("accordion"),Default.Id("htmlErrorsAccordion")]));
       _div_=Default.Div(List.ofArray([Default.Attr().Class("accordion"),Default.Id("htmlWarningsAccordion")]));
-      x=Operators.add((_this2=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("validator")]),_this2.NewTag("section",x1))),List.ofArray([input,Clienta.makeDiv("Doctype","doctype"),Default.Hr(Runtime.New(T,{
+      x=Operators.add((_this2=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("validator")]),_this2.NewTag("section",x1))),List.ofArray([input,Clientb.makeDiv("Doctype","doctype"),Default.Hr(Runtime.New(T,{
        $:0
-      })),Clienta.makeDiv("Charset","charset"),Default.Hr(Runtime.New(T,{
+      })),Clientb.makeDiv("Charset","charset"),Default.Hr(Runtime.New(T,{
        $:0
-      })),Clienta.makeDiv("Validity","validity"),Default.Hr(Runtime.New(T,{
+      })),Clientb.makeDiv("Validity","validity"),Default.Hr(Runtime.New(T,{
        $:0
       })),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#htmlErrors"),(_this3=HTML5.Attr(),(arg00="data-"+"toggle",_this3.NewAttr(arg00,"tab"))),Default.Id("htmlErrorsTab")])),List.ofArray([Default.Text("Errors")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#htmlWarnings"),(_this4=HTML5.Attr(),(arg001="data-"+"toggle",_this4.NewAttr(arg001,"tab"))),Default.Id("htmlWarningsTab")])),List.ofArray([Default.Text("Warnings")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("htmlErrors")])),List.ofArray([div])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("htmlWarnings")])),List.ofArray([_div_]))]))]))]));
       f=(f1=function()
@@ -1110,7 +1220,7 @@
        {
         var uriString;
         uriString=this.getAttribute("value");
-        return Clienta.displayMarkupValidation(uriString,div,_div_);
+        return Clientb.displayMarkupValidation(uriString,div,_div_);
        });
       },function(w)
       {
@@ -1123,7 +1233,7 @@
     ValidatorControl:Runtime.Class({
      get_Body:function()
      {
-      return Clienta.validatorSection();
+      return Clientb.validatorSection();
      }
     })
    },
@@ -1144,7 +1254,7 @@
         heading=x1[1];
         description=x1[4];
         column=x1[3];
-        return Clientb.makeAccordionGroup(accordionId,_id_,heading,line,column,description,recommendation);
+        return Clientc.makeAccordionGroup(accordionId,_id_,heading,line,column,description,recommendation);
        });
       },function(array)
       {
@@ -1162,9 +1272,9 @@
      displayViolations:function(violations,id,level,selector,accordionId,div)
      {
       var _violations_;
-      _violations_=Clientb.filterLevel(violations,level);
-      Clientb.updateTabHeader(_violations_,selector);
-      return Clientb.displayAccordions(id,_violations_,accordionId,div);
+      _violations_=Clientc.filterLevel(violations,level);
+      Clientc.updateTabHeader(_violations_,selector);
+      return Clientc.displayAccordions(id,_violations_,accordionId,div);
      },
      filterLevel:function(arr,level)
      {
@@ -1183,7 +1293,7 @@
      makeAccordionGroup:function(parent,id,heading,line,column,description,recommendation)
      {
       var _this,arg00,_this1,arg001,x;
-      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-group")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-heading")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.Attr().Class("accordion-toggle"),(_this=HTML5.Attr(),(arg00="data-"+"toggle",_this.NewAttr(arg00,"collapse"))),(_this1=HTML5.Attr(),(arg001="data-"+"parent",_this1.NewAttr(arg001,parent))),(x="#"+id,Default.HRef(x))])),List.ofArray([Default.Text(heading)]))])),Operators.add(Default.Div(List.ofArray([Default.Id(id),Default.Attr().Class("accordion-body collapse")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-inner")])),List.ofArray([Clientb.makeDiv("Line",line),Clientb.makeDiv("Column",column),Clientb.makeDiv("Description",description),Clientb.makeDiv("Recommendation",recommendation)]))]))]));
+      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-group")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-heading")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.Attr().Class("accordion-toggle"),(_this=HTML5.Attr(),(arg00="data-"+"toggle",_this.NewAttr(arg00,"collapse"))),(_this1=HTML5.Attr(),(arg001="data-"+"parent",_this1.NewAttr(arg001,parent))),(x="#"+id,Default.HRef(x))])),List.ofArray([Default.Text(heading)]))])),Operators.add(Default.Div(List.ofArray([Default.Id(id),Default.Attr().Class("accordion-body collapse")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-inner")])),List.ofArray([Clientc.makeDiv("Line",line),Clientc.makeDiv("Column",column),Clientc.makeDiv("Description",description),Clientc.makeDiv("Recommendation",recommendation)]))]))]));
      },
      makeDiv:function(txt,_txt_)
      {
@@ -1209,13 +1319,13 @@
        x2=(f2=function()
        {
         var x3,f3;
-        x3=Remoting.Async("Website:4",[id]);
+        x3=Remoting.Async("Website:5",[id]);
         f3=function(_arg11)
         {
          var a,violations,_displayViolations_,b,f4,f5;
          a=_arg11.$==1?(violations=_arg11.$0,(_displayViolations_=function(id1,level,selector,accordionId,div1)
          {
-          return Clientb.displayViolations(violations,id1,level,selector,accordionId,div1);
+          return Clientc.displayViolations(violations,id1,level,selector,accordionId,div1);
          },(_displayViolations_("errorAccordion","Error","#errorsTab","errorsAccordion",div),(_displayViolations_("WarningAccordion","Warning","#warningsTab","warningsAccordion",_div_),Concurrency.Return(null))))):(null,Concurrency.Return(null));
          b=(f4=function()
          {
@@ -1250,7 +1360,7 @@
     ViolationsControl:Runtime.Class({
      get_Body:function()
      {
-      return Clientb.violationsSection(this.id);
+      return Clientc.violationsSection(this.id);
      }
     })
    }
@@ -1276,17 +1386,18 @@
   Operators=Runtime.Safe(Html.Operators);
   Details=Runtime.Safe(OpenSEO.Details);
   Client2=Runtime.Safe(Details.Client);
-  Seq=Runtime.Safe(WebSharper.Seq);
   Utilities=Runtime.Safe(OpenSEO.Utilities);
   Client3=Runtime.Safe(Utilities.Client);
   jQuery=Runtime.Safe(Global.jQuery);
-  Keywords=Runtime.Safe(OpenSEO.Keywords);
-  Client4=Runtime.Safe(Keywords.Client);
+  Headers=Runtime.Safe(OpenSEO.Headers);
+  Client4=Runtime.Safe(Headers.Client);
   Arrays=Runtime.Safe(WebSharper.Arrays);
+  Keywords=Runtime.Safe(OpenSEO.Keywords);
+  Client5=Runtime.Safe(Keywords.Client);
   LatestReports=Runtime.Safe(OpenSEO.LatestReports);
-  Client5=Runtime.Safe(LatestReports.Client);
+  Client6=Runtime.Safe(LatestReports.Client);
   Links=Runtime.Safe(OpenSEO.Links);
-  Client6=Runtime.Safe(Links.Client);
+  Client7=Runtime.Safe(Links.Client);
   String=Runtime.Safe(Global.String);
   Number=Runtime.Safe(Global.Number);
   kendo=Runtime.Safe(Global.kendo);
@@ -1297,16 +1408,17 @@
   Formlet1=Runtime.Safe(Formlet.Formlet);
   window=Runtime.Safe(Global.window);
   Login=Runtime.Safe(OpenSEO.Login);
-  Client7=Runtime.Safe(Login.Client);
+  Client8=Runtime.Safe(Login.Client);
   Pagespeed=Runtime.Safe(OpenSEO.Pagespeed);
-  Client8=Runtime.Safe(Pagespeed.Client);
+  Client9=Runtime.Safe(Pagespeed.Client);
+  Seq=Runtime.Safe(WebSharper.Seq);
   Strings=Runtime.Safe(WebSharper.Strings);
   UrlForm=Runtime.Safe(OpenSEO.UrlForm);
-  Client9=Runtime.Safe(UrlForm.Client);
+  Clienta=Runtime.Safe(UrlForm.Client);
   Validator=Runtime.Safe(OpenSEO.Validator);
-  Clienta=Runtime.Safe(Validator.Client);
+  Clientb=Runtime.Safe(Validator.Client);
   Violations=Runtime.Safe(OpenSEO.Violations);
-  return Clientb=Runtime.Safe(Violations.Client);
+  return Clientc=Runtime.Safe(Violations.Client);
  });
  Runtime.OnLoad(function()
  {

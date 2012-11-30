@@ -9,6 +9,6 @@ module AssemblyInfo =
     [<AssemblyFileVersion("0.4.0.0")>]
     [<AssemblyProduct("OpenSEO")>]
     [<AssemblyTitle("OpenSEO")>]
-    [<AssemblyVersion("0.4.67.20")>]
+    [<AssemblyVersion("0.4.67.21")>]
 
     do ()
