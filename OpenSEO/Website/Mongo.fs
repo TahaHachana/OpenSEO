@@ -39,17 +39,14 @@ module Mongo =
         [<CLIMutableAttribute>]
         type UriDetails =
             {
-                _id               : ObjectId
-                RequestUri        : string
-                Size              : string
-                Server            : string
-                ElapsedTime       : string
-                Title             : string
-                Description       : string
-                TitleLength       : string
-                DescriptionLength : string
-                Headings          : string []
-                InsertDate        : DateTime
+                _id         : ObjectId
+                Description : string
+                ElapsedTime : string
+                Headings    : string []
+                InsertDate  : DateTime
+                RequestUri  : string
+                TextRatio   : float
+                Title       : string
             }
 
         [<CLIMutableAttribute>]
@@ -91,6 +88,15 @@ module Mongo =
                 Recommendation : string
                 InsertDate     : DateTime
             }
+
+        [<CLIMutableAttribute>]
+        type HttpHeader =
+            {
+                _id      : ObjectId
+                ObjectId : string
+                Key      : string
+                Value    : string
+            }
     
     open Types
 
@@ -109,42 +115,25 @@ module Mongo =
             | None   -> "MISSING"
             | Some x -> x
     
-        let stringLength = function
-            | "MISSING" -> "NA"
-            | x         -> string x.Length + " characters"
-    
-        let serverHeader (headers : Header list) =
-            headers
-            |> List.tryFind (fun x -> x.Key = "Server")
-            |> function
-                | None        -> "NA"
-                | Some header -> header.Value.Head
-
         let makeUriDetails (httpData : HttpData) id =
             let requestUri = httpData.RequestUri.ToString()
-            let size = httpData.Size |> function None -> "NA" | Some x -> string x + " KB"
-            let server = serverHeader httpData.Headers
-            let elapsedTime = httpData.ElapsedTime.ToString() + " milliseconds"
+            let elapsedTime = httpData.ElapsedTime.ToString()
             let htmlOption = httpData.Html
             let html = match htmlOption with None -> "" | Some x -> x
+            let textRatio = Html.textHtmlRatio html
             let title = Html.title html |> someOrMissing
-            let titleLength = stringLength title
             let metaTags = Html.metaTags html
             let description = Html.metaDescription metaTags |> someOrMissing
-            let descriptionLength = stringLength description
             let headings = Html.headings html |> List.toArray |> Array.map stringHeading
             {
-                _id               = id
-                RequestUri        = requestUri
-                Size              = size
-                Server            = server
-                ElapsedTime       = elapsedTime
-                Title             = title
-                TitleLength       = titleLength
-                Description       = description
-                DescriptionLength = descriptionLength
-                Headings          = headings
-                InsertDate        = DateTime.Now
+                _id         = id
+                Description = description
+                ElapsedTime = elapsedTime
+                Headings    = headings
+                InsertDate  = DateTime.Now
+                RequestUri  = requestUri
+                TextRatio   = textRatio
+                Title       = title
             }
 
         let uriDetailsCollection =
@@ -289,7 +278,7 @@ module Mongo =
         let cleanCollection datetime =
             try
                 let query = Utilities.makeLtQuery datetime
-                linksCollection.Remove query |> ignore
+                violationsCollection.Remove query |> ignore
             with _ -> ()
              
         let queryable = violationsCollection.FindAll().AsQueryable()
@@ -300,6 +289,44 @@ module Mongo =
             with _ -> ()
 
         let violationsById id =
+            try
+                query {
+                    for x in queryable do
+                        where (x.ObjectId = id)
+                        select x
+                }
+                |> Seq.toArray
+                |> Some
+            with _ -> None
+
+    [<AutoOpenAttribute>]
+    module Headers =
+        
+        let makeHttpHeader objectId key value =
+            {
+                _id      = ObjectId.GenerateNewId()
+                ObjectId = objectId
+                Key      = key
+                Value    = value
+            }
+
+        let headersCollection =
+            Utilities.collectionByName<HttpHeader> Utilities.database "httpheaders"
+
+        let cleanCollection datetime =
+            try
+                let query = Utilities.makeLtQuery datetime
+                headersCollection.Remove query |> ignore
+            with _ -> ()
+             
+        let queryable = headersCollection.FindAll().AsQueryable()
+    
+        let  insertHeaders headers =
+            try
+                headersCollection.InsertBatch headers |> ignore
+            with _ -> ()
+
+        let headersById id =
             try
                 query {
                     for x in queryable do

@@ -45,6 +45,7 @@
     <Compile Include="Keywords.fs" />
     <Compile Include="Links.fs" />
     <Compile Include="Violations.fs" />
+    <Compile Include="Headers.fs" />
     <Compile Include="Validator.fs" />
     <Compile Include="Pagespeed.fs" />
     <Compile Include="Login.fs" />
@@ -78,8 +79,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="SEOLib">
-      <HintPath>..\..\packages\SEOLib.0.5.98\lib\Net45\SEOLib.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\SEOLib.0.5.103\lib\Net40\SEOLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />
