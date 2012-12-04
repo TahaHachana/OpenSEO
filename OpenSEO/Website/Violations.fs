@@ -87,7 +87,6 @@ module Violations =
             let div   = Div [Attr.Class "accordion"; Id "errorsAccordion"]
             let div' = Div [Attr.Class "accordion"; Id "warningsAccordion"]
             HTML5.Tags.Section [Attr.Class "tab-pane fade in reportSection"; Id "violations"] -< [
-                div
                 Div [Attr.Class "tabbable"] -< [
                     UL [Attr.Class "nav nav-pills"] -< [
                         LI [Attr.Class "active"] -< [A [HRef "#errors"; HTML5.Attr.Data "toggle" "tab"; Id "errorsTab"] -< [Text "Errors"]]

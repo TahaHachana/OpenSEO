@@ -66,6 +66,10 @@
     <Reference Include="Google.Apis.Pagespeedonline.v1">
       <HintPath>..\..\..\..\..\Desktop\google-api-dotnet-client-1.2.4696-beta.binary\Services\PagespeedonlineService\Google.Apis.Pagespeedonline.v1.dll</HintPath>
     </Reference>
+    <Reference Include="IntelliFactory.WebSharper.Google.Visualization">
+      <HintPath>..\..\packages\WebSharper.Google.Visualization.2.4.51.145\lib\IntelliFactory.WebSharper.Google.Visualization.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="IntelliFactory.WebSharper.KendoUI">
       <HintPath>..\..\packages\WebSharper.KendoUI.2.4.44.47\lib\IntelliFactory.WebSharper.KendoUI.dll</HintPath>
       <Private>True</Private>
@@ -79,7 +83,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="SEOLib">
-      <HintPath>..\..\packages\SEOLib.0.5.103\lib\Net40\SEOLib.dll</HintPath>
+      <HintPath>..\..\packages\SEOLib.0.5.105\lib\Net45\SEOLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />

@@ -15,12 +15,8 @@ module Links =
                 ExternalLinks   : (string * string * string) []
                 InternalCount   : int
                 ExternalCount   : int
-                InternalPercent : float
-                ExternalPercent : float
                 FollowCount     : int
                 NofollowCount   : int
-                FollowPercent   : float
-                NofollowPercent : float
             }
 
         let linkToTuple (link : Types.Link) = link.URL, link.Anchor, link.Follow
@@ -38,7 +34,7 @@ module Links =
                     | Some links ->
                         let internalLinks, externalLinks = links |> Array.partition (fun x -> x.Type   = "Internal")
                         let followLinks  , nofollowLinks = links |> Array.partition (fun x -> x.Follow = "Follow")
-                        let percentage' = percentage links.Length
+//                        let percentage' = percentage links.Length
                         let internalCount = internalLinks.Length
                         let externalCount = externalLinks.Length
                         let followCount = followLinks.Length
@@ -49,12 +45,12 @@ module Links =
                                 ExternalLinks   = externalLinks |> Array.map linkToTuple
                                 InternalCount   = internalCount
                                 ExternalCount   = externalCount
-                                InternalPercent = percentage' internalCount
-                                ExternalPercent = percentage' externalCount
+//                                InternalPercent = percentage' internalCount
+//                                ExternalPercent = percentage' externalCount
                                 FollowCount     = followCount
                                 NofollowCount   = nofollowCount
-                                FollowPercent   = percentage' followCount
-                                NofollowPercent = percentage' nofollowCount
+//                                FollowPercent   = percentage' followCount
+//                                NofollowPercent = percentage' nofollowCount
                             } |> Some
             }
 
@@ -63,6 +59,9 @@ module Links =
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
         open IntelliFactory.WebSharper.KendoUI
+        open IntelliFactory.WebSharper.Google
+        open IntelliFactory.WebSharper.Google.Visualization
+        open IntelliFactory.WebSharper.Google.Visualization.Base
 
         [<JavaScript>]
         let makeTable id =
@@ -92,61 +91,43 @@ module Links =
             tr
 
         [<JavaScript>]
-        let displayLinks links (selector : string) =
+        let updateTabHeader (arr : 'T []) (selector : string) =
+            let count = arr.Length.ToString()
+            let jquery = JQuery.Of selector
+            let text = jquery.Text()
+            jquery.Text(String.concat "" [text; " ("; count; ")"]).Ignore 
+
+        [<JavaScript>]
+        let displayLinks links (selector : string) selector' =
             links
             |> Array.map (fun (x, y, z) -> tableRow x y z)
             |> Array.iter (fun x -> x.AppendTo(JQuery.Of(selector)).Ignore)
 
+            updateTabHeader links selector'
+
         [<JavaScript>]
-        let pieChart title category category' x y =
+        let makeDataTable column column' (rows : ('T * 'U) list) =
+            let dataTable = IntelliFactory.WebSharper.Google.Visualization.Base.DataTable()
+            dataTable.addColumn(ColumnType.StringType, column) |> ignore
+            dataTable.addColumn(ColumnType.NumberType, column') |> ignore
+            dataTable.addRows rows.Length |> ignore
+            rows |> List.iteri (fun idx (x, y) ->
+                dataTable.setCell(idx, 0, x)
+                dataTable.setCell(idx, 1, y))
+            dataTable
+
+        [<JavaScript>]
+        let drawPie dataTable =
             Div []
-            |>! OnAfterRender (fun el ->
-                chart.Chart (
-                    el.Body,
-                    chart.ChartConfiguration (
-                        Title =
-                            chart.TitleConfiguration (
-                                Text = title
-                            ),
-                        Legend =
-                            chart.LegendConfiguration (
-                                Position = "bottom"
-                            ),
-                        SeriesDefaults =
-                            chart.SeriesDefaultConfiguration (
-                                Labels = 
-                                    chart.LabelsConfiguration (
-                                        Visible = true,
-                                        Format = "{0}%"
-                                    )
-                            ),
-                        Series = [|
-                            chart.SeriesConfiguration (
-                                Type = "pie",
-                                Data = [|
-                                    chart.DataPoint (
-                                        Category = category,
-                                        Value = x
-                                    )
-                                    chart.DataPoint(
-                                        Category = category',
-                                        Value = y
-                                    )  
-                                |]
-                            )
-                        |],
-  
-                        Tooltip =
-                            chart.TooltipConfiguration (
-                                Visible = true,
-                                Format = "{0}%"
-                            ),
-  
-                        OnSeriesClick = fun args ->
-                            let msg = args.Category + " : " + (string args.Value)
-                            JavaScript.Alert (string args.Value)  
-                    )
-                ) |> ignore)
+            |>! OnAfterRender (fun x ->
+                let pie = Visualizations.PieChart(x.Dom)
+                let options =
+                    {
+                        Visualizations.PieChartOptions.Default with
+                            height = 600.
+                            width = 600.
+                    }
+                pie.draw(dataTable, options))
 
         [<JavaScript>]
         let makeDiv txt id =
@@ -174,14 +155,14 @@ module Links =
             HTML5.Tags.Section [Attr.Class "tab-pane fade in reportSection"; Id "links"] -< [
                 Div [Attr.Class "tabbable"] -< [
                     UL [Attr.Class "nav nav-pills"] -< [
-                        LI [Attr.Class "active"] -< [A [HRef "#links1"; HTML5.Attr.Data "toggle" "tab"] -< [Text "Internal"]]
-                        LI [A [HRef "#links2"; HTML5.Attr.Data "toggle" "tab"] -< [Text "External"]]
+                        LI [Attr.Class "active"] -< [A [HRef "#links1"; HTML5.Attr.Data "toggle" "tab"; Id "internalLinksTab"] -< [Text "Internal"]]
+                        LI [A [HRef "#links2"; HTML5.Attr.Data "toggle" "tab"; Id "externalLinksTab"] -< [Text "External"]]
                         LI [A [HRef "#linksStats"; HTML5.Attr.Data "toggle" "tab"] -< [Text "Stats"]]
                     ]
                     Div [Attr.Class "tab-content"] -< [
                         Div [Attr.Class "tab-pane active fade in span8"; Id "links1"] -< [makeTable "linksTable1"]
                         Div [Attr.Class "tab-pane fade span8"; Id "links2"] -< [makeTable "linksTable2"]
-                        Div [Attr.Class "tab-pane fade span8"; Id "linksStats"] -< [div; Hr []; div']
+                        Div [Attr.Class "tab-pane fade span8"; Id "linksStats"; Attr.Style "overflow-y: hidden;"] -< [div; Utilities.Client.hRule (); div']
                     ]
                 ]
             ]
@@ -191,15 +172,17 @@ module Links =
                     match linksOption with
                         | None -> ()
                         | Some links ->
-                            displayLinks links.InternalLinks "#linksTable1"
-                            displayLinks links.ExternalLinks "#linksTable2"
+                            displayLinks links.InternalLinks "#linksTable1" "#internalLinksTab"
+                            displayLinks links.ExternalLinks "#linksTable2" "#externalLinksTab"
                             setPText "#internalLinksCount" <| links.InternalCount.ToString()
                             setPText "#externalLinksCount" <| links.ExternalCount.ToString()
                             setPText "#followLinksCount"   <| links.FollowCount.ToString()
                             setPText "#nofollowLinksCount" <| links.NofollowCount.ToString()
-                            let pie  = pieChart "Internal vs. External" "Internal" "External" (float links.InternalPercent) (float links.ExternalPercent)
-                            let pie' = pieChart "Follow vs. NoFollow" "Follow" "NoFollow" (float links.FollowPercent) (float links.NofollowPercent)
-                            div.Append  pie
+                            let dataTable = makeDataTable "Link Type" "Count" ["External", links.ExternalCount; "Internal", links.InternalCount]
+                            let dataTable' = makeDataTable "Link Rel" "Count" ["Follow", links.FollowCount; "NoFollow", links.NofollowCount]
+                            let pie = drawPie dataTable
+                            let pie' = drawPie dataTable'
+                            div.Append pie
                             div'.Append pie'
                     Utilities.Client.updateProgressBar ()
                 } |> Async.Start)

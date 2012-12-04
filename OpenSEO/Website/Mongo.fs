@@ -96,6 +96,7 @@ module Mongo =
                 ObjectId : string
                 Key      : string
                 Value    : string
+                InsertDate     : DateTime
             }
     
     open Types
@@ -308,6 +309,7 @@ module Mongo =
                 ObjectId = objectId
                 Key      = key
                 Value    = value
+                InsertDate  = DateTime.Now
             }
 
         let headersCollection =
