@@ -11,20 +11,16 @@ module Links =
 
         type LinksData =
             {
-                InternalLinks   : (string * string * string) []
-                ExternalLinks   : (string * string * string) []
-                InternalCount   : int
-                ExternalCount   : int
-                FollowCount     : int
-                NofollowCount   : int
+                InternalLinks : (string * string * string) []
+                ExternalLinks : (string * string * string) []
+                InternalCount : int
+                ExternalCount : int
+                FollowCount   : int
+                NofollowCount : int
             }
 
         let linkToTuple (link : Types.Link) = link.URL, link.Anchor, link.Follow
-        
-        let round (x : float) = Math.Round(x, 2)
-
-        let percentage y x = float x / float y * 100. |> round
-            
+           
         [<Rpc>]
         let linksById id =
             async {
@@ -34,23 +30,18 @@ module Links =
                     | Some links ->
                         let internalLinks, externalLinks = links |> Array.partition (fun x -> x.Type   = "Internal")
                         let followLinks  , nofollowLinks = links |> Array.partition (fun x -> x.Follow = "Follow")
-//                        let percentage' = percentage links.Length
                         let internalCount = internalLinks.Length
                         let externalCount = externalLinks.Length
                         let followCount = followLinks.Length
                         let nofollowCount = nofollowLinks.Length
                         return
                             {
-                                InternalLinks   = internalLinks |> Array.map linkToTuple
-                                ExternalLinks   = externalLinks |> Array.map linkToTuple
-                                InternalCount   = internalCount
-                                ExternalCount   = externalCount
-//                                InternalPercent = percentage' internalCount
-//                                ExternalPercent = percentage' externalCount
-                                FollowCount     = followCount
-                                NofollowCount   = nofollowCount
-//                                FollowPercent   = percentage' followCount
-//                                NofollowPercent = percentage' nofollowCount
+                                InternalLinks = internalLinks |> Array.map linkToTuple
+                                ExternalLinks = externalLinks |> Array.map linkToTuple
+                                InternalCount = internalCount
+                                ExternalCount = externalCount
+                                FollowCount   = followCount
+                                NofollowCount = nofollowCount
                             } |> Some
             }
 
@@ -58,10 +49,6 @@ module Links =
 
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
-        open IntelliFactory.WebSharper.KendoUI
-        open IntelliFactory.WebSharper.Google
-        open IntelliFactory.WebSharper.Google.Visualization
-        open IntelliFactory.WebSharper.Google.Visualization.Base
 
         [<JavaScript>]
         let makeTable id =
@@ -102,32 +89,7 @@ module Links =
             links
             |> Array.map (fun (x, y, z) -> tableRow x y z)
             |> Array.iter (fun x -> x.AppendTo(JQuery.Of(selector)).Ignore)
-
             updateTabHeader links selector'
-
-        [<JavaScript>]
-        let makeDataTable column column' (rows : ('T * 'U) list) =
-            let dataTable = IntelliFactory.WebSharper.Google.Visualization.Base.DataTable()
-            dataTable.addColumn(ColumnType.StringType, column) |> ignore
-            dataTable.addColumn(ColumnType.NumberType, column') |> ignore
-            dataTable.addRows rows.Length |> ignore
-            rows |> List.iteri (fun idx (x, y) ->
-                dataTable.setCell(idx, 0, x)
-                dataTable.setCell(idx, 1, y))
-            dataTable
-
-        [<JavaScript>]
-        let drawPie dataTable =
-            Div []
-            |>! OnAfterRender (fun x ->
-                let pie = Visualizations.PieChart(x.Dom)
-                let options =
-                    {
-                        Visualizations.PieChartOptions.Default with
-                            height = 600.
-                            width = 600.
-                    }
-                pie.draw(dataTable, options))
 
         [<JavaScript>]
         let makeDiv txt id =
@@ -178,10 +140,10 @@ module Links =
                             setPText "#externalLinksCount" <| links.ExternalCount.ToString()
                             setPText "#followLinksCount"   <| links.FollowCount.ToString()
                             setPText "#nofollowLinksCount" <| links.NofollowCount.ToString()
-                            let dataTable = makeDataTable "Link Type" "Count" ["External", links.ExternalCount; "Internal", links.InternalCount]
-                            let dataTable' = makeDataTable "Link Rel" "Count" ["Follow", links.FollowCount; "NoFollow", links.NofollowCount]
-                            let pie = drawPie dataTable
-                            let pie' = drawPie dataTable'
+                            let dataTable = Utilities.Client.makeDataTable "Link Type" "Count" ["External", links.ExternalCount; "Internal", links.InternalCount]
+                            let dataTable' = Utilities.Client.makeDataTable "Link Rel" "Count" ["Follow", links.FollowCount; "NoFollow", links.NofollowCount]
+                            let pie = Utilities.Client.drawPie dataTable
+                            let pie' = Utilities.Client.drawPie dataTable'
                             div.Append pie
                             div'.Append pie'
                     Utilities.Client.updateProgressBar ()

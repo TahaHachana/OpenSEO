@@ -77,10 +77,17 @@ module Violations =
             |> Array.iter div.Append
 
         [<JavaScript>]
-        let displayViolations violations id level selector accordionId div =
+        let appendParagraph (div : Element) text =
+            let p = P [Text text]
+            div.Append p
+
+        [<JavaScript>]
+        let displayViolations violations id level selector accordionId div text =
             let violations' = filterLevel violations level
             updateTabHeader violations' selector
-            displayAccordions id violations' accordionId div
+            match violations'.Length with
+                | 0 -> appendParagraph div text
+                | _ -> displayAccordions id violations' accordionId div
 
         [<JavaScript>]
         let violationsSection id =
@@ -105,8 +112,8 @@ module Violations =
                         | None -> ()
                         | Some violations ->
                             let displayViolations' = displayViolations violations
-                            displayViolations' "errorAccordion" "Error" "#errorsTab" "errorsAccordion" div
-                            displayViolations' "WarningAccordion" "Warning" "#warningsTab" "warningsAccordion" div'
+                            displayViolations' "errorAccordion" "Error" "#errorsTab" "errorsAccordion" div "No errors were detected on the page."
+                            displayViolations' "WarningAccordion" "Warning" "#warningsTab" "warningsAccordion" div' "No warnings were detected on the page."
                     Utilities.Client.updateProgressBar ()
                 } |> Async.Start)
             

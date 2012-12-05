@@ -8,31 +8,16 @@ module Pagespeed =
 
     type SizeBreakdown =
         {
-            Css        : string
-            Html       : string
-            Images     : string
-            Javascript : string
-            Other      : string
-            Total      : string
-        }
-
-    type SizeStats =
-        {
-            Css        : float
-            Html       : float
-            Images     : float
-            Javascript : float
-            Other      : float
+            Css        : int
+            Html       : int
+            Images     : int
+            Javascript : int
+            Other      : int
+            Total      : int
         }
 
     module Server =
         
-        let round (x : float) = Math.Round(x, 2)
-
-        let percentage y x = float x / float y * 100. |> round
-
-        let kbSize x = float x / 1024. |> round |> string
-
         let makeSizeBreakDown css html images js other total =
             {
                 Css        = css
@@ -42,33 +27,6 @@ module Pagespeed =
                 Other      = other
                 Total      = total
             }
-
-        let makeSizeStats css html images js other =
-            {
-                Css        = css
-                Html       = html
-                Images     = images
-                Javascript = js
-                Other      = other
-            }
-
-        let makeSizeBreakdown' cssBytes htmlBytes imagesBytes jsBytes otherBytes totalBytes =
-            let cssBytes' = kbSize cssBytes
-            let htmlBytes' = kbSize htmlBytes
-            let imagesBytes' = kbSize imagesBytes
-            let jsBytes' = kbSize jsBytes
-            let otherBytes' = kbSize otherBytes
-            let totalBytes' = kbSize totalBytes
-            makeSizeBreakDown cssBytes' htmlBytes' imagesBytes' jsBytes' otherBytes' totalBytes'
-
-        let makeSizeStats' totalBytes cssBytes htmlBytes imagesBytes jsBytes otherBytes =
-            let percentage' = percentage totalBytes
-            let cssPercent = percentage' cssBytes
-            let htmlPercent = percentage' htmlBytes
-            let imagePercent = percentage' imagesBytes
-            let jsPercent = percentage' jsBytes
-            let otherPercent = percentage' otherBytes
-            makeSizeStats cssPercent htmlPercent imagePercent jsPercent otherPercent
 
         let getRules result =
             PageSpeed.pagespeedRules result
@@ -80,17 +38,15 @@ module Pagespeed =
 
         type PagespeedData =
             {
-                Score : int64
+                Score             : int64
                 ResourceBreakdown : SizeBreakdown
-                ResourceStats : SizeStats
-                Rules : (string * Suggestion list option) list
+                Rules             : (string * Suggestion list option) list
             }
 
-        let makePagespeedData score breakdown stats rules =
+        let makePagespeedData score breakdown rules =
             {
                 Score = score
                 ResourceBreakdown = breakdown
-                ResourceStats = stats
                 Rules = rules
             }
 
@@ -103,10 +59,9 @@ module Pagespeed =
             let javascriptBytes = stats.JavascriptBytes
             let otherBytes = stats.OtherBytes
             let totalBytes = List.sum [cssBytes; htmlBytes; imageBytes; javascriptBytes; otherBytes]
-            let sizeStats = makeSizeStats' totalBytes cssBytes htmlBytes imageBytes javascriptBytes otherBytes //makeSizeStats cssPercent htmlPercent imagePercent javascriptPercent otherPercent
-            let sizeBreakdown = makeSizeBreakdown' cssBytes htmlBytes imageBytes javascriptBytes otherBytes totalBytes
+            let sizeBreakdown = makeSizeBreakDown cssBytes htmlBytes imageBytes javascriptBytes otherBytes totalBytes
             let rules = getRules result
-            makePagespeedData score sizeBreakdown sizeStats rules
+            makePagespeedData score sizeBreakdown rules
 
         [<Rpc>]
         let runPagespeed uriString =
@@ -125,7 +80,7 @@ module Pagespeed =
 
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
-        open IntelliFactory.WebSharper.KendoUI
+        open IntelliFactory.WebSharper.EcmaScript
 
         [<JavaScript>]
         let makeDiv txt id =
@@ -137,70 +92,6 @@ module Pagespeed =
         [<JavaScript>]
         let setPText (selector : string) txt =
             JQuery.Of(selector).Text(txt).Ignore
-
-        [<JavaScript>]
-        let pieChart (sizeBreakdown : SizeStats) =
-            Div []
-            |>! OnAfterRender (fun el ->
-                chart.Chart (
-                    el.Body,
-                    chart.ChartConfiguration (
-                        Title =
-                            chart.TitleConfiguration (
-                                Text = "Resource Breakdown"
-                            ),
-                        Legend =
-                            chart.LegendConfiguration (
-                                Position = "bottom"
-                            ),
-                        SeriesDefaults =
-                            chart.SeriesDefaultConfiguration (
-                                Labels = 
-                                    chart.LabelsConfiguration (
-                                        Visible = true,
-                                        Format = "{0}%"
-                                    )
-                            ),
-                        Series = [|
-                            chart.SeriesConfiguration (
-                                Type = "pie",
-                                Data = [|
-                                    chart.DataPoint (
-                                        Category = "CSS",
-                                        Value = sizeBreakdown.Css
-                                    )
-                                    chart.DataPoint(
-                                        Category = "HTML",
-                                        Value = sizeBreakdown.Html
-                                    )  
-                                    chart.DataPoint(
-                                        Category = "Images",
-                                        Value = sizeBreakdown.Images
-                                    )  
-                                    chart.DataPoint(
-                                        Category = "JavaScript",
-                                        Value = sizeBreakdown.Javascript
-                                    )  
-                                    chart.DataPoint(
-                                        Category = "Other",
-                                        Value = sizeBreakdown.Other
-                                    )
-                                |]
-                            )
-                        |],
-  
-                        Tooltip =
-                            chart.TooltipConfiguration (
-                                Visible = true,
-                                Template = "#=category#",
-                                Format = "{0}"
-                            ),
-  
-                        OnSeriesClick = fun args ->
-                            let msg = args.Category + " : " + (string args.Value)
-                            JavaScript.Alert (string args.Value) 
-                    )
-                ) |> ignore)
 
         [<JavaScript>]
         let makeLi text = LI [Text text]
@@ -228,9 +119,7 @@ module Pagespeed =
                     ]
                 ]
                 Div [Id id; Attr.Class "accordion-body collapse"] -< [
-                    Div [Attr.Class "accordion-inner"] -< [
-                        div
-                    ]
+                    Div [Attr.Class "accordion-inner"] -< [div]
                 ]
             ]
 
@@ -252,6 +141,12 @@ module Pagespeed =
             updateTabHeader length "#speedSuggestionsTab"
 
         [<JavaScript>]
+        let kbSize x =
+            float x / 1024.
+            |> EcmaScript.Math.Round
+            |> fun x -> string x + " KB"
+
+        [<JavaScript>]
         let displaySpeedData uriString (div : Element) (div' : Element) =
             async {
                 let! speedDataOption = Server.runPagespeed uriString
@@ -261,24 +156,23 @@ module Pagespeed =
                         let score = string speedData.Score + " / 100"
                         let sizeBreakdown = speedData.ResourceBreakdown
                         setPText "#speedScore" score
-                        setPText "#cssSize" <| sizeBreakdown.Css + " KB"
-                        setPText "#htmlSize" <| sizeBreakdown.Html + " KB"
-                        setPText "#imagesSize" <| sizeBreakdown.Images + " KB"
-                        setPText "#jsSize" <| sizeBreakdown.Javascript + " KB"
-                        setPText "#otherSize" <| sizeBreakdown.Other + " KB"
-                        setPText "#totalSize" <| sizeBreakdown.Total + " KB"
+                        setPText "#cssSize" <| kbSize sizeBreakdown.Css
+                        setPText "#htmlSize" <| kbSize sizeBreakdown.Html
+                        setPText "#imagesSize" <| kbSize sizeBreakdown.Images
+                        setPText "#jsSize" <| kbSize sizeBreakdown.Javascript
+                        setPText "#otherSize" <| kbSize sizeBreakdown.Other
+                        setPText "#totalSize" <| kbSize sizeBreakdown.Total
                         displayAccordions "speedSuggestion" "speedSuggestionsAccordion" div speedData.Rules
-                        let chart = pieChart speedData.ResourceStats
+                        let dataTable = Utilities.Client.makeDataTable "Resource" "Size" ["CSS", sizeBreakdown.Css; "HTML", sizeBreakdown.Html; "Images", sizeBreakdown.Images; "JavaScript", sizeBreakdown.Javascript; "Other", sizeBreakdown.Other] 
+                        let chart = Utilities.Client.drawPie dataTable
                         div'.Append chart
             } |> Async.Start
 
         [<JavaScript>]
         let pagespeedSection id =
-            let input =
-                Input [Attr.Type "hidden"; Attr.Value ""; Id "pagespeedUri"]
-
+            let input = Input [Attr.Type "hidden"; Attr.Value ""; Id "pagespeedUri"]
             let div = Div [Attr.Class "accordion"; Id "speedSuggestionsAccordion"]
-            let div' = Div [Id "resourceSizeDiv"]
+            let div' = Div [Id "resourceSizeDiv"; Attr.Style "overflow-y: hidden;"]
             HTML5.Tags.Section [Attr.Class "tab-pane fade in reportSection"; Id "speed"] -< [
                 input
                 makeDiv "Score" "speedScore"
@@ -291,12 +185,12 @@ module Pagespeed =
                     Div [Attr.Class "tab-content"] -< [
                         Div [Attr.Class "tab-pane active fade in span8"; Id "speedSuggestions"] -< [div]
                         Div [Attr.Class "tab-pane fade span8"; Id "resourceBreakdown"] -< [
-                            makeDiv "CSS" "cssSize"
-                            makeDiv "HTML" "htmlSize"
-                            makeDiv "Images" "imagesSize"
+                            makeDiv "CSS"        "cssSize"
+                            makeDiv "HTML"       "htmlSize"
+                            makeDiv "Images"     "imagesSize"
                             makeDiv "JavaScript" "jsSize"
-                            makeDiv "Other" "otherSize"
-                            makeDiv "Total" "totalSize"
+                            makeDiv "Other"      "otherSize"
+                            makeDiv "Total"      "totalSize"
                             div'
                         ]
                     ]

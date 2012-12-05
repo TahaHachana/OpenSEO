@@ -33,6 +33,9 @@ module Utilities =
 
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
+        open IntelliFactory.WebSharper.Google
+        open IntelliFactory.WebSharper.Google.Visualization
+        open IntelliFactory.WebSharper.Google.Visualization.Base
 
         [<JavaScript>]
         let makeList lst =
@@ -99,3 +102,27 @@ module Utilities =
 
         [<JavaScript>]
         let hRule () = Hr [Attr.Class "span6 hrule"]
+
+        [<JavaScript>]
+        let makeDataTable column column' (rows : ('T * 'U) list) =
+            let dataTable = IntelliFactory.WebSharper.Google.Visualization.Base.DataTable()
+            dataTable.addColumn(ColumnType.StringType, column) |> ignore
+            dataTable.addColumn(ColumnType.NumberType, column') |> ignore
+            dataTable.addRows rows.Length |> ignore
+            rows |> List.iteri (fun idx (x, y) ->
+                dataTable.setCell(idx, 0, x)
+                dataTable.setCell(idx, 1, y))
+            dataTable
+
+        [<JavaScript>]
+        let drawPie dataTable =
+            Div []
+            |>! OnAfterRender (fun x ->
+                let pie = Visualizations.PieChart(x.Dom)
+                let options =
+                    {
+                        Visualizations.PieChartOptions.Default with
+                            height = 600.
+                            width  = 600.
+                    }
+                pie.draw(dataTable, options))

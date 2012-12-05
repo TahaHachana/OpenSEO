@@ -10,13 +10,13 @@ module Validator =
 
         type ValidationResult =
             {
-                Doctype : string
-                Charset : string
-                Status  : string
-                ErrorCount : string
+                Doctype      : string
+                Charset      : string
+                Status       : string
+                ErrorCount   : string
                 WarningCount : string
-                Errors : (string * string * string) list
-                Warnings : (string * string * string) list
+                Errors       : (string * string * string) list
+                Warnings     : (string * string * string) list
             }
 
         let markupErrorsData markupErrors =
@@ -47,13 +47,13 @@ module Validator =
                         let warnings = markupErrorsData markupValidation.Warnings
                         let validationResult =
                             {
-                                Doctype = markupValidation.Doctype
-                                Charset = markupValidation.Charset
-                                Status  = status
-                                ErrorCount = markupErrorsCount markupValidation.Errors
+                                Doctype      = markupValidation.Doctype
+                                Charset      = markupValidation.Charset
+                                Status       = status
+                                ErrorCount   = markupErrorsCount markupValidation.Errors
                                 WarningCount = markupErrorsCount markupValidation.Warnings
-                                Errors = errors
-                                Warnings = warnings
+                                Errors       = errors
+                                Warnings     = warnings
                             } |> Some
                         return validationResult
             }

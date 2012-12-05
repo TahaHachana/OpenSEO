@@ -1,6 +1,6 @@
 (function()
 {
- var Global=this,Runtime=this.IntelliFactory.Runtime,OpenSEO,AddThis,Client,WebSharper,Html,Default,HTML5,List,T,DBCleanup,Client1,Remoting,alert,Concurrency,EventsPervasives,Operators,Details,Client2,Utilities,Client3,jQuery,Headers,Client4,Arrays,Keywords,Client5,LatestReports,Client6,Links,Client7,google,visualization,PieChart,Google,Visualization,Visualizations,PieChartOptions,String,DataTable,Seq,Strings,Formlet,Controls,Enhance,Data,Formlet1,window,Login,Client8,Pagespeed,Client9,kendo,UrlForm,Clienta,Validator,Clientb,Violations,Clientc;
+ var Global=this,Runtime=this.IntelliFactory.Runtime,OpenSEO,AddThis,Client,WebSharper,Html,Default,HTML5,List,T,DBCleanup,Client1,Remoting,alert,Concurrency,EventsPervasives,Operators,Details,Client2,Utilities,Client3,jQuery,Headers,Client4,Arrays,Keywords,Client5,LatestReports,Client6,Links,Client7,String,Strings,Formlet,Controls,Enhance,Data,Formlet1,window,Login,Client8,Pagespeed,Client9,Seq,Number,Math,UrlForm,Clienta,google,visualization,PieChart,Google,Visualization,Visualizations,PieChartOptions,DataTable,Validator,Clientb,Violations,Clientc;
  Runtime.Define(Global,{
   OpenSEO:{
    AddThis:{
@@ -505,36 +505,6 @@
       f1(x);
       return Client7.updateTabHeader(links,_selector_);
      },
-     drawPie:function(dataTable)
-     {
-      var x,f,f1;
-      x=Default.Div(Runtime.New(T,{
-       $:0
-      }));
-      f=(f1=function(x1)
-      {
-       var pie,options,inputRecord;
-       pie=new PieChart(x1.Body);
-       options=(inputRecord=PieChartOptions.get_Default(),Runtime.New(PieChartOptions,{
-        backgroundColor:inputRecord.backgroundColor,
-        color:inputRecord.color,
-        colors:inputRecord.colors,
-        enableEvents:inputRecord.enableEvents,
-        height:600,
-        is3D:inputRecord.is3D,
-        labels:inputRecord.labels,
-        legend:inputRecord.legend,
-        title:inputRecord.title,
-        width:600
-       }));
-       return pie.draw(dataTable,options);
-      },function(w)
-      {
-       return Operators.OnAfterRender(f1,w);
-      });
-      f(x);
-      return x;
-     },
      linksSection:function(id)
      {
       var div,_div_,x,_this,x1,_this1,arg00,_this2,arg001,_this3,arg002,_this4,f,f1;
@@ -551,7 +521,7 @@
         f3=function(_arg11)
         {
          var a,links,txt,txt1,txt2,txt3,dataTable,_dataTable_,pie,_pie_,b,f4,f5;
-         a=_arg11.$==1?(links=_arg11.$0,(Client7.displayLinks(links.InternalLinks,"#linksTable1","#internalLinksTab"),(Client7.displayLinks(links.ExternalLinks,"#linksTable2","#externalLinksTab"),(txt=String(links.InternalCount),Client7.setPText("#internalLinksCount",txt),(txt1=String(links.ExternalCount),Client7.setPText("#externalLinksCount",txt1),(txt2=String(links.FollowCount),Client7.setPText("#followLinksCount",txt2),(txt3=String(links.NofollowCount),Client7.setPText("#nofollowLinksCount",txt3),(dataTable=Client7.makeDataTable("Link Type","Count",List.ofArray([["External",links.ExternalCount],["Internal",links.InternalCount]])),(_dataTable_=Client7.makeDataTable("Link Rel","Count",List.ofArray([["Follow",links.FollowCount],["NoFollow",links.NofollowCount]])),(pie=Client7.drawPie(dataTable),(_pie_=Client7.drawPie(_dataTable_),(div.AppendI(pie),(_div_.AppendI(_pie_),Concurrency.Return(null)))))))))))))):(null,Concurrency.Return(null));
+         a=_arg11.$==1?(links=_arg11.$0,(Client7.displayLinks(links.InternalLinks,"#linksTable1","#internalLinksTab"),(Client7.displayLinks(links.ExternalLinks,"#linksTable2","#externalLinksTab"),(txt=String(links.InternalCount),Client7.setPText("#internalLinksCount",txt),(txt1=String(links.ExternalCount),Client7.setPText("#externalLinksCount",txt1),(txt2=String(links.FollowCount),Client7.setPText("#followLinksCount",txt2),(txt3=String(links.NofollowCount),Client7.setPText("#nofollowLinksCount",txt3),(dataTable=Client3.makeDataTable("Link Type","Count",List.ofArray([["External",links.ExternalCount],["Internal",links.InternalCount]])),(_dataTable_=Client3.makeDataTable("Link Rel","Count",List.ofArray([["Follow",links.FollowCount],["NoFollow",links.NofollowCount]])),(pie=Client3.drawPie(dataTable),(_pie_=Client3.drawPie(_dataTable_),(div.AppendI(pie),(_div_.AppendI(_pie_),Concurrency.Return(null)))))))))))))):(null,Concurrency.Return(null));
          b=(f4=function()
          {
           Client3.updateProgressBar();
@@ -580,45 +550,6 @@
       });
       f(x);
       return x;
-     },
-     makeDataTable:function(column,_column_,rows)
-     {
-      var dataTable,x,f,x1,f1,x2,f2,f3,action;
-      dataTable=new DataTable();
-      x=dataTable.addColumn("string",column);
-      f=function(value)
-      {
-       value;
-      };
-      f(x);
-      x1=dataTable.addColumn("number",_column_);
-      f1=function(value)
-      {
-       value;
-      };
-      f1(x1);
-      x2=dataTable.addRows(rows.get_Length());
-      f2=function(value)
-      {
-       value;
-      };
-      f2(x2);
-      f3=(action=function(idx)
-      {
-       return Runtime.Tupled(function(tupledArg)
-       {
-        var x3,y;
-        x3=tupledArg[0];
-        y=tupledArg[1];
-        dataTable.setCell(idx,0,x3);
-        return dataTable.setCell(idx,1,y);
-       });
-      },function(list)
-      {
-       return Seq.iteri(action,list);
-      });
-      f3(rows);
-      return dataTable;
      },
      makeDiv:function(txt,id)
      {
@@ -766,27 +697,28 @@
        x1=Remoting.Async("Website:2",[uriString]);
        f1=function(_arg1)
        {
-        var speedData,score,sizeBreakdown,txt,txt1,txt2,txt3,txt4,txt5,chart;
+        var speedData,score,sizeBreakdown,txt,txt1,txt2,txt3,txt4,txt5,dataTable,chart;
         if(_arg1.$==1)
          {
           speedData=_arg1.$0;
           score=Global.String(speedData.Score)+" / 100";
           sizeBreakdown=speedData.ResourceBreakdown;
           Client9.setPText("#speedScore",score);
-          txt=sizeBreakdown.Css+" KB";
+          txt=Client9.kbSize(sizeBreakdown.Css);
           Client9.setPText("#cssSize",txt);
-          txt1=sizeBreakdown.Html+" KB";
+          txt1=Client9.kbSize(sizeBreakdown.Html);
           Client9.setPText("#htmlSize",txt1);
-          txt2=sizeBreakdown.Images+" KB";
+          txt2=Client9.kbSize(sizeBreakdown.Images);
           Client9.setPText("#imagesSize",txt2);
-          txt3=sizeBreakdown.Javascript+" KB";
+          txt3=Client9.kbSize(sizeBreakdown.Javascript);
           Client9.setPText("#jsSize",txt3);
-          txt4=sizeBreakdown.Other+" KB";
+          txt4=Client9.kbSize(sizeBreakdown.Other);
           Client9.setPText("#otherSize",txt4);
-          txt5=sizeBreakdown.Total+" KB";
+          txt5=Client9.kbSize(sizeBreakdown.Total);
           Client9.setPText("#totalSize",txt5);
           Client9.displayAccordions("speedSuggestion","speedSuggestionsAccordion",div,speedData.Rules);
-          chart=Client9.pieChart(speedData.ResourceStats);
+          dataTable=Client3.makeDataTable("Resource","Size",List.ofArray([["CSS",sizeBreakdown.Css],["HTML",sizeBreakdown.Html],["Images",sizeBreakdown.Images],["JavaScript",sizeBreakdown.Javascript],["Other",sizeBreakdown.Other]]));
+          chart=Client3.drawPie(dataTable);
           _div_.AppendI(chart);
           return Concurrency.Return(null);
          }
@@ -806,6 +738,19 @@
        return Concurrency.Start(arg00);
       };
       return f2(x);
+     },
+     kbSize:function(x)
+     {
+      var x1,x2,f,f1;
+      x1=(x2=Number(x)/1024,(f=function(arg00)
+      {
+       return Math.round(arg00);
+      },f(x2)));
+      f1=function(x3)
+      {
+       return Global.String(x3)+" KB";
+      };
+      return f1(x1);
      },
      makeAccordionGroup:function(parent,id,ruleName,suggestions)
      {
@@ -852,13 +797,13 @@
      },
      pagespeedSection:function()
      {
-      var input,_this,_this1,div,_div_,x,_this2,x1,_this3,arg00,_this4,arg001,f,f1;
+      var input,_this,_this1,div,_div_,_this2,x,_this3,x1,_this4,arg00,_this5,arg001,f,f1;
       input=Default.Input(List.ofArray([(_this=Default.Attr(),_this.NewAttr("type","hidden")),(_this1=Default.Attr(),_this1.NewAttr("value","")),Default.Id("pagespeedUri")]));
       div=Default.Div(List.ofArray([Default.Attr().Class("accordion"),Default.Id("speedSuggestionsAccordion")]));
-      _div_=Default.Div(List.ofArray([Default.Id("resourceSizeDiv")]));
-      x=Operators.add((_this2=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("speed")]),_this2.NewTag("section",x1))),List.ofArray([input,Client9.makeDiv("Score","speedScore"),Default.Hr(Runtime.New(T,{
+      _div_=Default.Div(List.ofArray([Default.Id("resourceSizeDiv"),(_this2=Default.Attr(),_this2.NewAttr("style","overflow-y: hidden;"))]));
+      x=Operators.add((_this3=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("speed")]),_this3.NewTag("section",x1))),List.ofArray([input,Client9.makeDiv("Score","speedScore"),Default.Hr(Runtime.New(T,{
        $:0
-      })),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#speedSuggestions"),(_this3=HTML5.Attr(),(arg00="data-"+"toggle",_this3.NewAttr(arg00,"tab"))),Default.Id("speedSuggestionsTab")])),List.ofArray([Default.Text("Suggestions")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#resourceBreakdown"),(_this4=HTML5.Attr(),(arg001="data-"+"toggle",_this4.NewAttr(arg001,"tab"))),Default.Id("sizeBreakdownTab")])),List.ofArray([Default.Text("Resource Breakdown")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("speedSuggestions")])),List.ofArray([div])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("resourceBreakdown")])),List.ofArray([Client9.makeDiv("CSS","cssSize"),Client9.makeDiv("HTML","htmlSize"),Client9.makeDiv("Images","imagesSize"),Client9.makeDiv("JavaScript","jsSize"),Client9.makeDiv("Other","otherSize"),Client9.makeDiv("Total","totalSize"),_div_]))]))]))]));
+      })),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#speedSuggestions"),(_this4=HTML5.Attr(),(arg00="data-"+"toggle",_this4.NewAttr(arg00,"tab"))),Default.Id("speedSuggestionsTab")])),List.ofArray([Default.Text("Suggestions")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#resourceBreakdown"),(_this5=HTML5.Attr(),(arg001="data-"+"toggle",_this5.NewAttr(arg001,"tab"))),Default.Id("sizeBreakdownTab")])),List.ofArray([Default.Text("Resource Breakdown")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("speedSuggestions")])),List.ofArray([div])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("resourceBreakdown")])),List.ofArray([Client9.makeDiv("CSS","cssSize"),Client9.makeDiv("HTML","htmlSize"),Client9.makeDiv("Images","imagesSize"),Client9.makeDiv("JavaScript","jsSize"),Client9.makeDiv("Other","otherSize"),Client9.makeDiv("Total","totalSize"),_div_]))]))]))]));
       f=(f1=function()
       {
        return jQuery("#pagespeedUri").change(function()
@@ -867,33 +812,6 @@
         uriString=this.getAttribute("value");
         return Client9.displaySpeedData(uriString,div,_div_);
        });
-      },function(w)
-      {
-       return Operators.OnAfterRender(f1,w);
-      });
-      f(x);
-      return x;
-     },
-     pieChart:function(sizeBreakdown)
-     {
-      var x,f,f1;
-      x=Default.Div(Runtime.New(T,{
-       $:0
-      }));
-      f=(f1=function(el)
-      {
-       var x1,returnVal,returnVal1,returnVal2,returnVal3,returnVal4,returnVal5,returnVal6,returnVal7,returnVal8,returnVal9,returnVala,returnValb,f2;
-       x1=new kendo.ui.Chart(el.Body,(returnVal=[{}],(null,returnVal[0].title=(returnVal1=[{}],(null,returnVal1[0].text="Resource Breakdown",returnVal1[0])),returnVal[0].legend=(returnVal2=[{}],(null,returnVal2[0].position="bottom",returnVal2[0])),returnVal[0].seriesDefaults=(returnVal3=[{}],(null,returnVal3[0].labels=(returnVal4=[{}],(null,returnVal4[0].visible=true,returnVal4[0].format="{0}%",returnVal4[0])),returnVal3[0])),returnVal[0].series=[(returnVal5=[{}],(null,returnVal5[0].type="pie",returnVal5[0].data=[(returnVal6=[{}],(null,returnVal6[0].category="CSS",returnVal6[0].value=sizeBreakdown.Css,returnVal6[0])),(returnVal7=[{}],(null,returnVal7[0].category="HTML",returnVal7[0].value=sizeBreakdown.Html,returnVal7[0])),(returnVal8=[{}],(null,returnVal8[0].category="Images",returnVal8[0].value=sizeBreakdown.Images,returnVal8[0])),(returnVal9=[{}],(null,returnVal9[0].category="JavaScript",returnVal9[0].value=sizeBreakdown.Javascript,returnVal9[0])),(returnVala=[{}],(null,returnVala[0].category="Other",returnVala[0].value=sizeBreakdown.Other,returnVala[0]))],returnVal5[0]))],returnVal[0].tooltip=(returnValb=[{}],(null,returnValb[0].visible=true,returnValb[0].template="#=category#",returnValb[0].format="{0}",returnValb[0])),returnVal[0].seriesClick=function(args)
-       {
-        var msg;
-        msg=args.category+" : "+Global.String(args.value);
-        return alert(Global.String(args.value));
-       },returnVal[0])));
-       f2=function(value)
-       {
-        value;
-       };
-       return f2(x1);
       },function(w)
       {
        return Operators.OnAfterRender(f1,w);
@@ -1052,9 +970,78 @@
    },
    Utilities:{
     Client:{
+     drawPie:function(dataTable)
+     {
+      var x,f,f1;
+      x=Default.Div(Runtime.New(T,{
+       $:0
+      }));
+      f=(f1=function(x1)
+      {
+       var pie,options,inputRecord;
+       pie=new PieChart(x1.Body);
+       options=(inputRecord=PieChartOptions.get_Default(),Runtime.New(PieChartOptions,{
+        backgroundColor:inputRecord.backgroundColor,
+        color:inputRecord.color,
+        colors:inputRecord.colors,
+        enableEvents:inputRecord.enableEvents,
+        height:600,
+        is3D:inputRecord.is3D,
+        labels:inputRecord.labels,
+        legend:inputRecord.legend,
+        title:inputRecord.title,
+        width:600
+       }));
+       return pie.draw(dataTable,options);
+      },function(w)
+      {
+       return Operators.OnAfterRender(f1,w);
+      });
+      f(x);
+      return x;
+     },
      hRule:function()
      {
       return Default.Hr(List.ofArray([Default.Attr().Class("span6 hrule")]));
+     },
+     makeDataTable:function(column,_column_,rows)
+     {
+      var dataTable,x,f,x1,f1,x2,f2,f3,action;
+      dataTable=new DataTable();
+      x=dataTable.addColumn("string",column);
+      f=function(value)
+      {
+       value;
+      };
+      f(x);
+      x1=dataTable.addColumn("number",_column_);
+      f1=function(value)
+      {
+       value;
+      };
+      f1(x1);
+      x2=dataTable.addRows(rows.get_Length());
+      f2=function(value)
+      {
+       value;
+      };
+      f2(x2);
+      f3=(action=function(idx)
+      {
+       return Runtime.Tupled(function(tupledArg)
+       {
+        var x3,y;
+        x3=tupledArg[0];
+        y=tupledArg[1];
+        dataTable.setCell(idx,0,x3);
+        return dataTable.setCell(idx,1,y);
+       });
+      },function(list)
+      {
+       return Seq.iteri(action,list);
+      });
+      f3(rows);
+      return dataTable;
      },
      makeDiv:function(idx,x,y)
      {
@@ -1288,6 +1275,12 @@
    },
    Violations:{
     Client:{
+     appendParagraph:function(div,text)
+     {
+      var p;
+      p=Default.P(List.ofArray([Default.Text(text)]));
+      return div.AppendI(p);
+     },
      displayAccordions:function(id,arr,accordionId,div)
      {
       var x,f,mapping,f1,action;
@@ -1318,12 +1311,20 @@
       });
       return f1(x);
      },
-     displayViolations:function(violations,id,level,selector,accordionId,div)
+     displayViolations:function(violations,id,level,selector,accordionId,div,text)
      {
-      var _violations_;
+      var _violations_,matchValue;
       _violations_=Clientc.filterLevel(violations,level);
       Clientc.updateTabHeader(_violations_,selector);
-      return Clientc.displayAccordions(id,_violations_,accordionId,div);
+      matchValue=_violations_.length;
+      if(matchValue===0)
+       {
+        return Clientc.appendParagraph(div,text);
+       }
+      else
+       {
+        return Clientc.displayAccordions(id,_violations_,accordionId,div);
+       }
      },
      filterLevel:function(arr,level)
      {
@@ -1372,10 +1373,10 @@
         f3=function(_arg11)
         {
          var a,violations,_displayViolations_,b,f4,f5;
-         a=_arg11.$==1?(violations=_arg11.$0,(_displayViolations_=function(id1,level,selector,accordionId,div1)
+         a=_arg11.$==1?(violations=_arg11.$0,(_displayViolations_=function(id1,level,selector,accordionId,div1,text)
          {
-          return Clientc.displayViolations(violations,id1,level,selector,accordionId,div1);
-         },(_displayViolations_("errorAccordion","Error","#errorsTab","errorsAccordion",div),(_displayViolations_("WarningAccordion","Warning","#warningsTab","warningsAccordion",_div_),Concurrency.Return(null))))):(null,Concurrency.Return(null));
+          return Clientc.displayViolations(violations,id1,level,selector,accordionId,div1,text);
+         },(_displayViolations_("errorAccordion","Error","#errorsTab","errorsAccordion",div,"No errors were detected on the page."),(_displayViolations_("WarningAccordion","Warning","#warningsTab","warningsAccordion",_div_,"No warnings were detected on the page."),Concurrency.Return(null))))):(null,Concurrency.Return(null));
          b=(f4=function()
          {
           Client3.updateProgressBar();
@@ -1447,16 +1448,7 @@
   Client6=Runtime.Safe(LatestReports.Client);
   Links=Runtime.Safe(OpenSEO.Links);
   Client7=Runtime.Safe(Links.Client);
-  google=Runtime.Safe(Global.google);
-  visualization=Runtime.Safe(google.visualization);
-  PieChart=Runtime.Safe(visualization.PieChart);
-  Google=Runtime.Safe(WebSharper.Google);
-  Visualization=Runtime.Safe(Google.Visualization);
-  Visualizations=Runtime.Safe(Visualization.Visualizations);
-  PieChartOptions=Runtime.Safe(Visualizations.PieChartOptions);
   String=Runtime.Safe(Global.String);
-  DataTable=Runtime.Safe(visualization.DataTable);
-  Seq=Runtime.Safe(WebSharper.Seq);
   Strings=Runtime.Safe(WebSharper.Strings);
   Formlet=Runtime.Safe(WebSharper.Formlet);
   Controls=Runtime.Safe(Formlet.Controls);
@@ -1468,9 +1460,19 @@
   Client8=Runtime.Safe(Login.Client);
   Pagespeed=Runtime.Safe(OpenSEO.Pagespeed);
   Client9=Runtime.Safe(Pagespeed.Client);
-  kendo=Runtime.Safe(Global.kendo);
+  Seq=Runtime.Safe(WebSharper.Seq);
+  Number=Runtime.Safe(Global.Number);
+  Math=Runtime.Safe(Global.Math);
   UrlForm=Runtime.Safe(OpenSEO.UrlForm);
   Clienta=Runtime.Safe(UrlForm.Client);
+  google=Runtime.Safe(Global.google);
+  visualization=Runtime.Safe(google.visualization);
+  PieChart=Runtime.Safe(visualization.PieChart);
+  Google=Runtime.Safe(WebSharper.Google);
+  Visualization=Runtime.Safe(Google.Visualization);
+  Visualizations=Runtime.Safe(Visualization.Visualizations);
+  PieChartOptions=Runtime.Safe(Visualizations.PieChartOptions);
+  DataTable=Runtime.Safe(visualization.DataTable);
   Validator=Runtime.Safe(OpenSEO.Validator);
   Clientb=Runtime.Safe(Validator.Client);
   Violations=Runtime.Safe(OpenSEO.Violations);
