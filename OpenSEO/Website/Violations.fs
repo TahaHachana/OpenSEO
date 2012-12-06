@@ -77,9 +77,7 @@ module Violations =
             |> Array.iter div.Append
 
         [<JavaScript>]
-        let appendParagraph (div : Element) text =
-            let p = P [Text text]
-            div.Append p
+        let appendParagraph (div : Element) text = div.Append (P [Text text])
 
         [<JavaScript>]
         let displayViolations violations id level selector accordionId div text =

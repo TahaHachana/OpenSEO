@@ -8,17 +8,21 @@ module DBCleanup =
     module Server =
         
         open Mongo
+        
+        let oneHourAgo () =
+            let timespan = TimeSpan(1, 0, 0)
+            DateTime.Now.Subtract timespan
             
         [<Rpc>]
-        let cleanDatabase () =
+        let emptyDatabase () =
             async {
-                let timespan = TimeSpan(1, 0, 0)
-                let datetime = DateTime.Now.Subtract timespan
-                Details.cleanCollection    datetime
-                Keywords.cleanCollection   datetime
-                Links.cleanCollection      datetime
-                Violations.cleanCollection datetime
-                Headers.cleanCollection    datetime
+                let datetime = oneHourAgo ()
+                let emptyCollection' collection = Utilities.emptyCollection datetime collection
+                emptyCollection' Details.uriDetailsCollection
+                emptyCollection' Keywords.keywordsCollection
+                emptyCollection' Links.linksCollection
+                emptyCollection' Violations.violationsCollection
+                emptyCollection' Headers.headersCollection
             }
 
     module Client =
@@ -31,7 +35,7 @@ module DBCleanup =
             |>! OnClick (fun x _ ->
                 async {
                     x.AddClass "disabled"
-                    do! Server.cleanDatabase ()
+                    do! Server.emptyDatabase ()
                     x.RemoveClass "disabled"
                     JavaScript.Alert "Done"
                 } |> Async.Start)

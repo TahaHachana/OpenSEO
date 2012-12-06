@@ -1,6 +1,5 @@
 ﻿namespace OpenSEO
 
-open System.Text.RegularExpressions
 open IntelliFactory.WebSharper
 
 module Utilities =
@@ -9,7 +8,7 @@ module Utilities =
 
         open IntelliFactory.Html
 
-        let inline makeLi activeLiOption href txt =
+        let makeLi activeLiOption href txt =
             match activeLiOption with
                 | None -> LI [A [HRef href] -< [Text txt]]
                 | Some activeLi ->
@@ -18,7 +17,7 @@ module Utilities =
                     else
                         LI [A [HRef href] -< [Text txt]]
 
-        let makeNavigation (activeLiOption : string option) =
+        let makeNavigation activeLiOption =
             let makeLi' = makeLi activeLiOption
             Div [Class "navbar navbar-fixed-top"; Id "navigation"] -< [
                 Div [Class "navbar-inner"] -< [
@@ -38,42 +37,22 @@ module Utilities =
         open IntelliFactory.WebSharper.Google.Visualization.Base
 
         [<JavaScript>]
-        let makeList lst =
-            UL [
-                for x in lst do
-                    yield LI [Text x]
-            ]
+        let makeUl lis = UL [for x in lis -> LI [Text x]]
 
         [<JavaScript>]
         let makeLi idx id =
             match idx with
-                | 0 ->
-                    LI [Attr.Class "active"] -< [
-                        A [HRef ("#" + id); HTML5.Attr.Data "toggle" "tab"] -< [
-                            Text id
-                        ]
-                    ]
-                | _ ->
-                    LI [
-                        A [HRef ("#" + id); HTML5.Attr.Data "toggle" "tab"] -< [
-                            Text id
-                        ]
-                    ]
+                | 0 -> LI [Attr.Class "active"] -< [A [HRef ("#" + id); HTML5.Attr.Data "toggle" "tab"] -< [Text id]]
+                | _ -> LI [A [HRef ("#" + id); HTML5.Attr.Data "toggle" "tab"] -< [Text id]]
 
         [<JavaScript>]
         let makeDiv idx x y =
             match idx with
-               | 0 ->
-                    Div [Attr.Class "tab-pane fade active in"; Id x] -< [
-                        makeList y
-                    ]
-               | _ ->
-                    Div [Attr.Class "tab-pane fade"; Id x] -< [
-                        makeList y
-                    ]
+               | 0 -> Div [Attr.Class "tab-pane fade active in"; Id x] -< [makeUl y]
+               | _ -> Div [Attr.Class "tab-pane fade"; Id x]           -< [makeUl y]
 
         [<JavaScript>]
-        let makeTabsDiv (tabsContent : (string * string list) []) =
+        let makeTabsDiv tabsContent =
             let lis =
                 tabsContent
                 |> Array.map fst
@@ -105,7 +84,7 @@ module Utilities =
 
         [<JavaScript>]
         let makeDataTable column column' (rows : ('T * 'U) list) =
-            let dataTable = IntelliFactory.WebSharper.Google.Visualization.Base.DataTable()
+            let dataTable = DataTable()
             dataTable.addColumn(ColumnType.StringType, column) |> ignore
             dataTable.addColumn(ColumnType.NumberType, column') |> ignore
             dataTable.addRows rows.Length |> ignore

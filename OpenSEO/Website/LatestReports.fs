@@ -24,8 +24,7 @@ module LatestReports =
         open IntelliFactory.WebSharper.Html
 
         [<JavaScript>]
-        let makeLi url =
-            LI [A [HRef url; Attr.Target "_blank"] -< [Text url]]
+        let makeLi url = LI [A [HRef url; Attr.Target "_blank"] -< [Text url]]
             
         [<JavaScript>]
         let latestReportsList () =
@@ -42,6 +41,7 @@ module LatestReports =
                 } |> Async.Start) 
                 
     type LatestReportsControl () =
+
         inherit Web.Control ()
             
         [<JavaScriptAttribute>]

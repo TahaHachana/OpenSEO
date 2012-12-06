@@ -22,6 +22,7 @@ module AddThis =
             section
 
     type AddThisControl () =
+
         inherit Web.Control ()
 
         [<JavaScript>]

@@ -1,6 +1,5 @@
 ﻿namespace OpenSEO
 
-open IntelliFactory.WebSharper
 open IntelliFactory.Html
 open SiteContent
 open Model
@@ -15,9 +14,7 @@ module View =
                 Div [Class "container"] -< [
                     HomeContent.intro :> INode<_>
                     new UrlForm.UrlFormControl () :> _
-                    Div [
-                        Img [Src "/Images/Loader.gif"; Id "loader"; Class "offset2"]
-                    ] :> _
+                    Div [Img [Src "/Images/Loader.gif"; Id "loader"; Class "offset2"]] :> _
                     HR [] :> _
                     new AddThis.AddThisControl () :> _
                 ]
@@ -62,9 +59,7 @@ module View =
                     SharedContent.loginInfo ctx
                     Div [Id "login"] -< [
                         H1 [Text "Login"]
-                        Div [
-                            new Login.LoginControl(redirectLink)
-                        ]
+                        Div [new Login.LoginControl(redirectLink)]
                     ]
                 ]
             ]
@@ -79,6 +74,17 @@ module View =
                         HR []
                         H4 [Text "Latest Reports"]
                         Div [new LatestReports.LatestReportsControl ()]
+                    ]
+                ]
+            ]
+
+    let custom404View =
+        Skin.withMainTemplate "URL Not Found" "" <| fun ctx ->
+            [
+                Div [Class "container"] -< [
+                    P [Text "The requested URL doesn't exist,"] -< [
+                        A [HRef "/"] -< [Text "click here"]
+                        Text "to navigate to the home page."
                     ]
                 ]
             ]

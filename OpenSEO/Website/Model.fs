@@ -7,12 +7,13 @@ module Model =
     type ReportId = string
 
     type Action =
-        | Home
         | About
-        | Report of ReportId
         | Admin
+        | Custom404
+        | Home
         | Login of Action option
         | Logout
+        | Report of ReportId
 
     type Page =
         {

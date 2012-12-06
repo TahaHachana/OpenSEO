@@ -1,10 +1,5 @@
 ﻿namespace OpenSEO
 
-#if INTERACTIVE
-#r "MongoDB.Bson.dll"
-#r "MongoDB.Driver.dll"
-#endif
-
 open System
 open System.Globalization
 open System.Linq
@@ -30,6 +25,12 @@ module Mongo =
         let collectionByName<'T> (db : MongoDatabase) (name : string) = db.GetCollection<'T> name
 
         let makeLtQuery datetime = Query.LT("InsertDate", BsonValue.Create datetime)
+
+        let emptyCollection datetime (collection : MongoCollection<'T>) =
+            try
+                let query = makeLtQuery datetime
+                collection.Remove query |> ignore
+            with _ -> ()
 
         let server = createServer Secure.mongoConnectionString
         let database = databaseByName server "OpenSEODB"
@@ -92,11 +93,11 @@ module Mongo =
         [<CLIMutableAttribute>]
         type HttpHeader =
             {
-                _id      : ObjectId
-                ObjectId : string
-                Key      : string
-                Value    : string
-                InsertDate     : DateTime
+                _id        : ObjectId
+                ObjectId   : string
+                Key        : string
+                Value      : string
+                InsertDate : DateTime
             }
     
     open Types
@@ -140,12 +141,6 @@ module Mongo =
         let uriDetailsCollection =
             Utilities.collectionByName<UriDetails> Utilities.database "uridetails"
         
-        let cleanCollection datetime =
-            try
-                let query = Utilities.makeLtQuery datetime
-                uriDetailsCollection.Remove query |> ignore
-            with _ -> ()
-
         let queryable = uriDetailsCollection.FindAll().AsQueryable()
     
         let insertUriDetails (httpData : HttpData) =
@@ -191,12 +186,6 @@ module Mongo =
         let keywordsCollection =
             Utilities.collectionByName<Keyword> Utilities.database "keywords"
 
-        let cleanCollection datetime =
-            try
-                let query = Utilities.makeLtQuery datetime
-                keywordsCollection.Remove query |> ignore
-            with _ -> ()
-
         let queryable = keywordsCollection.FindAll().AsQueryable()
     
         let  insertKeywords keywords =
@@ -231,12 +220,6 @@ module Mongo =
 
         let linksCollection = Utilities.collectionByName<Link> Utilities.database "links"
 
-        let cleanCollection datetime =
-            try
-                let query = Utilities.makeLtQuery datetime
-                linksCollection.Remove query |> ignore
-            with _ -> ()
-             
         let queryable = linksCollection.FindAll().AsQueryable()
     
         let  insertLinks links =
@@ -276,12 +259,6 @@ module Mongo =
         let violationsCollection =
             Utilities.collectionByName<Violation> Utilities.database "violations"
 
-        let cleanCollection datetime =
-            try
-                let query = Utilities.makeLtQuery datetime
-                violationsCollection.Remove query |> ignore
-            with _ -> ()
-             
         let queryable = violationsCollection.FindAll().AsQueryable()
     
         let  insertViolations violations =
@@ -315,12 +292,6 @@ module Mongo =
         let headersCollection =
             Utilities.collectionByName<HttpHeader> Utilities.database "httpheaders"
 
-        let cleanCollection datetime =
-            try
-                let query = Utilities.makeLtQuery datetime
-                headersCollection.Remove query |> ignore
-            with _ -> ()
-             
         let queryable = headersCollection.FindAll().AsQueryable()
     
         let  insertHeaders headers =

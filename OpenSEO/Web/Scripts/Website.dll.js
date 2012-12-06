@@ -1,6 +1,6 @@
 (function()
 {
- var Global=this,Runtime=this.IntelliFactory.Runtime,OpenSEO,AddThis,Client,WebSharper,Html,Default,HTML5,List,T,DBCleanup,Client1,Remoting,alert,Concurrency,EventsPervasives,Operators,Details,Client2,Utilities,Client3,jQuery,Headers,Client4,Arrays,Keywords,Client5,LatestReports,Client6,Links,Client7,String,Strings,Formlet,Controls,Enhance,Data,Formlet1,window,Login,Client8,Pagespeed,Client9,Seq,Number,Math,UrlForm,Clienta,google,visualization,PieChart,Google,Visualization,Visualizations,PieChartOptions,DataTable,Validator,Clientb,Violations,Clientc;
+ var Global=this,Runtime=this.IntelliFactory.Runtime,OpenSEO,AddThis,Client,WebSharper,Html,Default,HTML5,List,T,DBCleanup,Client1,Remoting,alert,Concurrency,EventsPervasives,Operators,Details,Client2,Utilities,Client3,jQuery,Headers,Client4,Arrays,Unchecked,Keywords,Client5,LatestReports,Client6,Links,Client7,String,Strings,Formlet,Controls,Enhance,Data,Formlet1,window,Login,Client8,Pagespeed,Client9,Seq,Number,Math,UrlForm,Clienta,google,visualization,PieChart,Google,Visualization,Visualizations,PieChartOptions,DataTable,Validator,Clientb,Violations,Clientc;
  Runtime.Define(Global,{
   OpenSEO:{
    AddThis:{
@@ -298,28 +298,40 @@
      {
       return jQuery("<td/>").text(text).appendTo(tableRow);
      },
-     displayKeywords:function(keywords,selector)
+     displayKeywords:function(wordsCount,keywords,selector)
      {
-      var x,f,mapping,f1,action;
-      x=(f=(mapping=Runtime.Tupled(function(tupledArg)
+      var x,x1,f,predicate,f1,mapping,f2,action;
+      x=(x1=(f=(predicate=Runtime.Tupled(function(tupledArg)
       {
-       var x1,y,z;
-       x1=tupledArg[0];
-       y=tupledArg[1];
-       z=tupledArg[2];
-       return Client5.tableRow(x1,y,z);
+       var x2,_arg1,_arg2,_arg3;
+       x2=tupledArg[0];
+       _arg1=tupledArg[1];
+       _arg2=tupledArg[2];
+       _arg3=tupledArg[3];
+       return Unchecked.Equals(x2,wordsCount);
+      }),function(array)
+      {
+       return Arrays.filter(predicate,array);
+      }),f(keywords)),(f1=(mapping=Runtime.Tupled(function(tupledArg)
+      {
+       var _arg4,x2,y,z;
+       _arg4=tupledArg[0];
+       x2=tupledArg[1];
+       y=tupledArg[2];
+       z=tupledArg[3];
+       return Client5.tableRow(x2,y,z);
       }),function(array)
       {
        return Arrays.map(mapping,array);
-      }),f(keywords));
-      f1=(action=function(x1)
+      }),f1(x1)));
+      f2=(action=function(x2)
       {
-       return x1.appendTo(jQuery(selector));
+       return x2.appendTo(jQuery(selector));
       },function(array)
       {
        return Arrays.iter(action,array);
       });
-      return f1(x);
+      return f2(x);
      },
      keywordsSection:function(id)
      {
@@ -335,7 +347,7 @@
         f3=function(_arg11)
         {
          var a,keywords,b,f4,f5;
-         a=_arg11.$==1?(keywords=_arg11.$0,(Client5.displayKeywords(keywords.get_Item(0),"#table1"),(Client5.displayKeywords(keywords.get_Item(1),"#table2"),(Client5.displayKeywords(keywords.get_Item(2),"#table3"),Concurrency.Return(null))))):(null,Concurrency.Return(null));
+         a=_arg11.$==1?(keywords=_arg11.$0,(Client5.displayKeywords(1,keywords,"#table1"),(Client5.displayKeywords(2,keywords,"#table2"),(Client5.displayKeywords(3,keywords,"#table3"),Concurrency.Return(null))))):(null,Concurrency.Return(null));
          b=(f4=function()
          {
           Client3.updateProgressBar();
@@ -385,8 +397,8 @@
       var tr;
       tr=jQuery("<tr/>");
       Client5.appendTd(keyword,tr);
-      Client5.appendTd(occurrence,tr);
-      Client5.appendTd(density,tr);
+      Client5.appendTd(Global.String(occurrence),tr);
+      Client5.appendTd(Global.String(density),tr);
       return tr;
      }
     },
@@ -1047,11 +1059,11 @@
      {
       if(idx===0)
        {
-        return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade active in"),Default.Id(x)])),List.ofArray([Client3.makeList(y)]));
+        return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade active in"),Default.Id(x)])),List.ofArray([Client3.makeUl(y)]));
        }
       else
        {
-        return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade"),Default.Id(x)])),List.ofArray([Client3.makeList(y)]));
+        return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade"),Default.Id(x)])),List.ofArray([Client3.makeUl(y)]));
        }
      },
      makeLi:function(idx,id)
@@ -1065,16 +1077,6 @@
        {
         return Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#"+id),(_this1=HTML5.Attr(),(arg001="data-"+"toggle",_this1.NewAttr(arg001,"tab")))])),List.ofArray([Default.Text(id)]))]));
        }
-     },
-     makeList:function(lst)
-     {
-      return Default.UL(Seq.toList(Seq.delay(function()
-      {
-       return Seq.map(function(x)
-       {
-        return Default.LI(List.ofArray([Default.Text(x)]));
-       },lst);
-      })));
      },
      makeTabsDiv:function(tabsContent)
      {
@@ -1109,6 +1111,16 @@
        return Arrays.mapi(mapping2,array);
       }),f2(tabsContent));
       return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),lis),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),divs)]));
+     },
+     makeUl:function(lis)
+     {
+      return Default.UL(Seq.toList(Seq.delay(function()
+      {
+       return Seq.map(function(x)
+       {
+        return Default.LI(List.ofArray([Default.Text(x)]));
+       },lis);
+      })));
      },
      updateProgressBar:function()
      {
@@ -1277,9 +1289,7 @@
     Client:{
      appendParagraph:function(div,text)
      {
-      var p;
-      p=Default.P(List.ofArray([Default.Text(text)]));
-      return div.AppendI(p);
+      return div.AppendI(Default.P(List.ofArray([Default.Text(text)])));
      },
      displayAccordions:function(id,arr,accordionId,div)
      {
@@ -1442,6 +1452,7 @@
   Headers=Runtime.Safe(OpenSEO.Headers);
   Client4=Runtime.Safe(Headers.Client);
   Arrays=Runtime.Safe(WebSharper.Arrays);
+  Unchecked=Runtime.Safe(WebSharper.Unchecked);
   Keywords=Runtime.Safe(OpenSEO.Keywords);
   Client5=Runtime.Safe(Keywords.Client);
   LatestReports=Runtime.Safe(OpenSEO.LatestReports);

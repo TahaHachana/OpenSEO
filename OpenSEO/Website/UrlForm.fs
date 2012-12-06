@@ -127,7 +127,7 @@ module UrlForm =
 
         [<JavaScript>]
         let urlForm () =
-            
+
             let legend = Legend [Text "Enter the URL you want to analyze."]
             let label = Label [Text "URL"]
             let urlInput =
@@ -166,6 +166,7 @@ module UrlForm =
             ]
 
     type UrlFormControl () =
+
         inherit Web.Control ()
 
         [<JavaScript>]

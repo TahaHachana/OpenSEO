@@ -1,6 +1,5 @@
 ﻿namespace OpenSEO
 
-open System
 open IntelliFactory.WebSharper
 
 module Links =
@@ -20,7 +19,7 @@ module Links =
             }
 
         let linkToTuple (link : Types.Link) = link.URL, link.Anchor, link.Follow
-           
+
         [<Rpc>]
         let linksById id =
             async {

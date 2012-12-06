@@ -13,7 +13,8 @@ module SiteContent =
                 Img [
                     Src "https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
                     Alt "Fork me on GitHub"
-                    Id "forkme"]
+                    Id "forkme"
+                ]
             ]
 
         let analyticsScript : Content.HtmlElement = Script [Src "../Scripts/GoogleAnalytics.js"]
@@ -63,7 +64,7 @@ module SiteContent =
 
         let title = "About OpenSEO | Open Source SEO Tool"
 
-        let metaDesc = "Learn more about OpenSEO, an open source search engine optimization app offering HTML, keywords and speed auditing features."
+        let metaDesc = "Learn more about OpenSEO, an open source SEO tool maintained by Taha Hachana on GitHub."
 
         let description : Content.HtmlElement =
             P [Text "OpenSEO is an open source SEO tool built with "] -< [

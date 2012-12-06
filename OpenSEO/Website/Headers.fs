@@ -12,14 +12,13 @@ module Headers =
         let httpHeaders objectIdString =
             async {
                 let httpHeadersOption = Headers.headersById objectIdString
-                let httpHeadersData =
+                return
                     match httpHeadersOption with
                         | None -> None
                         | Some httpHeaders ->
                             httpHeaders
                             |> Array.map (fun x -> x.Key, x.Value)
                             |> Some
-                return httpHeadersData
             }
 
     module Client =

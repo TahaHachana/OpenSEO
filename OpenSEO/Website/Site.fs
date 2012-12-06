@@ -2,7 +2,6 @@
 
 open IntelliFactory.WebSharper.Sitelets
 open Model
-open Skin
 open Controller
 
 module Site =

@@ -45,7 +45,7 @@ module Validator =
                         let status = markupValidation.Status |> function Invalid -> "Invalid" | _ -> "Valid"
                         let errors = markupErrorsData markupValidation.Errors
                         let warnings = markupErrorsData markupValidation.Warnings
-                        let validationResult =
+                        return
                             {
                                 Doctype      = markupValidation.Doctype
                                 Charset      = markupValidation.Charset
@@ -55,7 +55,6 @@ module Validator =
                                 Errors       = errors
                                 Warnings     = warnings
                             } |> Some
-                        return validationResult
             }
 
     module Client =
@@ -78,8 +77,7 @@ module Validator =
             ]
 
         [<JavaScript>]
-        let setPText (selector : string) txt =
-            JQuery.Of(selector).Text(txt).Ignore
+        let setPText (selector : string) txt = JQuery.Of(selector).Text(txt).Ignore
 
         [<JavaScript>]
         let makeAccordionGroup parent id message line column =

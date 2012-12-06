@@ -8,13 +8,11 @@ module Keywords =
         
         open Mongo
 
-        let filterWordsCount (keywords : Types.Keyword []) wordsCount =
-            keywords
-            |> Array.filter (fun x -> x.WordsCount = wordsCount)
-            |> Array.map (fun x ->
-                x.Combination,
-                x.Occurrence.ToString(),
-                x.Density.ToString())
+        let keywordData (keyword : Types.Keyword) =
+            keyword.WordsCount,
+            keyword.Combination,
+            keyword.Occurrence,
+            keyword.Density
 
         [<Rpc>]
         let keywordsById id =
@@ -23,11 +21,10 @@ module Keywords =
                 match keywordsOption with
                     | None -> return None
                     | Some keywords ->
-                        let filterWordsCount' = filterWordsCount keywords
-                        let oneKeyword    = filterWordsCount' 1
-                        let twoKeywords   = filterWordsCount' 2
-                        let threeKeywords = filterWordsCount' 3
-                        return Some [oneKeyword; twoKeywords; threeKeywords]            
+                        return
+                            keywords
+                            |> Array.map keywordData
+                            |> Some
             }
 
     module Client =
@@ -59,14 +56,15 @@ module Keywords =
         let tableRow keyword occurrence density =
             let tr  = JQuery.Of("<tr/>")
             appendTd keyword tr
-            appendTd occurrence tr
-            appendTd density tr
+            appendTd (string occurrence) tr
+            appendTd (string density) tr
             tr
 
         [<JavaScript>]
-        let displayKeywords keywords (selector : string) =
+        let displayKeywords wordsCount keywords (selector : string) =
             keywords
-            |> Array.map (fun (x, y, z) -> tableRow x y z)
+            |> Array.filter (fun (x, _, _, _) -> x = wordsCount)
+            |> Array.map (fun (_, x, y, z) -> tableRow x y z)
             |> Array.iter (fun x -> x.AppendTo(JQuery.Of(selector)).Ignore)
 
         [<JavaScript>]
@@ -91,9 +89,9 @@ module Keywords =
                     match keywordsOption with
                         | None -> ()
                         | Some keywords ->
-                            displayKeywords keywords.[0] "#table1"
-                            displayKeywords keywords.[1] "#table2"
-                            displayKeywords keywords.[2] "#table3"
+                            displayKeywords 1 keywords "#table1"
+                            displayKeywords 2 keywords "#table2"
+                            displayKeywords 3 keywords "#table3"
                     Utilities.Client.updateProgressBar ()
                 } |> Async.Start )
             
