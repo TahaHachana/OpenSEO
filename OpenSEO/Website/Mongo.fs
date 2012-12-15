@@ -16,7 +16,9 @@ module Mongo =
     module Utilities =
 
         /// Creates a mongo server instance.
-        let createServer (connectionString : string) = MongoServer.Create connectionString
+        let createServer (connectionString : string) =
+            let client = MongoClient connectionString
+            client.GetServer()
 
         /// Gets the database with the specified name.
         let databaseByName (mongoServer : MongoServer) (name : string) = mongoServer.GetDatabase name
