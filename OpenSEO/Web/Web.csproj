@@ -52,7 +52,9 @@
     <Content Include="Views\**\*.*" />
     <Content Include="*.asax" />
     <Compile Include="*.asax.cs" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Main.html" />
   </ItemGroup>
   <ItemGroup>

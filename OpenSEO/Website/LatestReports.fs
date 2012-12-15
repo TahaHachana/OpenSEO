@@ -15,7 +15,7 @@ module LatestReports =
                     | arr  ->
                         return
                             arr
-                            |> Array.map (fun x -> x.RequestUri)
+                            |> Array.map (fun x -> x._id.ToString())
                             |> Some
             }
 
@@ -24,8 +24,10 @@ module LatestReports =
         open IntelliFactory.WebSharper.Html
 
         [<JavaScript>]
-        let makeLi url = LI [A [HRef url; Attr.Target "_blank"] -< [Text url]]
-            
+        let makeLi objectIdString =
+            let href = "/Report/" + objectIdString
+            LI [A [HRef href; Attr.Target "_blank"] -< [Text objectIdString]]
+
         [<JavaScript>]
         let latestReportsList () =
             UL [Attr.Class "unstyled"]

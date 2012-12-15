@@ -430,9 +430,9 @@
            arr=_arg1.$0;
            x4=(f4=function(array)
            {
-            return Arrays.map(function(url)
+            return Arrays.map(function(objectIdString)
             {
-             return Client6.makeLi(url);
+             return Client6.makeLi(objectIdString);
             },array);
            },f4(arr));
            f5=(action=function(arg00)
@@ -468,10 +468,11 @@
       f(x);
       return x;
      },
-     makeLi:function(url)
+     makeLi:function(objectIdString)
      {
-      var _this;
-      return Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef(url),(_this=Default.Attr(),_this.NewAttr("target","_blank"))])),List.ofArray([Default.Text(url)]))]));
+      var href,_this;
+      href="/Report/"+objectIdString;
+      return Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef(href),(_this=Default.Attr(),_this.NewAttr("target","_blank"))])),List.ofArray([Default.Text(objectIdString)]))]));
      }
     },
     LatestReportsControl:Runtime.Class({
