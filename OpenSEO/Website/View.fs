@@ -81,10 +81,10 @@ module View =
     let custom404View =
         Skin.withMainTemplate "URL Not Found" "" <| fun ctx ->
             [
-                Div [Class "container"] -< [
-                    P [Text "The requested URL doesn't exist,"] -< [
+                Div [Class "container"; Style "margin-top: 200px;"] -< [
+                    P [Text "The requested URL doesn't exist, "] -< [
                         A [HRef "/"] -< [Text "click here"]
-                        Text "to navigate to the home page."
+                        Text " to navigate to the home page."
                     ]
                 ]
             ]
