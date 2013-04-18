@@ -1,52 +1,36 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
-open IntelliFactory.WebSharper.Sitelets
 open IntelliFactory.Html
-open Model
+open IntelliFactory.WebSharper.Sitelets
+open IntelliFactory.WebSharper.Sitelets.Content
+open Utils.Server
 
-module SiteContent =
+module Content =
 
-    module SharedContent =
+    module Shared =
 
-        let forkme : Content.HtmlElement =
-            A [HRef "https://github.com/TahaHachana/OpenSEO"; Target "_blank"] -< [
-                Img [
-                    Src "https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
-                    Alt "Fork me on GitHub"
-                    Id "forkme"
-                ]
-            ]
-
-        let analyticsScript : Content.HtmlElement = Script [Src "../Scripts/GoogleAnalytics.js"]
-
-        let ( => ) title href =
-            A [HRef href] -< [Text title]
-    
-        let randomizeUrl url =
-            url + "?d=" + System.Uri.EscapeUriString (System.DateTime.Now.ToString())
-
-        let loginInfo (ctx: Context<Action>) =
-            let user = UserSession.GetLoggedInUser ()
-            Div [Class "pull-right"] -< [
-                (
-                    match user with
-                    | Some username ->
-                        "Log Out (" + username + ")" => 
-                            (randomizeUrl <| ctx.Link Action.Logout)
-                    | None ->
-                        "Login" => (ctx.Link <| Action.Login None)
-                )
-            ]
-
-    module HomeContent =
+        let ga : HtmlElement= Script [Src "../Scripts/GoogleAnalytics.js"]
         
-        let navigation : Content.HtmlElement = Utilities.Server.makeNavigation <| Some "Home"
+        let nav : HtmlElement = nav None
+        
+        let footer : HtmlElement =
+            HTML5.Footer [Id "footer"] -< [
+                Div [Class "container"; Style "padding-top: 20px;"] -< [
+                    P [Text "Powered by "] -< [
+                        A ["WebSharper" => "http://www.websharper.com/"]
+                    ]
+                ]            
+            ]
+
+    module Home =
+        
+        let navigation : HtmlElement = nav <| Some "Home"
         
         let title = "Open Source SEO Tool"
 
         let metaDesc = "Open source SEO (search engine optimization) tool offering HTML auditing, keywords analysis and speed testing functionality."
 
-        let intro : Content.HtmlElement =
+        let intro : HtmlElement =
             HTML5.Header [Id "header"] -< [
                 P [
                     Strong [Text "OpenSEO"]
@@ -58,15 +42,15 @@ module SiteContent =
                 ]
             ]
 
-    module AboutContent =
+    module About =
         
-        let navigation : Content.HtmlElement = Utilities.Server.makeNavigation <| Some "About"
+        let navigation : HtmlElement = nav <| Some "About"
 
         let title = "About OpenSEO | Open Source SEO Tool"
 
         let metaDesc = "Learn more about OpenSEO, an open source SEO tool maintained by Taha Hachana on GitHub."
 
-        let description : Content.HtmlElement =
+        let description : HtmlElement =
             P [Text "OpenSEO is an open source SEO tool built with "] -< [
                 A [HRef "http://www.websharper.com/"; Target "_blank"] -< [Text "WebSharper"]
                 Text " that uses functionality provided by a "
@@ -76,18 +60,17 @@ module SiteContent =
                 Text " on GitHub."
             ]
 
-    module ReportContent =
+    module Report =
         
-        let navigation : Content.HtmlElement =
-            Utilities.Server.makeNavigation None
-
         let title = "SEO Report"
 
         let metaDesc = ""
 
-        let progressBar : Content.HtmlElement =
-            Div [Class "progress"; Id "progressDiv"] -< [
-                Div [Class "bar"; Id "progressBar"; HTML5.Data "width" "0"]
+        let progressBar : HtmlElement =
+            Div [Style "height: 100px;"] -< [
+                Div [Class "progress"; Id "progressDiv"] -< [
+                    Div [Class "bar"; Id "progressBar"; HTML5.Data "width" "0"]
+                ]
             ]
 
         let tabs id =
@@ -102,12 +85,12 @@ module SiteContent =
                     LI [A [HRef "#speed"; HTML5.Data "toggle" "tab"] -< [Text "Speed"]]
                 ]
                 Div [Class "tab-content"] -< [
-                    new Details.DetailsControl(id)       :> INode<_>
-                    new Keywords.KeywordsControl(id)     :> _
-                    new Links.LinksControl(id)           :> _
-                    new Violations.ViolationsControl(id) :> _
-                    new Headers.HeadersControl(id)       :> _
-                    new Validator.ValidatorControl ()    :> _
-                    new Pagespeed.PagespeedControl ()    :> _
+                    new Details.Control(id)    :> INode<_>
+                    new Keywords.Control(id)   :> _
+                    new Links.Control(id)      :> _
+                    new Violations.Control(id) :> _
+                    new Headers.Control(id)    :> _
+                    new Validator.Control()    :> _
+                    new Pagespeed.Control()    :> _
                 ]
             ]

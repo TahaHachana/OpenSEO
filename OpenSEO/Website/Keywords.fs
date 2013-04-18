@@ -1,44 +1,41 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open IntelliFactory.WebSharper
 
 module Keywords =
 
-    module Server =
+    module private Server =
         
         open Mongo
 
-        let keywordData (keyword : Types.Keyword) =
-            keyword.WordsCount,
-            keyword.Combination,
-            keyword.Occurrence,
-            keyword.Density
+        let keywordData (k : Keyword) = k.WordsCount, k.Combination, k.Occurrence, k.Density
 
         [<Rpc>]
         let keywordsById id =
             async {
-                let keywordsOption = Keywords.keywordsById id
+                let keywordsOption = Keywords.byId id
                 match keywordsOption with
-                    | None -> return None
+                    | None          -> return None
                     | Some keywords ->
-                        return
+                        let someK =
                             keywords
                             |> Array.map keywordData
                             |> Some
+                        return someK
             }
 
-    module Client =
+    [<JavaScript>]
+    module private Client =
 
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
+        open Utils.Client
 
-        [<JavaScript>]
         let makeTh id =
             match id with
                 | "table1" -> TH [Text "Keyword"]
                 | _        -> TH [Text "Keywords Combination"]
 
-        [<JavaScript>]
         let makeTable id =
             Table [Id id; Attr.Class "table table-bordered table-striped span10"] -< [
                 TR [
@@ -48,11 +45,9 @@ module Keywords =
                 ]
             ]
 
-        [<JavaScript>]
         let appendTd text (tableRow : JQuery) =
             JQuery.Of("<td/>").Text(text).AppendTo(tableRow).Ignore
 
-        [<JavaScript>]
         let tableRow keyword occurrence density =
             let tr  = JQuery.Of("<tr/>")
             appendTd keyword tr
@@ -60,15 +55,13 @@ module Keywords =
             appendTd (string density) tr
             tr
 
-        [<JavaScript>]
         let displayKeywords wordsCount keywords (selector : string) =
             keywords
             |> Array.filter (fun (x, _, _, _) -> x = wordsCount)
             |> Array.map (fun (_, x, y, z) -> tableRow x y z)
             |> Array.iter (fun x -> x.AppendTo(JQuery.Of(selector)).Ignore)
 
-        [<JavaScript>]
-        let keywordsSection id =
+        let main id =
             HTML5.Tags.Section [Attr.Class "tab-pane fade in reportSection"; Id "keywords"] -< [
                 Div [Attr.Class "tabbable"] -< [
                     UL [Attr.Class "nav nav-pills"] -< [
@@ -87,17 +80,17 @@ module Keywords =
                 async {
                     let! keywordsOption = Server.keywordsById id
                     match keywordsOption with
-                        | None -> ()
+                        | None -> do ()
                         | Some keywords ->
-                            displayKeywords 1 keywords "#table1"
-                            displayKeywords 2 keywords "#table2"
-                            displayKeywords 3 keywords "#table3"
-                    Utilities.Client.updateProgressBar ()
+                            do displayKeywords 1 keywords "#table1"
+                            do displayKeywords 2 keywords "#table2"
+                            do displayKeywords 3 keywords "#table3"
+                    do updateProgressBar()
                 } |> Async.Start )
             
-    type KeywordsControl(id) =
+    type Control(id) =
             
-        inherit Web.Control ()
+        inherit Web.Control()
 
-        [<JavaScriptAttribute>]
-        override __.Body = Client.keywordsSection id :> _
+        [<JavaScript>]
+        override __.Body = Client.main id :> _

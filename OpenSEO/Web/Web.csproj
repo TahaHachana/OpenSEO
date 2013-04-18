@@ -79,6 +79,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\PublishProfiles\OpenSEOFileSys.pubxml" />
     <None Include="Properties\PublishProfiles\OpenSEOLocal.pubxml" />
   </ItemGroup>
   <ItemGroup>

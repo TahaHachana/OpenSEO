@@ -1,26 +1,28 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open IntelliFactory.WebSharper.Sitelets
 open Model
-open View
 
 module Controller =
+    
+    let private protect view =
+        match UserSession.GetLoggedInUser() with
+            | None -> Content.Redirect <| Login None
+            | _    -> view
+
+    let private logout() =
+        UserSession.Logout ()
+        Content.Redirect Home
 
     let controller =
 
         let handle = function
-            | Home            -> homeView
-            | About           -> aboutView
-            | Custom404       -> custom404View
-            | Report reportId -> reportView reportId
-            | Admin           ->
-                let user = UserSession.GetLoggedInUser()
-                match user with
-                    | None    -> Content.Redirect <| Login None
-                    | _       -> adminView
-            | Login action    -> loginView action
-            | Logout          ->
-                UserSession.Logout ()
-                Content.Redirect Home
+            | Home      -> Views.home
+            | About     -> Views.about
+            | Error     -> Views.error
+            | Report id -> Views.report id
+            | Admin     -> protect Views.admin
+            | Login a   -> Views.login a
+            | Logout    -> logout()
 
         { Handle = handle }

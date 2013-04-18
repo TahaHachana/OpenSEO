@@ -1,4 +1,4 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open IntelliFactory.WebSharper.Sitelets
 
@@ -9,15 +9,8 @@ module Model =
     type Action =
         | About
         | Admin
-        | Custom404
+        | Error
         | Home
         | Login of Action option
         | Logout
-        | Report of ReportId
-
-    type Page =
-        {
-            Title           : string
-            MetaDescription : string
-            Body            : Content.HtmlElement list
-        }
+        | [<CompiledName("report")>] Report of ReportId

@@ -1,4 +1,4 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open System
 open IntelliFactory.WebSharper
@@ -6,7 +6,7 @@ open SEOLib
 
 module Pagespeed =
 
-    type SizeBreakdown =
+    type private SizeBreakdown =
         {
             Css        : int
             Html       : int
@@ -16,7 +16,7 @@ module Pagespeed =
             Total      : int
         }
 
-    module Server =
+    module private Server =
         
         let makeSizeBreakDown css html images js other total =
             {
@@ -76,27 +76,24 @@ module Pagespeed =
                     | _ -> return None
             }    
 
-    module Client =
+    [<JavaScript>]
+    module private Client =
 
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
         open IntelliFactory.WebSharper.EcmaScript
+        open Utils.Client
 
-        [<JavaScript>]
         let makeDiv txt id =
             Div [Attr.Class "row-fluid"] -< [
                 Div [Attr.Class "span3"] -< [H4 [Attr.Class "h4"] -< [Text txt]]
                 Div [Attr.Class "span9"] -< [P [Id id]]
             ]
 
-        [<JavaScript>]
-        let setPText (selector : string) txt =
-            JQuery.Of(selector).Text(txt).Ignore
+        let setPText (selector : string) txt = JQuery.Of(selector).Text(txt).Ignore
 
-        [<JavaScript>]
-        let makeLi text = LI [Text text]
+        let makeLi txt = LI [Text txt]
 
-        [<JavaScript>]
         let makeDiv' (suggestion : Suggestion) =
             Div [
                 H4 [Attr.Class "h4"] -< [Text suggestion.Header]
@@ -105,11 +102,10 @@ module Pagespeed =
                 ]
             ]
 
-        [<JavaScript>]
         let makeAccordionGroup parent id ruleName (suggestions : Suggestion list option) =
             let div =
                 match suggestions with
-                    | None -> Div []
+                    | None   -> Div []
                     | Some x -> Div [yield! x |> List.map makeDiv']
 
             Div [Attr.Class "accordion-group"] -< [
@@ -123,13 +119,11 @@ module Pagespeed =
                 ]
             ]
 
-        [<JavaScript>]
         let updateTabHeader count (selector : string) =
             let jquery = JQuery.Of selector
             let text = jquery.Text()
             jquery.Text(String.concat "" [text; " ("; count; ")"]).Ignore 
 
-        [<JavaScript>]
         let displayAccordions id accordionId (div : Element) (lst : (string * Suggestion list option) list) =
             lst
             |> List.mapi (fun idx x ->
@@ -140,18 +134,16 @@ module Pagespeed =
             let length = string lst.Length
             updateTabHeader length "#speedSuggestionsTab"
 
-        [<JavaScript>]
         let kbSize x =
             float x / 1024.
             |> EcmaScript.Math.Round
             |> fun x -> string x + " KB"
 
-        [<JavaScript>]
         let displaySpeedData uriString (div : Element) (div' : Element) =
             async {
                 let! speedDataOption = Server.runPagespeed uriString
                 match speedDataOption with
-                    | None -> ()
+                    | None -> do ()
                     | Some speedData ->
                         let score = string speedData.Score + " / 100"
                         let sizeBreakdown = speedData.ResourceBreakdown
@@ -163,13 +155,12 @@ module Pagespeed =
                         setPText "#otherSize" <| kbSize sizeBreakdown.Other
                         setPText "#totalSize" <| kbSize sizeBreakdown.Total
                         displayAccordions "speedSuggestion" "speedSuggestionsAccordion" div speedData.Rules
-                        let dataTable = Utilities.Client.makeDataTable "Resource" "Size" ["CSS", sizeBreakdown.Css; "HTML", sizeBreakdown.Html; "Images", sizeBreakdown.Images; "JavaScript", sizeBreakdown.Javascript; "Other", sizeBreakdown.Other] 
-                        let chart = Utilities.Client.drawPie dataTable
-                        div'.Append chart
+                        let dataTable = makeDataTable "Resource" "Size" ["CSS", sizeBreakdown.Css; "HTML", sizeBreakdown.Html; "Images", sizeBreakdown.Images; "JavaScript", sizeBreakdown.Javascript; "Other", sizeBreakdown.Other] 
+                        let chart = drawPie dataTable
+                        do div'.Append chart
             } |> Async.Start
 
-        [<JavaScript>]
-        let pagespeedSection id =
+        let main id =
             let input = Input [Attr.Type "hidden"; Attr.Value ""; Id "pagespeedUri"]
             let div = Div [Attr.Class "accordion"; Id "speedSuggestionsAccordion"]
             let div' = Div [Id "resourceSizeDiv"; Attr.Style "overflow-y: hidden;"]
@@ -201,9 +192,9 @@ module Pagespeed =
                     let uriString = x.GetAttribute "value"
                     displaySpeedData uriString div div').Ignore)
 
-    type PagespeedControl () =
+    type Control() =
             
-        inherit Web.Control ()
+        inherit Web.Control()
 
         [<JavaScript>]
-        override __.Body = Client.pagespeedSection id :> _
+        override __.Body = Client.main id :> _

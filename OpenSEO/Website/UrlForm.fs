@@ -1,22 +1,21 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open IntelliFactory.WebSharper
 open System
 
 module UrlForm =
 
-    type MongoObjectId = string
+    type private MongoObjectId = string
 
-    type Result =
+    type private Result =
         | MongoError
         | InvalidUri
         | NotHtml
         | RequestFailed
         | Success of MongoObjectId
 
-    module Server =
+    module private Server =
 
-        open Mongo
         open SEOLib
         open SEOLib.Types
 
@@ -40,16 +39,16 @@ module UrlForm =
 
         let processKeywords html id =
             Keywords.analyzeKeywords html
-            |> Array.map (fun x -> Keywords.makeKeyword id x.WordsCount x.Combination x.Occurrence x.Density)
-            |> Keywords.insertKeywords
+            |> Array.map (fun x -> Mongo.RecordTypes.Keyword.Make id x.WordsCount x.Combination x.Occurrence x.Density)
+            |> Mongo.Keywords.insert
 
         let processLinks html requestUri id =
             Links.collectLinks html requestUri
             |> List.map (fun x ->
-                let linkType = x.Type |> function Internal -> "Internal" | _ -> "External"
-                let follow = x.Follow |> function DoFollow -> "Follow" | _ -> "NoFollow"
-                Mongo.Links.makeLink id x.URL x.Anchor linkType follow)
-            |> Mongo.Links.insertLinks
+                let linkType = x.Type   |> function Internal -> "Internal" | _ -> "External"
+                let follow   = x.Follow |> function DoFollow -> "Follow"   | _ -> "NoFollow"
+                Mongo.RecordTypes.Link.Make id x.URL x.Anchor linkType follow)
+            |> Mongo.Links.insert
 
         let processViolations html requestUri id =
             async {
@@ -67,8 +66,8 @@ module UrlForm =
                                 let x, y = getLineCol 0 0 index lines
                                 string x, string y
                     let level' = x.Level |> function Error -> "Error" | Warning -> "Warning"
-                    Violations.makeViolation id category' code' column x.Description x.Heading level' line x.Recommendation)
-                |> Violations.insertViolations  
+                    Mongo.RecordTypes.Violation.Make id category' code' column x.Description x.Heading level' line x.Recommendation)
+                |> Mongo.Violations.insert
             }
         
         let processHeaders (httpData : HttpData) id =
@@ -77,9 +76,9 @@ module UrlForm =
                 header.Value |> List.map (fun x -> header.Key, x))
             |> List.concat
             |> List.map (fun (key, value) ->
-                Headers.makeHttpHeader id key value)
+                Mongo.RecordTypes.HttpHeader.Make id key value)
             |> List.toArray
-            |> Headers.insertHeaders
+            |> Mongo.Headers.insert
 
         [<Rpc>]
         let fetchInsert uriString =
@@ -92,7 +91,7 @@ module UrlForm =
                         match httpDataOption with
                             | None -> return RequestFailed
                             | Some httpData ->
-                                let idOption = Details.insertUriDetails httpData
+                                let idOption = Mongo.Details.insert httpData
                                 match idOption with
                                     | None -> return MongoError
                                     | Some id ->
@@ -109,25 +108,22 @@ module UrlForm =
                                                 return Success id'
             }
 
-    module Client =
+    [<JavaScript>]
+    module private Client =
         
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
 
-        [<JavaScript>]
         let alertHideLoader (element : Element) (jquery : JQuery) msg =
-            jquery.Css("visibility", "hidden").Ignore
-            element.RemoveClass "disabled"
-            JavaScript.Alert msg
+            do jquery.Css("visibility", "hidden").Ignore
+            do element.RemoveClass "disabled"
+            do JavaScript.Alert msg
 
-        [<JavaScript>]
         let showLoader (jquery : JQuery) (element : Element) =
             element.AddClass "disabled"
             jquery.Css("visibility", "visible").Ignore
 
-        [<JavaScript>]
-        let urlForm () =
-
+        let main() =
             let legend = Legend [Text "Enter the URL you want to analyze."]
             let label = Label [Text "URL"]
             let urlInput =
@@ -142,7 +138,7 @@ module UrlForm =
                     let key' = key.KeyCode
                     match key' with
                         | 13 -> JQuery.Of("#submitButton").Click().Ignore
-                        | _  -> ())
+                        | _  -> do ())
 
             let submitBtn =
                 Button [Id "submitButton"; Attr.Class "btn btn-success"; Text "URL Review"; Attr.Type "button"]
@@ -157,7 +153,7 @@ module UrlForm =
                             | InvalidUri         -> alertHideLoader' "The specified URL is invalid."
                             | NotHtml            -> alertHideLoader' "The specified URL doesn't point to a HTML document. The application can only process HTML pages."
                             | RequestFailed      -> alertHideLoader' "Downloading the specified URL failed."
-                            | Success mongoObjId -> Html5.Window.Self.Location.Href <- ("/Report/" + mongoObjId)
+                            | Success mongoObjId -> Html5.Window.Self.Location.Href <- ("/report/" + mongoObjId)
                     } |> Async.Start)
 
             Div [Id "urlForm"; Attr.Class "input-append offset2"] -< [
@@ -165,9 +161,9 @@ module UrlForm =
                 submitBtn
             ]
 
-    type UrlFormControl () =
+    type Control() =
 
-        inherit Web.Control ()
+        inherit Web.Control()
 
         [<JavaScript>]
-        override __.Body = Client.urlForm () :> _
+        override __.Body = Client.main() :> _

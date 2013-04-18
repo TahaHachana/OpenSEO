@@ -1,10 +1,10 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open IntelliFactory.WebSharper
 
 module Validator =
 
-    module Server =
+    module private Server =
         
         open SEOLib
 
@@ -26,13 +26,13 @@ module Validator =
                 | Some lst ->
                     lst |> List.map (fun x ->
                         let line = x.Line |> function None -> "NA" | Some x -> x
-                        let col = x.Col |> function None -> "NA" | Some x -> x
+                        let col  = x.Col  |> function None -> "NA" | Some x -> x
                         line, col, x.Message)
 
         let markupErrorsCount (markupErrors : MarkupError list option) =
             markupErrors
             |> function
-                | None -> "0"
+                | None     -> "0"
                 | Some lst -> lst.Length |> string
 
         [<Rpc>]
@@ -57,51 +57,44 @@ module Validator =
                             } |> Some
             }
 
+    [<JavaScript>]
     module Client =
         
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
 
-        [<JavaScript>]
         let makeDiv txt id =
             Div [Attr.Class "row-fluid"] -< [
                 Div [Attr.Class "span3"] -< [H4 [Attr.Class "h4"] -< [Text txt]]
                 Div [Attr.Class "span9"] -< [P [Id id]]
             ]
 
-        [<JavaScript>]
         let makeDiv' txt txt' =
             Div [Attr.Class "row-fluid"] -< [
                 Div [Attr.Class "span3"] -< [H4 [Attr.Class "h4"] -< [Text txt]]
                 Div [Attr.Class "span9"] -< [P [Text txt']]
             ]
 
-        [<JavaScript>]
         let setPText (selector : string) txt = JQuery.Of(selector).Text(txt).Ignore
 
-        [<JavaScript>]
         let makeAccordionGroup parent id message line column =
             Div [Attr.Class "accordion-group"] -< [
                 Div [Attr.Class "accordion-heading"] -< [
-                    A [Attr.Class "accordion-toggle"; HTML5.Attr.Data "toggle" "collapse"; HTML5.Attr.Data "parent" parent; HRef <| "#" + id] -< [
-                        Text message
-                    ]
+                    A [Attr.Class "accordion-toggle"; HTML5.Attr.Data "toggle" "collapse"; HTML5.Attr.Data "parent" parent; HRef <| "#" + id] -- Text message
                 ]
                 Div [Id id; Attr.Class "accordion-body collapse"] -< [
                     Div [Attr.Class "accordion-inner"] -< [
-                        makeDiv'  "Line"        line
-                        makeDiv'  "Column"      column
+                        makeDiv'  "Line"   line
+                        makeDiv'  "Column" column
                     ]
                 ]
             ]
 
-        [<JavaScript>]
         let updateTabHeader count (selector : string) =
             let jquery = JQuery.Of selector
             let text = jquery.Text()
             jquery.Text(String.concat "" [text; " ("; count; ")"]).Ignore 
 
-        [<JavaScript>]
         let displayAccordions id lst accordionId (div : Element) =
             lst
             |> List.mapi (fun idx x ->
@@ -110,17 +103,15 @@ module Validator =
                 makeAccordionGroup accordionId id' message line column)
             |> List.iter div.Append
 
-        [<JavaScript>]
         let displayMarkupErrors count id lst selector accordionId div =
             updateTabHeader count selector
             displayAccordions id lst accordionId div
 
-        [<JavaScript>]
         let displayMarkupValidation uriString div div' =
             async {
                 let! validationResultOption = Server.validate uriString
                 match validationResultOption with
-                    | None -> ()
+                    | None -> do ()
                     | Some validationResult ->
                         let doctype = validationResult.Doctype
                         let charset = validationResult.Charset
@@ -132,8 +123,7 @@ module Validator =
                         displayMarkupErrors validationResult.WarningCount "htmlWarningAccordion" validationResult.Warnings "#htmlWarningsTab" "htmlWarningsAccordion" div'
             } |> Async.Start
 
-        [<JavaScript>]
-        let validatorSection () =
+        let main() =
             let input =
                 Input [Attr.Type "hidden"; Attr.Value ""; Id "validatorUri"]
             let div   = Div [Attr.Class "accordion"; Id "htmlErrorsAccordion"]
@@ -162,9 +152,9 @@ module Validator =
                     let uriString = x.GetAttribute "value"
                     displayMarkupValidation uriString div div').Ignore)
                 
-    type ValidatorControl () =
+    type Control() =
 
-        inherit Web.Control ()
+        inherit Web.Control()
 
         [<JavaScript>]
-        override __.Body = Client.validatorSection () :> _
+        override __.Body = Client.main() :> _

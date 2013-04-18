@@ -1,25 +1,28 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open IntelliFactory.WebSharper
 
 module LatestReports =
 
-    module Server =
+    module private Server =
+        
+        open Mongo
 
         [<Rpc>]
-        let latestReports () =
+        let latestReports() =
             async {
-                let reports = Mongo.Details.latestReports ()
+                let reports = Details.latest()
                 match reports with
                     | [||] -> return None
                     | arr  ->
-                        return
+                        let someArr =
                             arr
                             |> Array.map (fun x -> x._id.ToString())
                             |> Some
+                        return someArr
             }
 
-    module Client =
+    module private Client =
     
         open IntelliFactory.WebSharper.Html
 
@@ -29,22 +32,22 @@ module LatestReports =
             LI [A [HRef href; Attr.Target "_blank"] -< [Text objectIdString]]
 
         [<JavaScript>]
-        let latestReportsList () =
+        let main() =
             UL [Attr.Class "unstyled"]
             |>! OnAfterRender (fun x ->
                 async {
-                    let! arrOption = Server.latestReports ()
+                    let! arrOption = Server.latestReports()
                     match arrOption with
-                        | None -> ()
+                        | None -> do ()
                         | Some arr ->
                             arr
                             |> Array.map makeLi
                             |> Array.iter x.Append
                 } |> Async.Start) 
                 
-    type LatestReportsControl () =
+    type Control() =
 
-        inherit Web.Control ()
+        inherit Web.Control()
             
-        [<JavaScriptAttribute>]
-        override __.Body = Client.latestReportsList () :> _
+        [<JavaScript>]
+        override __.Body = Client.main() :> _

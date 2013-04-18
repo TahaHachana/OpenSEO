@@ -1,4 +1,4 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open System
 open System.Globalization
@@ -7,24 +7,21 @@ open MongoDB.Bson
 open MongoDB.Driver
 open MongoDB.Driver.Builders
 open SEOLib
+open SEOLib.Types
 
 module Mongo =
     
     let culture = CultureInfo.CreateSpecificCulture "en-US"
     CultureInfo.DefaultThreadCurrentCulture <- culture
 
-    module Utilities =
+    [<AutoOpen>]
+    module Utils =
 
-        /// Creates a mongo server instance.
-        let createServer (connectionString : string) =
-            let client = MongoClient connectionString
-            client.GetServer()
-
-        /// Gets the database with the specified name.
-        let databaseByName (mongoServer : MongoServer) (name : string) = mongoServer.GetDatabase name
-
-        /// Gets the database collection with the specified name.
-        let collectionByName<'T> (db : MongoDatabase) (name : string) = db.GetCollection<'T> name
+        let mongoClient (connectionString: string) = MongoClient connectionString
+        
+        let database (server : MongoServer) (name : string) = server.GetDatabase name
+        
+        let collection<'T> (db : MongoDatabase) (name : string) = db.GetCollection<'T> name
 
         let makeLtQuery datetime = Query.LT("InsertDate", BsonValue.Create datetime)
 
@@ -32,14 +29,29 @@ module Mongo =
             try
                 let query = makeLtQuery datetime
                 collection.Remove query |> ignore
-            with _ -> ()
+            with _ -> do ()
 
-        let server = createServer Secure.mongoConnectionString
-        let database = databaseByName server "OpenSEODB"
+        let stringHeading (heading : Heading) =
+            match heading with
+                | H1 x -> "H1|||" + x
+                | H2 x -> "H2|||" + x
+                | H3 x -> "H3|||" + x
+                | H4 x -> "H4|||" + x
+                | H5 x -> "H5|||" + x
+                | H6 x -> "H6|||" + x
 
-    module Types =
+        let someOrMissing = function
+            | None   -> "MISSING"
+            | Some x -> x
+
+    let client = mongoClient Secure.connectionString
+    let server = client.GetServer()
+    let db = database server "OpenSEODB"
+
+    [<AutoOpen>]
+    module RecordTypes =
         
-        [<CLIMutableAttribute>]
+        [<CLIMutable>]
         type UriDetails =
             {
                 _id         : ObjectId
@@ -52,7 +64,28 @@ module Mongo =
                 Title       : string
             }
 
-        [<CLIMutableAttribute>]
+            static member Make (httpData : HttpData) id =
+                let requestUri = httpData.RequestUri.ToString()
+                let elapsedTime = httpData.ElapsedTime.ToString()
+                let htmlOption = httpData.Html
+                let html = match htmlOption with None -> "" | Some x -> x
+                let textRatio = Html.textHtmlRatio html
+                let title = Html.title html |> someOrMissing
+                let metaTags = Html.metaTags html
+                let description = Html.metaDescription metaTags |> someOrMissing
+                let headings = Html.headings html |> List.toArray |> Array.map stringHeading
+                {
+                    _id         = id
+                    Description = description
+                    ElapsedTime = elapsedTime
+                    Headings    = headings
+                    InsertDate  = DateTime.Now
+                    RequestUri  = requestUri
+                    TextRatio   = textRatio
+                    Title       = title
+                }
+
+        [<CLIMutable>]
         type Keyword =
             {
                 _id         : ObjectId
@@ -64,7 +97,19 @@ module Mongo =
                 InsertDate  : DateTime
             }
 
-        [<CLIMutableAttribute>]
+            static member Make objectId wordsCount combination occurrence density =
+                {
+                    _id         = ObjectId.GenerateNewId()
+                    ObjectId    = objectId
+                    WordsCount  = wordsCount
+                    Combination = combination
+                    Occurrence  = occurrence
+                    Density     = density
+                    InsertDate  = DateTime.Now
+                }
+
+
+        [<CLIMutable>]
         type Link =
             {
                 _id        : ObjectId
@@ -75,8 +120,20 @@ module Mongo =
                 Follow     : string
                 InsertDate : DateTime
             }
+            
+            static member Make objectId url anchor linkType follow =
+                {
+                    _id        = ObjectId.GenerateNewId()
+                    ObjectId   = objectId
+                    URL        = url
+                    Anchor     = anchor
+                    Type       = linkType
+                    Follow     = follow
+                    InsertDate = DateTime.Now
+                }
 
-        [<CLIMutableAttribute>]
+
+        [<CLIMutable>]
         type Violation =
             {
                 _id            : ObjectId
@@ -92,7 +149,22 @@ module Mongo =
                 InsertDate     : DateTime
             }
 
-        [<CLIMutableAttribute>]
+            static member Make objectId category code column description heading level line recommendation =
+                {
+                    _id            = ObjectId.GenerateNewId()
+                    ObjectId       = objectId
+                    Category       = category
+                    Code           = code
+                    Column         = column
+                    Description    = description
+                    Heading        = heading
+                    Level          = level
+                    Line           = line
+                    Recommendation = recommendation
+                    InsertDate     = DateTime.Now
+                }
+
+        [<CLIMutable>]
         type HttpHeader =
             {
                 _id        : ObjectId
@@ -101,104 +173,74 @@ module Mongo =
                 Value      : string
                 InsertDate : DateTime
             }
+
+            static member Make objectId key value =
+                {
+                    _id        = ObjectId.GenerateNewId()
+                    ObjectId   = objectId
+                    Key        = key
+                    Value      = value
+                    InsertDate = DateTime.Now
+                }
+
+    [<AutoOpen>]
+    module Collections =
+
+        let uriDetails  = collection<UriDetails> db "uridetails"    
+        let keywords    = collection<Keyword>    db "keywords"
+        let links       = collection<Link>       db "links"
+        let violations  = collection<Violation>  db "violations"
+        let httpHeaders = collection<HttpHeader> db "httpheaders"
     
-    open Types
+    [<AutoOpen>]    
+    module Queryable =
+        
+        let asQueryable (collection : MongoCollection<_>) = collection.FindAll().AsQueryable()
+        
+        let udq = asQueryable uriDetails
+        let kq  = asQueryable keywords
+        let lq  = asQueryable links
+        let vq  = asQueryable violations
+        let hhq = asQueryable httpHeaders
 
     module Details =
-
-        let stringHeading (heading : Heading) =
-            match heading with
-                | H1 x -> "H1|||" + x
-                | H2 x -> "H2|||" + x
-                | H3 x -> "H3|||" + x
-                | H4 x -> "H4|||" + x
-                | H5 x -> "H5|||" + x
-                | H6 x -> "H6|||" + x
-
-        let someOrMissing = function
-            | None   -> "MISSING"
-            | Some x -> x
     
-        let makeUriDetails (httpData : HttpData) id =
-            let requestUri = httpData.RequestUri.ToString()
-            let elapsedTime = httpData.ElapsedTime.ToString()
-            let htmlOption = httpData.Html
-            let html = match htmlOption with None -> "" | Some x -> x
-            let textRatio = Html.textHtmlRatio html
-            let title = Html.title html |> someOrMissing
-            let metaTags = Html.metaTags html
-            let description = Html.metaDescription metaTags |> someOrMissing
-            let headings = Html.headings html |> List.toArray |> Array.map stringHeading
-            {
-                _id         = id
-                Description = description
-                ElapsedTime = elapsedTime
-                Headings    = headings
-                InsertDate  = DateTime.Now
-                RequestUri  = requestUri
-                TextRatio   = textRatio
-                Title       = title
-            }
-
-        let uriDetailsCollection =
-            Utilities.collectionByName<UriDetails> Utilities.database "uridetails"
-        
-        let queryable = uriDetailsCollection.FindAll().AsQueryable()
-    
-        let insertUriDetails (httpData : HttpData) =
+        let insert (httpData : HttpData) =
             try
                 let id = ObjectId.GenerateNewId()
-                let uriDetails = makeUriDetails httpData id
-                uriDetailsCollection.Insert uriDetails |> ignore
+                let records = UriDetails.Make httpData id
+                uriDetails.Insert records |> ignore
                 Some id
             with _ -> None
 
-        let uriDetailsById id =
+        let byId id =
             try
                 let id' = ObjectId.Parse id
                 query {
-                    for x in queryable do
+                    for x in udq do
                         find (x._id = id')
                 } |> Some
             with _ -> None
         
-        let latestReports () =
+        let latest() =
             try
                 query {
-                    for x in queryable do
+                    for x in udq do
                         sortByDescending x.InsertDate
                         take 10
                 } |> Seq.toArray
             with _ -> [||]
 
-    [<AutoOpenAttribute>]
     module Keywords =
 
-        let makeKeyword objectId wordsCount combination occurrence density =
-            {
-                _id         = ObjectId.GenerateNewId()
-                ObjectId    = objectId
-                WordsCount  = wordsCount
-                Combination = combination
-                Occurrence  = occurrence
-                Density     = density
-                InsertDate  = DateTime.Now
-            }
+        let  insert records =
+            try  keywords.InsertBatch records |> ignore
+            with _ -> do ()
 
-        let keywordsCollection =
-            Utilities.collectionByName<Keyword> Utilities.database "keywords"
-
-        let queryable = keywordsCollection.FindAll().AsQueryable()
-    
-        let  insertKeywords keywords =
-            try
-                keywordsCollection.InsertBatch keywords |> ignore
-            with _ -> ()
-
-        let keywordsById id =
+        let byId id =
             try
                 query {
-                    for x in queryable do
+                    for x in kq do
                         where (x.ObjectId = id)
                         select x
                 }
@@ -206,33 +248,16 @@ module Mongo =
                 |> Some
             with _ -> None
 
-    [<AutoOpenAttribute>]
     module Links =
-        
-        let makeLink objectId url anchor linkType follow =
-            {
-                _id        = ObjectId.GenerateNewId()
-                ObjectId   = objectId
-                URL        = url
-                Anchor     = anchor
-                Type       = linkType
-                Follow     = follow
-                InsertDate = DateTime.Now
-            }
 
-        let linksCollection = Utilities.collectionByName<Link> Utilities.database "links"
+        let  insert records =
+            try  links.InsertBatch records |> ignore
+            with _ -> do ()
 
-        let queryable = linksCollection.FindAll().AsQueryable()
-    
-        let  insertLinks links =
-            try
-                linksCollection.InsertBatch links |> ignore
-            with _ -> ()
-
-        let linksById id =
+        let byId id =
             try
                 query {
-                    for x in queryable do
+                    for x in lq do
                         where (x.ObjectId = id)
                         select x
                 }
@@ -240,38 +265,16 @@ module Mongo =
                 |> Some
             with _ -> None
 
-    [<AutoOpenAttribute>]
     module Violations =
+ 
+        let  insert records =
+            try  violations.InsertBatch records |> ignore
+            with _ -> do ()
 
-        let makeViolation objectId category code column description heading level line recommendation =
-            {
-                _id            = ObjectId.GenerateNewId()
-                ObjectId       = objectId
-                Category       = category
-                Code           = code
-                Column         = column
-                Description    = description
-                Heading        = heading
-                Level          = level
-                Line           = line
-                Recommendation = recommendation
-                InsertDate     = DateTime.Now
-            }
-
-        let violationsCollection =
-            Utilities.collectionByName<Violation> Utilities.database "violations"
-
-        let queryable = violationsCollection.FindAll().AsQueryable()
-    
-        let  insertViolations violations =
-            try
-                violationsCollection.InsertBatch violations |> ignore
-            with _ -> ()
-
-        let violationsById id =
+        let byId id =
             try
                 query {
-                    for x in queryable do
+                    for x in vq do
                         where (x.ObjectId = id)
                         select x
                 }
@@ -279,32 +282,16 @@ module Mongo =
                 |> Some
             with _ -> None
 
-    [<AutoOpenAttribute>]
     module Headers =
-        
-        let makeHttpHeader objectId key value =
-            {
-                _id      = ObjectId.GenerateNewId()
-                ObjectId = objectId
-                Key      = key
-                Value    = value
-                InsertDate  = DateTime.Now
-            }
+            
+        let  insert records =
+            try  httpHeaders.InsertBatch records |> ignore
+            with _ -> do ()
 
-        let headersCollection =
-            Utilities.collectionByName<HttpHeader> Utilities.database "httpheaders"
-
-        let queryable = headersCollection.FindAll().AsQueryable()
-    
-        let  insertHeaders headers =
-            try
-                headersCollection.InsertBatch headers |> ignore
-            with _ -> ()
-
-        let headersById id =
+        let byId id =
             try
                 query {
-                    for x in queryable do
+                    for x in hhq do
                         where (x.ObjectId = id)
                         select x
                 }

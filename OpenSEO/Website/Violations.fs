@@ -1,42 +1,42 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open IntelliFactory.WebSharper
 
 module Violations =
 
-    module Server =
+    module private Server =
         
         open Mongo
             
-        let violationData (x : Types.Violation) =
-            x.Level, x.Heading, x.Line, x.Column, x.Description, x.Recommendation
+        let violationData (x : Violation) = x.Level, x.Heading, x.Line, x.Column, x.Description, x.Recommendation
 
         [<Rpc>]
         let violationsById id =
             async {
-                let violationsOption = Mongo.Violations.violationsById id
+                let violationsOption = Violations.byId id
                 match violationsOption with
-                    | None -> return None
+                    | None            -> return None
                     | Some violations ->
-                        return
+                        let someArr =
                             violations
                             |> Array.map violationData
                             |> Some
+                        return someArr
             }
 
+    [<JavaScript>]
     module Client =
 
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
+        open Utils.Client
 
-        [<JavaScript>]
         let makeDiv txt txt' =
             Div [Attr.Class "row-fluid"] -< [
                 Div [Attr.Class "span3"] -< [H4 [Attr.Class "h4"] -< [Text txt]]
                 Div [Attr.Class "span9"] -< [P [Text txt']]
             ]
 
-        [<JavaScript>]
         let makeAccordionGroup parent id heading line column description recommendation =
             Div [Attr.Class "accordion-group"] -< [
                 Div [Attr.Class "accordion-heading"] -< [
@@ -54,20 +54,17 @@ module Violations =
                 ]
             ]
 
-        [<JavaScript>]
         let filterLevel arr (level : string) =
             arr |> Array.filter (fun x ->
                 let level', _, _, _, _, _ = x
                 level' = level)
 
-        [<JavaScript>]
         let updateTabHeader (arr : 'T []) (selector : string) =
             let count = arr.Length.ToString()
             let jquery = JQuery.Of selector
             let text = jquery.Text()
             jquery.Text(String.concat "" [text; " ("; count; ")"]).Ignore 
 
-        [<JavaScript>]
         let displayAccordions id arr accordionId (div : Element) =
             arr
             |> Array.mapi (fun idx x ->
@@ -76,10 +73,8 @@ module Violations =
                 makeAccordionGroup accordionId id' heading line column description recommendation)
             |> Array.iter div.Append
 
-        [<JavaScript>]
         let appendParagraph (div : Element) text = div.Append (P [Text text])
 
-        [<JavaScript>]
         let displayViolations violations id level selector accordionId div text =
             let violations' = filterLevel violations level
             updateTabHeader violations' selector
@@ -87,8 +82,7 @@ module Violations =
                 | 0 -> appendParagraph div text
                 | _ -> displayAccordions id violations' accordionId div
 
-        [<JavaScript>]
-        let violationsSection id =
+        let main id =
             let div   = Div [Attr.Class "accordion"; Id "errorsAccordion"]
             let div' = Div [Attr.Class "accordion"; Id "warningsAccordion"]
             HTML5.Tags.Section [Attr.Class "tab-pane fade in reportSection"; Id "violations"] -< [
@@ -107,17 +101,17 @@ module Violations =
                 async {
                     let! violationsOption = Server.violationsById id
                     match violationsOption with
-                        | None -> ()
+                        | None -> do ()
                         | Some violations ->
                             let displayViolations' = displayViolations violations
                             displayViolations' "errorAccordion" "Error" "#errorsTab" "errorsAccordion" div "No errors were detected on the page."
                             displayViolations' "WarningAccordion" "Warning" "#warningsTab" "warningsAccordion" div' "No warnings were detected on the page."
-                    Utilities.Client.updateProgressBar ()
+                    do updateProgressBar()
                 } |> Async.Start)
             
-    type ViolationsControl(id) =
+    type Control(id) =
             
-        inherit Web.Control ()
+        inherit Web.Control()
 
         [<JavaScript>]
-        override __.Body = Client.violationsSection id :> _
+        override __.Body = Client.main id :> _

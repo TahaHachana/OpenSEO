@@ -1,4 +1,4 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open IntelliFactory.WebSharper.Sitelets
 open Model
@@ -9,7 +9,11 @@ module Site =
     let router : Router<Action> =
         Router.Table
             [
-                Home, "/"
+                About     , "about"
+                Admin     , "admin"
+                Error     , "error"
+                Home      , "/"
+                Login None, "login"
             ]
         <|>
         Router.Infer()
@@ -26,4 +30,4 @@ type Website() =
         member this.Actions = []
 
 [<assembly: WebsiteAttribute(typeof<Website>)>]
-do ()
+do()

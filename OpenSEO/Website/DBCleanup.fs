@@ -1,48 +1,47 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open System
 open IntelliFactory.WebSharper
 
 module DBCleanup =
 
-    module Server =
+    module private Server =
         
         open Mongo
-        
-        let oneHourAgo () =
-            let timespan = TimeSpan(1, 0, 0)
-            DateTime.Now.Subtract timespan
+        open Utils.Server
+
+        let oneHourAgo() = TimeSpan(1, 0, 0) |> DateTime.Now.Subtract
             
         [<Rpc>]
-        let emptyDatabase () =
+        let emptyDatabase() =
             async {
-                let datetime = oneHourAgo ()
-                let emptyCollection' collection = Utilities.emptyCollection datetime collection
-                emptyCollection' Details.uriDetailsCollection
-                emptyCollection' Keywords.keywordsCollection
-                emptyCollection' Links.linksCollection
-                emptyCollection' Violations.violationsCollection
-                emptyCollection' Headers.headersCollection
+                let datetime = oneHourAgo()
+                let emptyCollection' collection = emptyCollection datetime collection
+                do emptyCollection' uriDetails
+                do emptyCollection' keywords
+                do emptyCollection' links
+                do emptyCollection' violations
+                do emptyCollection' httpHeaders
             }
 
-    module Client =
+    module private Client =
 
         open IntelliFactory.WebSharper.Html
         
         [<JavaScript>]
-        let cleanDbBtn () =
+        let main() =
             Button [Attr.Class "btn btn-primary"; Text "Clean Database"]
             |>! OnClick (fun x _ ->
                 async {
                     x.AddClass "disabled"
-                    do! Server.emptyDatabase ()
+                    do! Server.emptyDatabase()
                     x.RemoveClass "disabled"
                     JavaScript.Alert "Done"
                 } |> Async.Start)
                     
-    type ButtonControl () =
+    type Control() =
             
-        inherit Web.Control ()
+        inherit Web.Control()
 
-        [<JavaScriptAttribute>]
-        override __.Body = Client.cleanDbBtn () :> _
+        [<JavaScript>]
+        override __.Body = Client.main() :> _

@@ -1,12 +1,13 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open IntelliFactory.WebSharper
 
-module Utilities =
+module Utils =
 
     module Server =
 
         open IntelliFactory.Html
+        open IntelliFactory.WebSharper.Sitelets
 
         let makeLi activeLiOption href txt =
             match activeLiOption with
@@ -17,16 +18,30 @@ module Utilities =
                     else
                         LI [A [HRef href] -< [Text txt]]
 
-        let makeNavigation activeLiOption =
+        let nav activeLiOption =
             let makeLi' = makeLi activeLiOption
-            Div [Class "navbar navbar-fixed-top"; Id "navigation"] -< [
+            Div [Class "navbar navbar-fixed-top navbar-inverse"; Id "navigation"] -< [
                 Div [Class "navbar-inner"] -< [
-                    UL [Class "nav"] -< [
-                        makeLi' "/"      "Home"
-                        makeLi' "/About" "About"
+                    Div [Class "container"] -< [
+                        UL [Class "nav"] -< [
+                            makeLi' "/"      "Home"
+                            makeLi' "/about" "About"
+                        ]
                     ]
                 ]
             ]
+
+        let (=>) anchor href = A [HRef href] -< [Text anchor]
+    
+        let randomizeUrl url = url + "?d=" + System.Uri.EscapeUriString (System.DateTime.Now.ToString())
+
+        let loginInfo logoutAction loginAction (ctx: Context<_>) =
+            let userOption = UserSession.GetLoggedInUser ()
+            let link =
+                match userOption with
+                    | Some user -> "Log Out (" + user + ")" => (randomizeUrl <| ctx.Link logoutAction)
+                    | None      -> "Login"                  => (ctx.Link <| loginAction None)
+            Div [Class "pull-right"; Style "margin-top: 50px;"] -< [link]
 
     module Client =
 
@@ -66,7 +81,7 @@ module Utilities =
             ]
 
         [<JavaScript>]
-        let updateProgressBar () =
+        let updateProgressBar() =
             let progressBarJquery = JQuery.Of "#progressBar"
             let dataWidth = progressBarJquery.Data("width").ToString() |> int
             match dataWidth with
@@ -80,7 +95,7 @@ module Utilities =
                     progressBarJquery.Css("width", width').Ignore
 
         [<JavaScript>]
-        let hRule () = Hr [Attr.Class "span6 hrule"]
+        let hRule() = Hr [Attr.Class "span6 offset2 hrule"]
 
         [<JavaScript>]
         let makeDataTable column column' (rows : ('T * 'U) list) =

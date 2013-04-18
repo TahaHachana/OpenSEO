@@ -38,7 +38,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Secure.fs" />
     <Compile Include="Mongo.fs" />
-    <Compile Include="Utilities.fs" />
+    <Compile Include="Utils.fs" />
     <Compile Include="LatestReports.fs" />
     <Compile Include="DBCleanup.fs" />
     <Compile Include="Details.fs" />
@@ -51,35 +51,42 @@
     <Compile Include="Login.fs" />
     <Compile Include="UrlForm.fs" />
     <Compile Include="AddThis.fs" />
+    <Compile Include="ForkMe.fs" />
+    <Compile Include="Content.fs" />
     <Compile Include="Model.fs" />
-    <Compile Include="SiteContent.fs" />
-    <Compile Include="Skin.fs" />
-    <Compile Include="View.fs" />
+    <Compile Include="Views.fs" />
     <Compile Include="Controller.fs" />
     <Compile Include="Site.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="ExtSharper">
+      <HintPath>..\..\packages\ExtSharper.0.1.13\lib\Net45\ExtSharper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Google.Apis">
-      <HintPath>..\..\..\..\..\Desktop\google-api-dotnet-client-1.2.4696-beta.binary\Lib\Google.Apis.dll</HintPath>
+      <HintPath>..\..\..\..\T\google-pagespeedonline-v1-rev17-csharp-1.3.0-beta\pagespeedonline\Lib\Google.Apis.dll</HintPath>
     </Reference>
     <Reference Include="Google.Apis.Pagespeedonline.v1">
-      <HintPath>..\..\..\..\..\Desktop\google-api-dotnet-client-1.2.4696-beta.binary\Services\PagespeedonlineService\Google.Apis.Pagespeedonline.v1.dll</HintPath>
+      <HintPath>..\..\..\..\T\google-pagespeedonline-v1-rev17-csharp-1.3.0-beta\pagespeedonline\google-pagespeedonline-v1-rev17-csharp-1.3.0-beta-bin\Google.Apis.Pagespeedonline.v1.dll</HintPath>
     </Reference>
     <Reference Include="IntelliFactory.WebSharper.Google.Visualization">
       <HintPath>..\..\packages\WebSharper.Google.Visualization.2.4.51.145\lib\IntelliFactory.WebSharper.Google.Visualization.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MongoDB.Bson">
-      <HintPath>..\..\packages\mongocsharpdriver.1.7\lib\net35\MongoDB.Bson.dll</HintPath>
+      <HintPath>..\..\packages\mongocsharpdriver.1.8.1\lib\net35\MongoDB.Bson.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="MongoDB.Driver">
-      <HintPath>..\..\packages\mongocsharpdriver.1.7\lib\net35\MongoDB.Driver.dll</HintPath>
+      <HintPath>..\..\packages\mongocsharpdriver.1.8.1\lib\net35\MongoDB.Driver.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="SEOLib">
-      <HintPath>..\..\packages\SEOLib.0.5.105\lib\Net45\SEOLib.dll</HintPath>
+      <HintPath>..\..\packages\SEOLib.0.5.110\Lib\net45\SEOLib.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />

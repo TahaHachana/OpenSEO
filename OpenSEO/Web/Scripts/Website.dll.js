@@ -1,17 +1,11 @@
 (function()
 {
- var Global=this,Runtime=this.IntelliFactory.Runtime,OpenSEO,AddThis,Client,WebSharper,Html,Default,HTML5,List,T,DBCleanup,Client1,Remoting,alert,Concurrency,EventsPervasives,Operators,Details,Client2,Utilities,Client3,jQuery,Headers,Client4,Arrays,Unchecked,Keywords,Client5,LatestReports,Client6,Links,Client7,String,Strings,Formlet,Controls,Enhance,Data,Formlet1,window,Login,Client8,Pagespeed,Client9,Seq,Number,Math,UrlForm,Clienta,google,visualization,PieChart,Google,Visualization,Visualizations,PieChartOptions,DataTable,Validator,Clientb,Violations,Clientc;
+ var Global=this,Runtime=this.IntelliFactory.Runtime,WebSharper,Html,Default,HTML5,List,T,Website,AddThis,Client,Remoting,alert,Concurrency,EventsPervasives,DBCleanup,Client1,Details,Client2,Utils,Client3,jQuery,Operators,ForkMe,Headers,Client4,Arrays,Unchecked,Keywords,Client5,LatestReports,Client6,Links,Client7,String,Strings,Login,Client8,window,Pagespeed,Client9,Seq,Number,Math,UrlForm,Clienta,google,visualization,PieChart,Google,Visualization,Visualizations,PieChartOptions,DataTable,Validator,Clientb,Violations,Clientc;
  Runtime.Define(Global,{
-  OpenSEO:{
+  Website:{
    AddThis:{
-    AddThisControl:Runtime.Class({
-     get_Body:function()
-     {
-      return Client.addThisSection();
-     }
-    }),
     Client:{
-     addThisSection:function()
+     main:function()
      {
       var section,_this,x;
       section=(_this=HTML5.Tags(),(x=Runtime.New(T,{
@@ -20,17 +14,17 @@
       section.set_Html("<div class=\"addthis_toolbox addthis_default_style \">\r\n                <a class=\"addthis_button_facebook_like\" fb:like:layout=\"button_count\"></a>\r\n                <a class=\"addthis_button_tweet\"></a>\r\n                <a class=\"addthis_button_pinterest_pinit\"></a>\r\n                <a class=\"addthis_counter addthis_pill_style\"></a>\r\n                </div>\r\n                <script type=\"text/javascript\" src=\"http://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-50af450141ce9366\"></script>");
       return section;
      }
-    }
-   },
-   DBCleanup:{
-    ButtonControl:Runtime.Class({
+    },
+    Control:Runtime.Class({
      get_Body:function()
      {
-      return Client1.cleanDbBtn();
+      return Client.main();
      }
-    }),
+    })
+   },
+   DBCleanup:{
     Client:{
-     cleanDbBtn:function()
+     main:function()
      {
       var x,f,x1;
       x=Default.Button(List.ofArray([Default.Attr().Class("btn btn-primary"),Default.Text("Clean Database")]));
@@ -78,11 +72,66 @@
       f(x);
       return x;
      }
-    }
+    },
+    Control:Runtime.Class({
+     get_Body:function()
+     {
+      return Client1.main();
+     }
+    })
    },
    Details:{
     Client:{
-     detailsSection:function(id)
+     displayDetails:function(details,tabsDiv)
+     {
+      var title,description,txt,txt1,headings,matchValue,x,f;
+      title=details.Title;
+      description=details.Description;
+      Client2.setPText("#url",details.RequestUri);
+      txt=details.ElapsedTime+" milliseconds";
+      Client2.setPText("#elapsedTime",txt);
+      txt1=Global.String(details.TextRatio)+" %";
+      Client2.setPText("#textRatio",txt1);
+      Client2.setPText("#title",title);
+      Client2.displayLength(title,"#titleDiv");
+      Client2.setPText("#description",description);
+      Client2.displayLength(description,"#descDiv");
+      headings=details.Headings;
+      matchValue=headings.length;
+      if(matchValue===0)
+       {
+        return null;
+       }
+      else
+       {
+        x=Client3.makeTabsDiv(headings);
+        f=function(arg00)
+        {
+         return tabsDiv.AppendI(arg00);
+        };
+        return f(x);
+       }
+     },
+     displayLength:function(str,selector)
+     {
+      var strLength,x;
+      strLength=str==="MISSING"?{
+       $:0
+      }:{
+       $:1,
+       $0:"("+Global.String(str.length)+" characters)"
+      };
+      if(strLength.$==1)
+       {
+        x=strLength.$0;
+        return jQuery(selector).append(jQuery("<small/>").text(x));
+       }
+      else
+       {
+        return null;
+       }
+     },
+     main:function(id)
      {
       var tabsDiv,x,_this,x1,f,f1;
       tabsDiv=Default.Div(Runtime.New(T,{
@@ -132,51 +181,6 @@
       f(x);
       return x;
      },
-     displayDetails:function(details,tabsDiv)
-     {
-      var title,description,txt,txt1,headings,matchValue,tabs;
-      title=details.Title;
-      description=details.Description;
-      Client2.setPText("#url",details.RequestUri);
-      txt=details.ElapsedTime+" milliseconds";
-      Client2.setPText("#elapsedTime",txt);
-      txt1=Global.String(details.TextRatio)+" %";
-      Client2.setPText("#textRatio",txt1);
-      Client2.setPText("#title",title);
-      Client2.displayLength(title,"#titleDiv");
-      Client2.setPText("#description",description);
-      Client2.displayLength(description,"#descDiv");
-      headings=details.Headings;
-      matchValue=headings.length;
-      if(matchValue===0)
-       {
-        return null;
-       }
-      else
-       {
-        tabs=Client3.makeTabsDiv(headings);
-        return tabsDiv.AppendI(tabs);
-       }
-     },
-     displayLength:function(str,selector)
-     {
-      var strLength,x;
-      strLength=str==="MISSING"?{
-       $:0
-      }:{
-       $:1,
-       $0:"("+Global.String(str.length)+" characters)"
-      };
-      if(strLength.$==1)
-       {
-        x=strLength.$0;
-        return jQuery(selector).append(jQuery("<small/>").text(x));
-       }
-      else
-       {
-        return null;
-       }
-     },
      makeDiv:function(divId,h4Text,pId)
      {
       return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3"),Default.Id(divId)])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text(h4Text)]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([Default.P(List.ofArray([Default.Id(pId)]))]))]));
@@ -190,12 +194,24 @@
       return jQuery(selector).text(txt);
      }
     },
-    DetailsControl:Runtime.Class({
+    Control:Runtime.Class({
      get_Body:function()
      {
-      return Client2.detailsSection(this.id);
+      return Client2.main(this.id);
      }
     })
+   },
+   ForkMe:{
+    Control:Runtime.Class({
+     get_Body:function()
+     {
+      return ForkMe.main();
+     }
+    }),
+    main:function()
+    {
+     return Operators.add(Default.A(List.ofArray([Default.HRef("https://github.com/TahaHachana/OpenSEO")])),List.ofArray([Default.Img(List.ofArray([Default.Src("https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"),Default.Alt("Fork me on GitHub"),Default.Id("forkme")]))]));
+    }
    },
    Headers:{
     Client:{
@@ -225,7 +241,7 @@
       });
       return f1(x);
      },
-     headersSection:function(id)
+     main:function(id)
      {
       var tabsDiv,x,_this,x1,f,f1;
       tabsDiv=Default.Div(Runtime.New(T,{
@@ -285,10 +301,10 @@
       return tr;
      }
     },
-    HeadersControl:Runtime.Class({
+    Control:Runtime.Class({
      get_Body:function()
      {
-      return Client4.headersSection(this.id);
+      return Client4.main(this.id);
      }
     })
    },
@@ -333,7 +349,7 @@
       });
       return f2(x);
      },
-     keywordsSection:function(id)
+     main:function(id)
      {
       var x,_this,x1,_this1,arg00,_this2,arg001,_this3,arg002,f,f1;
       x=Operators.add((_this=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("keywords")]),_this.NewTag("section",x1))),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#keywords1"),(_this1=HTML5.Attr(),(arg00="data-"+"toggle",_this1.NewAttr(arg00,"tab")))])),List.ofArray([Default.Text("1 Keyword")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#keywords2"),(_this2=HTML5.Attr(),(arg001="data-"+"toggle",_this2.NewAttr(arg001,"tab")))])),List.ofArray([Default.Text("2 Keywords")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#keywords3"),(_this3=HTML5.Attr(),(arg002="data-"+"toggle",_this3.NewAttr(arg002,"tab")))])),List.ofArray([Default.Text("3 Keywords")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("keywords1")])),List.ofArray([Client5.makeTable("table1")])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("keywords2")])),List.ofArray([Client5.makeTable("table2")])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("keywords3")])),List.ofArray([Client5.makeTable("table3")]))]))]))]));
@@ -402,16 +418,16 @@
       return tr;
      }
     },
-    KeywordsControl:Runtime.Class({
+    Control:Runtime.Class({
      get_Body:function()
      {
-      return Client5.keywordsSection(this.id);
+      return Client5.main(this.id);
      }
     })
    },
    LatestReports:{
     Client:{
-     latestReportsList:function()
+     main:function()
      {
       var x,f,f1;
       x=Default.UL(List.ofArray([Default.Attr().Class("unstyled")]));
@@ -475,10 +491,10 @@
       return Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef(href),(_this=Default.Attr(),_this.NewAttr("target","_blank"))])),List.ofArray([Default.Text(objectIdString)]))]));
      }
     },
-    LatestReportsControl:Runtime.Class({
+    Control:Runtime.Class({
      get_Body:function()
      {
-      return Client6.latestReportsList();
+      return Client6.main();
      }
     })
    },
@@ -518,7 +534,7 @@
       f1(x);
       return Client7.updateTabHeader(links,_selector_);
      },
-     linksSection:function(id)
+     main:function(id)
      {
       var div,_div_,x,_this,x1,_this1,arg00,_this2,arg001,_this3,arg002,_this4,f,f1;
       div=Default.Div(List.ofArray([Client7.makeDiv("Internal Links","internalLinksCount"),Client7.makeDiv("External Links","externalLinksCount")]));
@@ -594,80 +610,93 @@
       return jquery.text(Strings.concat("",List.ofArray([text," (",count,")"])));
      }
     },
-    LinksControl:Runtime.Class({
+    Control:Runtime.Class({
      get_Body:function()
      {
-      return Client7.linksSection(this.id);
+      return Client7.main(this.id);
      }
     })
    },
    Login:{
     Client:{
-     loginForm:function(redirectUrl)
+     main:function(redirectUrl)
      {
-      var userName,x,f,password,x1,f1,formlet1,x2,x3,x4,f2,f3;
-      userName=(x=Controls.Input(""),(f=function(formlet)
+      var userInput,_this,_this1,_this2,submitBtn,x,_this3,f,x1,x4,x5,_this4,x6,_this5,x7,_this6,_this7,x8,_this8;
+      userInput=Default.Input(List.ofArray([(_this=Default.Attr(),_this.NewAttr("type","text")),(_this1=HTML5.Attr(),_this1.NewAttr("autofocus","autofocus")),(_this2=HTML5.Attr(),_this2.NewAttr("placeholder","username"))]));
+      submitBtn=(x=Operators.add(Default.Button(List.ofArray([(_this3=Default.Attr(),_this3.NewAttr("type","button")),Default.Attr().Class("btn"),Default.Id("login-btn")])),List.ofArray([Default.Text("Submit")])),(f=(x1=function()
       {
-       return Enhance.WithTextLabel("Username",formlet);
-      },f(x)));
-      password=(x1=Controls.Password(""),(f1=function(formlet)
-      {
-       return Enhance.WithTextLabel("Password",formlet);
-      },f1(x1)));
-      formlet1=(x2=(x3=Data.$(Data.$((x4=function(n)
-      {
-       return function(pw)
+       return function()
        {
-        return{
-         Name:n,
-         Password:pw
-        };
-       };
-      },Formlet1.Return(x4)),userName),password),(f2=function(formlet)
-      {
-       return Enhance.WithSubmitButton(formlet);
-      },f2(x3))),(f3=function(formlet)
-      {
-       return Enhance.WithFormContainer(formlet);
-      },f3(x2)));
-      return Formlet1.Run(function(loginInfo)
-      {
-       var x5,f4,f6;
-       x5=(f4=function()
-       {
-        var x6,f5;
-        x6=Remoting.Async("Website:1",[loginInfo]);
-        f5=function(_arg1)
+        var x2,f1,f3;
+        x2=(f1=function()
         {
-         if(_arg1)
-          {
-           window.location.href=redirectUrl;
-           return Concurrency.Return(null);
-          }
-         else
-          {
-           alert("Login failed");
-           return Concurrency.Return(null);
-          }
+         var x3,f2;
+         x3=Remoting.Async("Website:1",[{
+          Name:userInput.get_Value(),
+          Password:Client8.passInput().get_Value()
+         }]);
+         f2=function(_arg11)
+         {
+          if(_arg11.$==1)
+           {
+            window.location.href=redirectUrl;
+            return Concurrency.Return(null);
+           }
+          else
+           {
+            alert("Login failed");
+            return Concurrency.Return(null);
+           }
+         };
+         return Concurrency.Bind(x3,f2);
+        },Concurrency.Delay(f1));
+        f3=function(arg00)
+        {
+         var t;
+         t={
+          $:0
+         };
+         return Concurrency.Start(arg00);
         };
-        return Concurrency.Bind(x6,f5);
-       },Concurrency.Delay(f4));
-       f6=function(arg00)
-       {
-        var t;
-        t={
-         $:0
-        };
-        return Concurrency.Start(arg00);
+        return f3(x2);
        };
-       return f6(x5);
-      },formlet1);
-     }
+      },function(arg10)
+      {
+       return EventsPervasives.Events().OnClick(x1,arg10);
+      }),(f(x),x)));
+      return Default.Form(List.ofArray([(x4=List.ofArray([(x5=List.ofArray([Default.Text("Login")]),(_this4=Default.Tags(),_this4.NewTag("legend",x5))),(x6=List.ofArray([Default.Text("Username")]),(_this5=Default.Tags(),_this5.NewTag("label",x6))),userInput,(x7=List.ofArray([Default.Text("Password")]),(_this6=Default.Tags(),_this6.NewTag("label",x7))),Client8.passInput()]),(_this7=Default.Tags(),_this7.NewTag("fieldset",x4))),(x8=List.ofArray([submitBtn]),(_this8=Default.Tags(),_this8.NewTag("fieldset",x8)))]));
+     },
+     passInput:Runtime.Field(function()
+     {
+      var x,_this,_this1,f,x1;
+      x=Default.Input(List.ofArray([(_this=Default.Attr(),_this.NewAttr("type","password")),(_this1=HTML5.Attr(),_this1.NewAttr("placeholder","password"))]));
+      f=(x1=function()
+      {
+       return function(key)
+       {
+        var matchValue;
+        matchValue=key.KeyCode;
+        if(matchValue===13)
+         {
+          return jQuery("#login-btn").click();
+         }
+        else
+         {
+          return null;
+         }
+       };
+      },function(arg10)
+      {
+       return EventsPervasives.Events().OnKeyDown(x1,arg10);
+      });
+      f(x);
+      return x;
+     })
     },
-    LoginControl:Runtime.Class({
+    Control:Runtime.Class({
      get_Body:function()
      {
-      return Client8.loginForm(this.redirectUrl);
+      return Client8.main(this.redirectUrl);
      }
     })
    },
@@ -765,6 +794,30 @@
       };
       return f1(x1);
      },
+     main:function()
+     {
+      var input,_this,_this1,div,_div_,_this2,x,_this3,x1,_this4,arg00,_this5,arg001,f,f1;
+      input=Default.Input(List.ofArray([(_this=Default.Attr(),_this.NewAttr("type","hidden")),(_this1=Default.Attr(),_this1.NewAttr("value","")),Default.Id("pagespeedUri")]));
+      div=Default.Div(List.ofArray([Default.Attr().Class("accordion"),Default.Id("speedSuggestionsAccordion")]));
+      _div_=Default.Div(List.ofArray([Default.Id("resourceSizeDiv"),(_this2=Default.Attr(),_this2.NewAttr("style","overflow-y: hidden;"))]));
+      x=Operators.add((_this3=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("speed")]),_this3.NewTag("section",x1))),List.ofArray([input,Client9.makeDiv("Score","speedScore"),Default.Hr(Runtime.New(T,{
+       $:0
+      })),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#speedSuggestions"),(_this4=HTML5.Attr(),(arg00="data-"+"toggle",_this4.NewAttr(arg00,"tab"))),Default.Id("speedSuggestionsTab")])),List.ofArray([Default.Text("Suggestions")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#resourceBreakdown"),(_this5=HTML5.Attr(),(arg001="data-"+"toggle",_this5.NewAttr(arg001,"tab"))),Default.Id("sizeBreakdownTab")])),List.ofArray([Default.Text("Resource Breakdown")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("speedSuggestions")])),List.ofArray([div])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("resourceBreakdown")])),List.ofArray([Client9.makeDiv("CSS","cssSize"),Client9.makeDiv("HTML","htmlSize"),Client9.makeDiv("Images","imagesSize"),Client9.makeDiv("JavaScript","jsSize"),Client9.makeDiv("Other","otherSize"),Client9.makeDiv("Total","totalSize"),_div_]))]))]))]));
+      f=(f1=function()
+      {
+       return jQuery("#pagespeedUri").change(function()
+       {
+        var uriString;
+        uriString=this.getAttribute("value");
+        return Client9.displaySpeedData(uriString,div,_div_);
+       });
+      },function(w)
+      {
+       return Operators.OnAfterRender(f1,w);
+      });
+      f(x);
+      return x;
+     },
      makeAccordionGroup:function(parent,id,ruleName,suggestions)
      {
       var div,x,_this,arg00,_this1,arg001,x1;
@@ -796,41 +849,17 @@
        x=suggestion.Urls;
        f=function(list)
        {
-        return List.map(function(text)
+        return List.map(function(txt)
         {
-         return Client9.makeLi(text);
+         return Client9.makeLi(txt);
         },list);
        };
        return f(x);
       })))]));
      },
-     makeLi:function(text)
+     makeLi:function(txt)
      {
-      return Default.LI(List.ofArray([Default.Text(text)]));
-     },
-     pagespeedSection:function()
-     {
-      var input,_this,_this1,div,_div_,_this2,x,_this3,x1,_this4,arg00,_this5,arg001,f,f1;
-      input=Default.Input(List.ofArray([(_this=Default.Attr(),_this.NewAttr("type","hidden")),(_this1=Default.Attr(),_this1.NewAttr("value","")),Default.Id("pagespeedUri")]));
-      div=Default.Div(List.ofArray([Default.Attr().Class("accordion"),Default.Id("speedSuggestionsAccordion")]));
-      _div_=Default.Div(List.ofArray([Default.Id("resourceSizeDiv"),(_this2=Default.Attr(),_this2.NewAttr("style","overflow-y: hidden;"))]));
-      x=Operators.add((_this3=HTML5.Tags(),(x1=List.ofArray([Default.Attr().Class("tab-pane fade in reportSection"),Default.Id("speed")]),_this3.NewTag("section",x1))),List.ofArray([input,Client9.makeDiv("Score","speedScore"),Default.Hr(Runtime.New(T,{
-       $:0
-      })),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tabbable")])),List.ofArray([Operators.add(Default.UL(List.ofArray([Default.Attr().Class("nav nav-pills")])),List.ofArray([Operators.add(Default.LI(List.ofArray([Default.Attr().Class("active")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#speedSuggestions"),(_this4=HTML5.Attr(),(arg00="data-"+"toggle",_this4.NewAttr(arg00,"tab"))),Default.Id("speedSuggestionsTab")])),List.ofArray([Default.Text("Suggestions")]))])),Default.LI(List.ofArray([Operators.add(Default.A(List.ofArray([Default.HRef("#resourceBreakdown"),(_this5=HTML5.Attr(),(arg001="data-"+"toggle",_this5.NewAttr(arg001,"tab"))),Default.Id("sizeBreakdownTab")])),List.ofArray([Default.Text("Resource Breakdown")]))]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-content")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane active fade in span8"),Default.Id("speedSuggestions")])),List.ofArray([div])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("tab-pane fade span8"),Default.Id("resourceBreakdown")])),List.ofArray([Client9.makeDiv("CSS","cssSize"),Client9.makeDiv("HTML","htmlSize"),Client9.makeDiv("Images","imagesSize"),Client9.makeDiv("JavaScript","jsSize"),Client9.makeDiv("Other","otherSize"),Client9.makeDiv("Total","totalSize"),_div_]))]))]))]));
-      f=(f1=function()
-      {
-       return jQuery("#pagespeedUri").change(function()
-       {
-        var uriString;
-        uriString=this.getAttribute("value");
-        return Client9.displaySpeedData(uriString,div,_div_);
-       });
-      },function(w)
-      {
-       return Operators.OnAfterRender(f1,w);
-      });
-      f(x);
-      return x;
+      return Default.LI(List.ofArray([Default.Text(txt)]));
      },
      setPText:function(selector,txt)
      {
@@ -844,10 +873,10 @@
       return jquery.text(Strings.concat("",List.ofArray([text," (",count,")"])));
      }
     },
-    PagespeedControl:Runtime.Class({
+    Control:Runtime.Class({
      get_Body:function()
      {
-      return Client9.pagespeedSection(function(x)
+      return Client9.main(function(x)
       {
        return x;
       });
@@ -867,17 +896,7 @@
       })("disabled");
       return alert(msg);
      },
-     showLoader:function(jquery,element)
-     {
-      var objectArg,arg00;
-      objectArg=element["HtmlProvider@32"];
-      (arg00=element.Body,function(arg10)
-      {
-       return objectArg.AddClass(arg00,arg10);
-      })("disabled");
-      return jquery.css("visibility","visible");
-     },
-     urlForm:function()
+     main:function()
      {
       var legend,x,_this,label,x1,_this1,urlInput,x2,_this2,_this3,_this4,_this5,f,x3,submitBtn,x4,_this6,f1,x5;
       legend=(x=List.ofArray([Default.Text("Enter the URL you want to analyze.")]),(_this=Default.Tags(),_this.NewTag("legend",x)));
@@ -943,7 +962,7 @@
                 if(_arg1.$==4)
                  {
                   mongoObjId=_arg1.$0;
-                  window.location.href="/Report/"+mongoObjId;
+                  window.location.href="/report/"+mongoObjId;
                   return Concurrency.Return(null);
                  }
                 else
@@ -972,16 +991,26 @@
        return EventsPervasives.Events().OnClick(x5,arg10);
       }),(f1(x4),x4)));
       return Operators.add(Default.Div(List.ofArray([Default.Id("urlForm"),Default.Attr().Class("input-append offset2")])),List.ofArray([urlInput,submitBtn]));
+     },
+     showLoader:function(jquery,element)
+     {
+      var objectArg,arg00;
+      objectArg=element["HtmlProvider@32"];
+      (arg00=element.Body,function(arg10)
+      {
+       return objectArg.AddClass(arg00,arg10);
+      })("disabled");
+      return jquery.css("visibility","visible");
      }
     },
-    UrlFormControl:Runtime.Class({
+    Control:Runtime.Class({
      get_Body:function()
      {
-      return Clienta.urlForm();
+      return Clienta.main();
      }
     })
    },
-   Utilities:{
+   Utils:{
     Client:{
      drawPie:function(dataTable)
      {
@@ -1015,7 +1044,7 @@
      },
      hRule:function()
      {
-      return Default.Hr(List.ofArray([Default.Attr().Class("span6 hrule")]));
+      return Default.Hr(List.ofArray([Default.Attr().Class("span6 offset2 hrule")]));
      },
      makeDataTable:function(column,_column_,rows)
      {
@@ -1226,31 +1255,7 @@
       };
       return f2(x);
      },
-     makeAccordionGroup:function(parent,id,message,line,column)
-     {
-      var _this,arg00,_this1,arg001,x;
-      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-group")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-heading")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.Attr().Class("accordion-toggle"),(_this=HTML5.Attr(),(arg00="data-"+"toggle",_this.NewAttr(arg00,"collapse"))),(_this1=HTML5.Attr(),(arg001="data-"+"parent",_this1.NewAttr(arg001,parent))),(x="#"+id,Default.HRef(x))])),List.ofArray([Default.Text(message)]))])),Operators.add(Default.Div(List.ofArray([Default.Id(id),Default.Attr().Class("accordion-body collapse")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-inner")])),List.ofArray([Clientb["makeDiv'"]("Line",line),Clientb["makeDiv'"]("Column",column)]))]))]));
-     },
-     makeDiv:function(txt,id)
-     {
-      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text(txt)]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([Default.P(List.ofArray([Default.Id(id)]))]))]));
-     },
-     "makeDiv'":function(txt,_txt_)
-     {
-      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text(txt)]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([Default.P(List.ofArray([Default.Text(_txt_)]))]))]));
-     },
-     setPText:function(selector,txt)
-     {
-      return jQuery(selector).text(txt);
-     },
-     updateTabHeader:function(count,selector)
-     {
-      var jquery,text;
-      jquery=jQuery(selector);
-      text=jquery.text();
-      return jquery.text(Strings.concat("",List.ofArray([text," (",count,")"])));
-     },
-     validatorSection:function()
+     main:function()
      {
       var input,_this,_this1,div,_div_,x,_this2,x1,_this3,arg00,_this4,arg001,f,f1;
       input=Default.Input(List.ofArray([(_this=Default.Attr(),_this.NewAttr("type","hidden")),(_this1=Default.Attr(),_this1.NewAttr("value","")),Default.Id("validatorUri")]));
@@ -1277,12 +1282,36 @@
       });
       f(x);
       return x;
+     },
+     makeAccordionGroup:function(parent,id,message,line,column)
+     {
+      var el,_this,arg00,_this1,arg001,x,inner;
+      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-group")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-heading")])),List.ofArray([(el=Default.A(List.ofArray([Default.Attr().Class("accordion-toggle"),(_this=HTML5.Attr(),(arg00="data-"+"toggle",_this.NewAttr(arg00,"collapse"))),(_this1=HTML5.Attr(),(arg001="data-"+"parent",_this1.NewAttr(arg001,parent))),(x="#"+id,Default.HRef(x))])),(inner=Default.Text(message),Operators.add(el,List.ofArray([inner]))))])),Operators.add(Default.Div(List.ofArray([Default.Id(id),Default.Attr().Class("accordion-body collapse")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-inner")])),List.ofArray([Clientb["makeDiv'"]("Line",line),Clientb["makeDiv'"]("Column",column)]))]))]));
+     },
+     makeDiv:function(txt,id)
+     {
+      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text(txt)]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([Default.P(List.ofArray([Default.Id(id)]))]))]));
+     },
+     "makeDiv'":function(txt,_txt_)
+     {
+      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text(txt)]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([Default.P(List.ofArray([Default.Text(_txt_)]))]))]));
+     },
+     setPText:function(selector,txt)
+     {
+      return jQuery(selector).text(txt);
+     },
+     updateTabHeader:function(count,selector)
+     {
+      var jquery,text;
+      jquery=jQuery(selector);
+      text=jquery.text();
+      return jquery.text(Strings.concat("",List.ofArray([text," (",count,")"])));
      }
     },
-    ValidatorControl:Runtime.Class({
+    Control:Runtime.Class({
      get_Body:function()
      {
-      return Clientb.validatorSection();
+      return Clientb.main();
      }
     })
    },
@@ -1351,24 +1380,7 @@
       });
       return f(arr);
      },
-     makeAccordionGroup:function(parent,id,heading,line,column,description,recommendation)
-     {
-      var _this,arg00,_this1,arg001,x;
-      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-group")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-heading")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.Attr().Class("accordion-toggle"),(_this=HTML5.Attr(),(arg00="data-"+"toggle",_this.NewAttr(arg00,"collapse"))),(_this1=HTML5.Attr(),(arg001="data-"+"parent",_this1.NewAttr(arg001,parent))),(x="#"+id,Default.HRef(x))])),List.ofArray([Default.Text(heading)]))])),Operators.add(Default.Div(List.ofArray([Default.Id(id),Default.Attr().Class("accordion-body collapse")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-inner")])),List.ofArray([Clientc.makeDiv("Line",line),Clientc.makeDiv("Column",column),Clientc.makeDiv("Description",description),Clientc.makeDiv("Recommendation",recommendation)]))]))]));
-     },
-     makeDiv:function(txt,_txt_)
-     {
-      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text(txt)]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([Default.P(List.ofArray([Default.Text(_txt_)]))]))]));
-     },
-     updateTabHeader:function(arr,selector)
-     {
-      var count,copyOfStruct,jquery,text;
-      count=(copyOfStruct=[arr.length],String(copyOfStruct[0]));
-      jquery=jQuery(selector);
-      text=jquery.text();
-      return jquery.text(Strings.concat("",List.ofArray([text," (",count,")"])));
-     },
-     violationsSection:function(id)
+     main:function(id)
      {
       var div,_div_,x,_this,x1,_this1,arg00,_this2,arg001,f,f1;
       div=Default.Div(List.ofArray([Default.Attr().Class("accordion"),Default.Id("errorsAccordion")]));
@@ -1416,12 +1428,29 @@
       });
       f(x);
       return x;
+     },
+     makeAccordionGroup:function(parent,id,heading,line,column,description,recommendation)
+     {
+      var _this,arg00,_this1,arg001,x;
+      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-group")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-heading")])),List.ofArray([Operators.add(Default.A(List.ofArray([Default.Attr().Class("accordion-toggle"),(_this=HTML5.Attr(),(arg00="data-"+"toggle",_this.NewAttr(arg00,"collapse"))),(_this1=HTML5.Attr(),(arg001="data-"+"parent",_this1.NewAttr(arg001,parent))),(x="#"+id,Default.HRef(x))])),List.ofArray([Default.Text(heading)]))])),Operators.add(Default.Div(List.ofArray([Default.Id(id),Default.Attr().Class("accordion-body collapse")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("accordion-inner")])),List.ofArray([Clientc.makeDiv("Line",line),Clientc.makeDiv("Column",column),Clientc.makeDiv("Description",description),Clientc.makeDiv("Recommendation",recommendation)]))]))]));
+     },
+     makeDiv:function(txt,_txt_)
+     {
+      return Operators.add(Default.Div(List.ofArray([Default.Attr().Class("row-fluid")])),List.ofArray([Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span3")])),List.ofArray([Operators.add(Default.H4(List.ofArray([Default.Attr().Class("h4")])),List.ofArray([Default.Text(txt)]))])),Operators.add(Default.Div(List.ofArray([Default.Attr().Class("span9")])),List.ofArray([Default.P(List.ofArray([Default.Text(_txt_)]))]))]));
+     },
+     updateTabHeader:function(arr,selector)
+     {
+      var count,copyOfStruct,jquery,text;
+      count=(copyOfStruct=[arr.length],String(copyOfStruct[0]));
+      jquery=jQuery(selector);
+      text=jquery.text();
+      return jquery.text(Strings.concat("",List.ofArray([text," (",count,")"])));
      }
     },
-    ViolationsControl:Runtime.Class({
+    Control:Runtime.Class({
      get_Body:function()
      {
-      return Clientc.violationsSection(this.id);
+      return Clientc.main(this.id);
      }
     })
    }
@@ -1429,53 +1458,49 @@
  });
  Runtime.OnInit(function()
  {
-  OpenSEO=Runtime.Safe(Global.OpenSEO);
-  AddThis=Runtime.Safe(OpenSEO.AddThis);
-  Client=Runtime.Safe(AddThis.Client);
   WebSharper=Runtime.Safe(Global.IntelliFactory.WebSharper);
   Html=Runtime.Safe(WebSharper.Html);
   Default=Runtime.Safe(Html.Default);
   HTML5=Runtime.Safe(Default.HTML5);
   List=Runtime.Safe(WebSharper.List);
   T=Runtime.Safe(List.T);
-  DBCleanup=Runtime.Safe(OpenSEO.DBCleanup);
-  Client1=Runtime.Safe(DBCleanup.Client);
+  Website=Runtime.Safe(Global.Website);
+  AddThis=Runtime.Safe(Website.AddThis);
+  Client=Runtime.Safe(AddThis.Client);
   Remoting=Runtime.Safe(WebSharper.Remoting);
   alert=Runtime.Safe(Global.alert);
   Concurrency=Runtime.Safe(WebSharper.Concurrency);
   EventsPervasives=Runtime.Safe(Html.EventsPervasives);
-  Operators=Runtime.Safe(Html.Operators);
-  Details=Runtime.Safe(OpenSEO.Details);
+  DBCleanup=Runtime.Safe(Website.DBCleanup);
+  Client1=Runtime.Safe(DBCleanup.Client);
+  Details=Runtime.Safe(Website.Details);
   Client2=Runtime.Safe(Details.Client);
-  Utilities=Runtime.Safe(OpenSEO.Utilities);
-  Client3=Runtime.Safe(Utilities.Client);
+  Utils=Runtime.Safe(Website.Utils);
+  Client3=Runtime.Safe(Utils.Client);
   jQuery=Runtime.Safe(Global.jQuery);
-  Headers=Runtime.Safe(OpenSEO.Headers);
+  Operators=Runtime.Safe(Html.Operators);
+  ForkMe=Runtime.Safe(Website.ForkMe);
+  Headers=Runtime.Safe(Website.Headers);
   Client4=Runtime.Safe(Headers.Client);
   Arrays=Runtime.Safe(WebSharper.Arrays);
   Unchecked=Runtime.Safe(WebSharper.Unchecked);
-  Keywords=Runtime.Safe(OpenSEO.Keywords);
+  Keywords=Runtime.Safe(Website.Keywords);
   Client5=Runtime.Safe(Keywords.Client);
-  LatestReports=Runtime.Safe(OpenSEO.LatestReports);
+  LatestReports=Runtime.Safe(Website.LatestReports);
   Client6=Runtime.Safe(LatestReports.Client);
-  Links=Runtime.Safe(OpenSEO.Links);
+  Links=Runtime.Safe(Website.Links);
   Client7=Runtime.Safe(Links.Client);
   String=Runtime.Safe(Global.String);
   Strings=Runtime.Safe(WebSharper.Strings);
-  Formlet=Runtime.Safe(WebSharper.Formlet);
-  Controls=Runtime.Safe(Formlet.Controls);
-  Enhance=Runtime.Safe(Formlet.Enhance);
-  Data=Runtime.Safe(Formlet.Data);
-  Formlet1=Runtime.Safe(Formlet.Formlet);
-  window=Runtime.Safe(Global.window);
-  Login=Runtime.Safe(OpenSEO.Login);
+  Login=Runtime.Safe(Website.Login);
   Client8=Runtime.Safe(Login.Client);
-  Pagespeed=Runtime.Safe(OpenSEO.Pagespeed);
+  window=Runtime.Safe(Global.window);
+  Pagespeed=Runtime.Safe(Website.Pagespeed);
   Client9=Runtime.Safe(Pagespeed.Client);
   Seq=Runtime.Safe(WebSharper.Seq);
   Number=Runtime.Safe(Global.Number);
   Math=Runtime.Safe(Global.Math);
-  UrlForm=Runtime.Safe(OpenSEO.UrlForm);
+  UrlForm=Runtime.Safe(Website.UrlForm);
   Clienta=Runtime.Safe(UrlForm.Client);
   google=Runtime.Safe(Global.google);
   visualization=Runtime.Safe(google.visualization);
@@ -1485,12 +1510,13 @@
   Visualizations=Runtime.Safe(Visualization.Visualizations);
   PieChartOptions=Runtime.Safe(Visualizations.PieChartOptions);
   DataTable=Runtime.Safe(visualization.DataTable);
-  Validator=Runtime.Safe(OpenSEO.Validator);
+  Validator=Runtime.Safe(Website.Validator);
   Clientb=Runtime.Safe(Validator.Client);
-  Violations=Runtime.Safe(OpenSEO.Violations);
+  Violations=Runtime.Safe(Website.Violations);
   return Clientc=Runtime.Safe(Violations.Client);
  });
  Runtime.OnLoad(function()
  {
+  Client8.passInput();
  });
 }());

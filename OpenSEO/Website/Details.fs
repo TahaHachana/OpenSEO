@@ -1,11 +1,11 @@
-﻿namespace OpenSEO
+﻿namespace Website
 
 open System
 open IntelliFactory.WebSharper
 
 module Details =
 
-    module Server =
+    module private Server =
         
         open Mongo
 
@@ -27,7 +27,7 @@ module Details =
             |> Seq.sortBy fst
             |> Seq.toArray
 
-        let makeDetails (uriDetails : Types.UriDetails) =
+        let makeDetails (uriDetails : UriDetails) =
             {
                 Description = uriDetails.Description
                 ElapsedTime = uriDetails.ElapsedTime
@@ -40,36 +40,33 @@ module Details =
         [<Rpc>]
         let details id =
             async {
-                let uriDetailsOption = Details.uriDetailsById id
+                let uriDetailsOption = Details.byId id
                 match uriDetailsOption with
                     | None            -> return None
                     | Some uriDetails -> return makeDetails uriDetails
             }
 
-    module Client =
+    [<JavaScript>]
+    module private Client =
         
         open IntelliFactory.WebSharper.Html
         open IntelliFactory.WebSharper.JQuery
+        open Utils.Client
 
-        [<JavaScript>]
         let makeDiv divId h4Text pId =
             Div [Attr.Class "row-fluid"] -< [
                 Div [Attr.Class "span3"; Id divId] -< [H4 [Attr.Class "h4"] -< [Text h4Text]]
                 Div [Attr.Class "span9"] -< [P [Id pId]]
             ]
         
-        [<JavaScript>]
-        let setPText (selector : string) txt =
-            JQuery.Of(selector).Text(txt).Ignore
+        let setPText (selector : string) txt = JQuery.Of(selector).Text(txt).Ignore
 
-        [<JavaScript>]
         let displayLength str (selector : string) =
             let strLength = match str with "MISSING" -> None | x -> Some ("(" + string x.Length + " characters)")
             match strLength with
-                | None   -> ()
+                | None   -> do ()
                 | Some x -> JQuery.Of(selector).Append(JQuery.Of("<small/>").Text(x)).Ignore
 
-        [<JavaScript>]
         let displayDetails (details : Server.Details) (tabsDiv : Element) =
             let title = details.Title
             let description = details.Description
@@ -82,29 +79,25 @@ module Details =
             displayLength description "#descDiv"
             let headings = details.Headings
             match headings.Length with
-                | 0 -> ()
-                | _ ->
-                    let tabs = Utilities.Client.makeTabsDiv headings
-                    tabsDiv.Append tabs
+                | 0 -> do ()
+                | _ -> do makeTabsDiv headings |> tabsDiv.Append
 
-        [<JavaScript>]
         let setInputVal (selector : string) requestUri =
             JQuery.Of(selector).Val(requestUri).Trigger("change").Ignore
 
-        [<JavaScript>]
-        let detailsSection id =
+        let main id =
             let tabsDiv = Div []
             HTML5.Tags.Section [Attr.Class "tab-pane fade active in reportSection"; Id "details"] -< [
                 makeDiv "urlDiv" "URL" "url"
-                Utilities.Client.hRule ()
+                hRule()
                 makeDiv "timeDiv" "Elapsed Time" "elapsedTime"
-                Utilities.Client.hRule ()
+                hRule()
                 makeDiv "textRatioDiv" "Text/HTML Ratio" "textRatio"
-                Utilities.Client.hRule ()
+                hRule()
                 makeDiv "titleDiv" "Title" "title"
-                Utilities.Client.hRule ()
+                hRule()
                 makeDiv "descDiv" "Description" "description"
-                Utilities.Client.hRule ()
+                hRule()
                 Div [Attr.Class "row-fluid"] -< [
                     Div [Attr.Class "span3"] -< [H4 [Attr.Class "h4"] -< [Text "Headings"]]
                     Div [Attr.Class "span9"] -< [tabsDiv]
@@ -114,18 +107,18 @@ module Details =
                 async {
                     let! detailsOption = Server.details id
                     match detailsOption with
-                        | None -> ()
+                        | None -> do ()
                         | Some details ->
-                            displayDetails details tabsDiv
+                            do displayDetails details tabsDiv
                             let requestUri = details.RequestUri
-                            setInputVal "#validatorUri" requestUri
-                            setInputVal "#pagespeedUri" requestUri
-                            Utilities.Client.updateProgressBar ()
+                            do setInputVal "#validatorUri" requestUri
+                            do setInputVal "#pagespeedUri" requestUri
+                            do updateProgressBar()
                 } |> Async.Start)
                 
-    type DetailsControl(id) =
+    type Control(id) =
 
         inherit Web.Control()
 
         [<JavaScript>]
-        override __.Body = Client.detailsSection id :> _
+        override __.Body = Client.main id :> _
