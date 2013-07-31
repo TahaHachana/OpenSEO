@@ -8,6 +8,14 @@ http://openseo.apphb.com/
 
 Open source SEO tool built with [WebSharper](http://www.websharper.com/ "WebSharper") using functionality provided by this [SEO library](https://github.com/TahaHachana/SEOLib).
 
+Build Instructions
+------------------
+
+* setup a free database named "OpenSEODB" with MongoLab or MongoHQ ;
+* create the following mongo collections: uridetails, keywords, links, violations, httpheaders ;
+* update the connectionString value in Secure.fs with a valid connection string ;
+* update the apiKey value in Secure.fs with a valid Google page speed API key if you want the speed analysis to work (optional).
+
 MIT License
 -----------
 
