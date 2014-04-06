@@ -1,4 +1,0 @@
-﻿User-agent: *
-Disallow: /Report
-
-Sitemap: http://openseo.apphb.com/Sitemap.xml
