@@ -99,13 +99,19 @@ except speed.
   Links (internal/external, follow/nofollow, filterable), Errors, Warnings, HTTP headers.
 - Loading/error states for each `ReviewResult` variant.
 
-### Phase 4: PageSpeed Insights v5 + CrUX
+### Phase 4: PageSpeed Insights v5 + CrUX, settings
 - PSI v5 `runPagespeed` with `category=performance,seo,accessibility,best-practices`,
   mobile and desktop strategies. Works keyless at low volume.
 - Optional user-supplied API key stored in the app config dir (Tauri `store` plugin);
   never bundled in the binary.
 - Show Lighthouse scores, Core Web Vitals (lab + CrUX field data when available), and
   top failing audits with their savings.
+- Settings panel (persisted with the same store): PageSpeed API key and User-Agent.
+- User-Agent presets replace the Googlebot checkbox: `OpenSEO` (default),
+  `Chrome desktop`, `Chrome mobile` (closest to Google's mobile-first crawl, rarely
+  blocked), `Googlebot` (kept, but labelled as often blocked by bot protection) and
+  custom. Core: add the Chrome presets to `UserAgent`. CLI: `--googlebot` becomes
+  `--user-agent <openseo|chrome|chrome-mobile|googlebot|STRING>`.
 
 ### Phase 5: Rendered-DOM mode (the new capability)
 - Load the target URL in a hidden secondary Tauri webview, wait for load + idle,
@@ -139,8 +145,8 @@ except speed.
 
 | # | Question | Recommendation |
 |---|---|---|
-| D1 | Frontend tech | **Plain HTML/CSS/JS, no build step**, for the MVP. Node isn't installed, and the UI is mostly tables and tabs. Alternatives: Leptos (all-Rust, via `trunk`), or Svelte/TS (needs Node). |
-| D2 | User-Agent | Default to an honest `OpenSEO/<version>` UA with a setting to spoof Googlebot. Some sites block fake Googlebot by reverse-DNS check, so spoofing gives misleading results. |
+| D1 | Frontend tech | **Decided:** plain HTML/CSS/JS, no build step. Node isn't installed, and the UI is mostly tables and tabs. Alternatives: Leptos (all-Rust, via `trunk`), or Svelte/TS (needs Node). |
+| D2 | User-Agent | **Decided:** honest `OpenSEO/<version>` default; presets (Chrome desktop/mobile, Googlebot) and custom live in Settings, not the toolbar (Phase 4). Fake Googlebot is often blocked by reverse-DNS checks, so it's a preset, not a headline option. Revisit a browser default if 403s from bot protection turn out to be common. |
 | D3 | Rule fidelity | Port verbatim first (Phase 1), modernize later (Phase 6), so parity is verifiable. |
 | D4 | Keyword language | English stop words only, as before; consider detecting `<html lang>` and adding stop word lists later. |
 | D5 | License | The repo has none. Pick one (MIT/Apache-2.0 is the Rust norm) before the first release. |
