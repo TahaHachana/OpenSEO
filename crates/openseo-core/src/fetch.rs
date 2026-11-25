@@ -2,36 +2,75 @@
 //!
 //! Redirects are followed manually so the report can show the full chain.
 
+use std::str::FromStr;
 use std::time::{Duration, Instant};
 
 use reqwest::{StatusCode, header};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use url::Url;
 
+/// Chrome major version used in the browser presets. Bump it now and then:
+/// a very old version can trigger "update your browser" pages.
+const CHROME_MAJOR: u32 = 158;
+
 /// The User-Agent sent with requests.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "preset", content = "value", rename_all = "camelCase")]
 pub enum UserAgent {
-    /// `OpenSEO/<version>` (default).
+    /// `OpenSEO/<version>` (default): honest, but bot protection may block it.
     #[default]
     OpenSeo,
-    /// Googlebot's UA string, as the original tool sent. Sites that verify
-    /// Googlebot by reverse DNS may block or treat these requests differently.
+    /// Desktop Chrome on Windows.
+    ChromeDesktop,
+    /// Chrome on Android: the page Google's mobile-first indexing sees, and rarely blocked.
+    ChromeMobile,
+    /// Googlebot Smartphone, Google's main crawler. Sites that verify Googlebot
+    /// by reverse DNS often block or treat these requests differently.
     Googlebot,
     Custom(String),
 }
 
 impl UserAgent {
-    fn as_header(&self) -> String {
+    /// The User-Agent header value.
+    pub fn header_value(&self) -> String {
         match self {
             UserAgent::OpenSeo => format!(
                 "Mozilla/5.0 (compatible; OpenSEO/{}; +https://github.com/TahaHachana/OpenSEO)",
                 crate::VERSION
             ),
-            UserAgent::Googlebot => {
-                "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)".into()
-            }
+            UserAgent::ChromeDesktop => format!(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) \
+                 Chrome/{CHROME_MAJOR}.0.0.0 Safari/537.36"
+            ),
+            UserAgent::ChromeMobile => format!(
+                "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) \
+                 Chrome/{CHROME_MAJOR}.0.0.0 Mobile Safari/537.36"
+            ),
+            UserAgent::Googlebot => format!(
+                "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 \
+                 (KHTML, like Gecko) Chrome/{CHROME_MAJOR}.0.0.0 Mobile Safari/537.36 \
+                 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+            ),
             UserAgent::Custom(ua) => ua.clone(),
         }
+    }
+}
+
+/// Parses a preset name (`openseo`, `chrome`, `chrome-mobile`, `googlebot`);
+/// anything else is used verbatim as a custom User-Agent.
+impl FromStr for UserAgent {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
+        Ok(match s.to_ascii_lowercase().as_str() {
+            "" => return Err("the User-Agent can't be empty".into()),
+            "openseo" => UserAgent::OpenSeo,
+            "chrome" | "chrome-desktop" => UserAgent::ChromeDesktop,
+            "chrome-mobile" => UserAgent::ChromeMobile,
+            "googlebot" => UserAgent::Googlebot,
+            _ => UserAgent::Custom(s.to_owned()),
+        })
     }
 }
 
@@ -138,7 +177,7 @@ impl From<reqwest::Error> for FetchError {
 
 pub fn client(options: &FetchOptions) -> Result<reqwest::Client, FetchError> {
     Ok(reqwest::Client::builder()
-        .user_agent(options.user_agent.as_header())
+        .user_agent(options.user_agent.header_value())
         .redirect(reqwest::redirect::Policy::none())
         .timeout(options.timeout)
         .build()?)
@@ -225,4 +264,47 @@ fn collect_headers(map: &header::HeaderMap) -> Vec<HttpHeader> {
                 .collect(),
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_presets_and_custom_user_agents() {
+        assert_eq!("OpenSEO".parse(), Ok(UserAgent::OpenSeo));
+        assert_eq!("chrome".parse(), Ok(UserAgent::ChromeDesktop));
+        assert_eq!("chrome-mobile".parse(), Ok(UserAgent::ChromeMobile));
+        assert_eq!("googlebot".parse(), Ok(UserAgent::Googlebot));
+        assert_eq!(
+            " MyBot/1.0 ".parse(),
+            Ok(UserAgent::Custom("MyBot/1.0".into()))
+        );
+        assert!("  ".parse::<UserAgent>().is_err());
+    }
+
+    #[test]
+    fn serializes_for_settings_files() {
+        let json = |ua: &UserAgent| serde_json::to_string(ua).unwrap();
+        assert_eq!(
+            json(&UserAgent::ChromeMobile),
+            r#"{"preset":"chromeMobile"}"#
+        );
+        assert_eq!(
+            json(&UserAgent::Custom("X".into())),
+            r#"{"preset":"custom","value":"X"}"#
+        );
+        let back: UserAgent = serde_json::from_str(r#"{"preset":"googlebot"}"#).unwrap();
+        assert_eq!(back, UserAgent::Googlebot);
+        assert!(
+            UserAgent::Googlebot
+                .header_value()
+                .contains("Googlebot/2.1")
+        );
+        assert!(
+            UserAgent::ChromeMobile
+                .header_value()
+                .contains("Mobile Safari")
+        );
+    }
 }

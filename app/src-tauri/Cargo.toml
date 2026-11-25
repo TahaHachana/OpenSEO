@@ -13,8 +13,10 @@ workspace = true
 [dependencies]
 openseo-core = { version = "0.1.0", path = "../../crates/openseo-core" }
 serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
 tauri = "2"
 tauri-plugin-opener = "2"
+tauri-plugin-store = "2"
 
 [build-dependencies]
 tauri-build = "2"

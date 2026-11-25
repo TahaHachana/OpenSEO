@@ -18,16 +18,17 @@
              placeholder="Enter a URL, e.g. example.com" aria-label="Page URL" required autofocus>
       <button id="submit" type="submit">Analyze</button>
     </form>
-    <label class="option" title="Send Googlebot's User-Agent. Some sites block or treat fake Googlebot requests differently.">
-      <input id="googlebot" type="checkbox"> Googlebot UA
-    </label>
+    <button id="open-settings" class="icon-button" type="button" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.5 7.5 0 0 0 0-2l2-1.6a.5.5 0 0 0 .1-.6l-1.9-3.3a.5.5 0 0 0-.6-.2l-2.4 1a7.3 7.3 0 0 0-1.7-1l-.4-2.5a.5.5 0 0 0-.5-.4h-3.8a.5.5 0 0 0-.5.4l-.4 2.5a7.3 7.3 0 0 0-1.7 1l-2.4-1a.5.5 0 0 0-.6.2L2.5 8.8a.5.5 0 0 0 .1.6l2 1.6a7.5 7.5 0 0 0 0 2l-2 1.6a.5.5 0 0 0-.1.6l1.9 3.3c.1.2.4.3.6.2l2.4-1c.5.4 1.1.7 1.7 1l.4 2.5c0 .2.2.4.5.4h3.8c.3 0 .5-.2.5-.4l.4-2.5a7.3 7.3 0 0 0 1.7-1l2.4 1c.2.1.5 0 .6-.2l1.9-3.3a.5.5 0 0 0-.1-.6l-2-1.6ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg>
+    </button>
   </header>
 
   <main id="view">
     <section id="empty" class="state">
       <h1>SEO report for any web page</h1>
       <p>Enter a URL to check its title, description, headings, keywords, links and markup issues.</p>
-      <p class="muted">Pages are fetched from your computer. Nothing is sent anywhere else.</p>
+      <p class="muted">Pages are fetched from your computer. PageSpeed tests run only when you
+        start one, and send the page URL to Google.</p>
     </section>
 
     <section id="loading" class="state" hidden>
@@ -53,6 +54,7 @@
       <nav class="tabs" role="tablist">
         <button role="tab" data-tab="overview" aria-selected="true">Overview</button>
         <button role="tab" data-tab="issues">Issues <span id="issues-count" class="count"></span></button>
+        <button role="tab" data-tab="speed">Speed</button>
         <button role="tab" data-tab="keywords">Keywords</button>
         <button role="tab" data-tab="links">Links <span id="links-count" class="count"></span></button>
         <button role="tab" data-tab="headers">HTTP headers <span id="headers-count" class="count"></span></button>
@@ -60,6 +62,15 @@
 
       <div class="panel" id="tab-overview" role="tabpanel"></div>
       <div class="panel" id="tab-issues" role="tabpanel" hidden></div>
+      <div class="panel" id="tab-speed" role="tabpanel" hidden>
+        <div class="toolbar">
+          <div class="segmented" id="speed-strategy" role="group" aria-label="Device">
+            <button data-strategy="mobile" aria-pressed="true">Mobile</button>
+            <button data-strategy="desktop" aria-pressed="false">Desktop</button>
+          </div>
+        </div>
+        <div id="speed-body"></div>
+      </div>
       <div class="panel" id="tab-keywords" role="tabpanel" hidden>
         <div class="toolbar">
           <div class="segmented" id="kw-words" role="group" aria-label="Words per combination">
@@ -102,5 +113,38 @@
       </div>
     </section>
   </main>
+
+  <dialog id="settings" aria-labelledby="settings-title">
+    <form id="settings-form" method="dialog">
+      <h2 id="settings-title">Settings</h2>
+
+      <label class="field" for="ua-preset">User-Agent</label>
+      <select id="ua-preset">
+        <option value="openSeo">OpenSEO (honest bot name, default)</option>
+        <option value="chromeMobile">Chrome on Android (what mobile-first indexing sees)</option>
+        <option value="chromeDesktop">Chrome on Windows</option>
+        <option value="googlebot">Googlebot Smartphone (often blocked as fake)</option>
+        <option value="custom">Custom…</option>
+      </select>
+      <input id="ua-custom" type="text" spellcheck="false" placeholder="Custom User-Agent string" hidden>
+      <p class="hint">Some sites block unfamiliar bots. If a page returns 403, try a Chrome preset.
+        Sites that verify Googlebot by IP address block fake Googlebot requests.</p>
+
+      <label class="field" for="psi-key">PageSpeed Insights API key</label>
+      <div class="key-row">
+        <input id="psi-key" type="password" spellcheck="false" autocomplete="off" placeholder="Optional, but needed in practice">
+        <button id="psi-key-toggle" type="button" class="secondary">Show</button>
+      </div>
+      <p class="hint">The shared keyless quota is usually used up. A free key from
+        <a id="psi-key-link" class="ext" href="https://developers.google.com/speed/docs/insights/v5/get-started">Google</a>
+        gives you your own. It is saved in plain text in this app's settings file.</p>
+
+      <p id="settings-error" class="form-error" hidden></p>
+      <div class="dialog-actions">
+        <button type="button" id="settings-cancel" class="secondary">Cancel</button>
+        <button type="submit" id="settings-save" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
 </body>
 </html>

@@ -12,6 +12,8 @@ Branch: `rust-rewrite`
 - [x] Phase 1: core parity with SEOLib, minus PageSpeed (Phase 4)
 - [x] Phase 2: CLI (`openseo report <url> [--json] [-v] [--top N] [--googlebot]`)
 - [x] Phase 3: Tauri app MVP (`cargo run -p openseo-app [-- <url>]`)
+- [x] Phase 4: PageSpeed Insights + CrUX field data, settings (User-Agent presets, API key)
+- [ ] Phase 5: rendered-DOM mode
 
 Deliberate deviations from SEOLib (bugs fixed while porting) are listed in the
 module docs of `keywords.rs`, `rules.rs` and `html.rs`.
@@ -101,7 +103,11 @@ except speed.
 
 ### Phase 4: PageSpeed Insights v5 + CrUX, settings
 - PSI v5 `runPagespeed` with `category=performance,seo,accessibility,best-practices`,
-  mobile and desktop strategies. Works keyless at low volume.
+  mobile and desktop strategies. **In practice an API key is required**: the keyless
+  quota is shared by everyone and was exhausted when tested (429 "Queries per day").
+  Tests therefore run on demand (a button), not on every review.
+- CrUX field data comes from the PSI response (`loadingExperience`), so no separate
+  CrUX API call or key is needed.
 - Optional user-supplied API key stored in the app config dir (Tauri `store` plugin);
   never bundled in the binary.
 - Show Lighthouse scores, Core Web Vitals (lab + CrUX field data when available), and

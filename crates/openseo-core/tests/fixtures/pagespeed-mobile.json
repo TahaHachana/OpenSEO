@@ -1,0 +1,63 @@
+{
+  "id": "https://shop.example/",
+  "loadingExperience": {
+    "id": "https://shop.example/",
+    "origin_fallback": true,
+    "overall_category": "AVERAGE",
+    "metrics": {
+      "LARGEST_CONTENTFUL_PAINT_MS": { "percentile": 2900, "category": "AVERAGE" },
+      "INTERACTION_TO_NEXT_PAINT": { "percentile": 180, "category": "FAST" },
+      "CUMULATIVE_LAYOUT_SHIFT_SCORE": { "percentile": 12, "category": "AVERAGE" },
+      "FIRST_CONTENTFUL_PAINT_MS": { "percentile": 1700, "category": "FAST" },
+      "EXPERIMENTAL_TIME_TO_FIRST_BYTE": { "percentile": 900, "category": "AVERAGE" },
+      "SOME_FUTURE_METRIC": { "percentile": 1, "category": "FAST" }
+    }
+  },
+  "lighthouseResult": {
+    "lighthouseVersion": "13.0.1",
+    "finalDisplayedUrl": "https://shop.example/",
+    "runWarnings": ["The page loaded too slowly to finish within the time limit."],
+    "categories": {
+      "performance": {
+        "id": "performance", "title": "Performance", "score": 0.47,
+        "auditRefs": [
+          { "id": "largest-contentful-paint", "weight": 25, "group": "metrics" },
+          { "id": "render-blocking-insight", "weight": 0, "group": "insights" },
+          { "id": "image-delivery-insight", "weight": 0, "group": "insights" },
+          { "id": "unused-javascript", "weight": 0, "group": "diagnostics" },
+          { "id": "final-screenshot", "weight": 0, "group": "hidden" },
+          { "id": "dom-size", "weight": 0, "group": "diagnostics" }
+        ]
+      },
+      "accessibility": {
+        "id": "accessibility", "title": "Accessibility", "score": 0.88,
+        "auditRefs": [
+          { "id": "image-alt", "weight": 10, "group": "a11y-names-labels" },
+          { "id": "color-contrast", "weight": 7, "group": "a11y-color-contrast" },
+          { "id": "video-caption", "weight": 0 }
+        ]
+      },
+      "best-practices": { "id": "best-practices", "title": "Best Practices", "score": 1, "auditRefs": [] },
+      "seo": {
+        "id": "seo", "title": "SEO", "score": 0.92,
+        "auditRefs": [ { "id": "meta-description", "weight": 1, "group": "seo-content" } ]
+      }
+    },
+    "audits": {
+      "first-contentful-paint": { "id": "first-contentful-paint", "title": "First Contentful Paint", "score": 0.7, "scoreDisplayMode": "numeric", "numericValue": 2210.5, "displayValue": "2.2 s" },
+      "largest-contentful-paint": { "id": "largest-contentful-paint", "title": "Largest Contentful Paint", "score": 0.21, "scoreDisplayMode": "numeric", "numericValue": 5480.2, "displayValue": "5.5 s" },
+      "total-blocking-time": { "id": "total-blocking-time", "title": "Total Blocking Time", "score": 0.55, "scoreDisplayMode": "numeric", "numericValue": 410, "displayValue": "410 ms" },
+      "cumulative-layout-shift": { "id": "cumulative-layout-shift", "title": "Cumulative Layout Shift", "score": 0.82, "scoreDisplayMode": "numeric", "numericValue": 0.118, "displayValue": "0.118" },
+      "speed-index": { "id": "speed-index", "title": "Speed Index", "score": 0.6, "scoreDisplayMode": "numeric", "numericValue": 5100, "displayValue": "5.1 s" },
+      "render-blocking-insight": { "id": "render-blocking-insight", "title": "Render blocking requests", "description": "Requests are blocking the page's initial render. [Learn more](https://developer.chrome.com/docs/performance/insights/render-blocking).", "score": 0, "scoreDisplayMode": "metricSavings", "displayValue": "Est savings of 1,200 ms", "metricSavings": { "FCP": 1200, "LCP": 1200 } },
+      "image-delivery-insight": { "id": "image-delivery-insight", "title": "Improve image delivery", "description": "Reducing the download time of images can improve load time. [Learn more](https://developer.chrome.com/docs/performance/insights/image-delivery)", "score": 0.5, "scoreDisplayMode": "metricSavings", "displayValue": "Est savings of 340 KiB", "metricSavings": { "LCP": 450 }, "details": { "type": "table", "overallSavingsBytes": 348160 } },
+      "unused-javascript": { "id": "unused-javascript", "title": "Reduce unused JavaScript", "description": "Reduce unused JavaScript.", "score": 0.5, "scoreDisplayMode": "metricSavings", "details": { "type": "opportunity", "overallSavingsMs": 2050, "overallSavingsBytes": 512000 } },
+      "dom-size": { "id": "dom-size", "title": "Avoids an excessive DOM size", "score": 1, "scoreDisplayMode": "metricSavings" },
+      "final-screenshot": { "id": "final-screenshot", "title": "Final Screenshot", "score": null, "scoreDisplayMode": "informative" },
+      "image-alt": { "id": "image-alt", "title": "Image elements do not have `[alt]` attributes", "description": "Informative elements should aim for short, descriptive alternate text. [Learn how](https://dequeuniversity.com/rules/axe/4.10/image-alt).", "score": 0, "scoreDisplayMode": "binary" },
+      "color-contrast": { "id": "color-contrast", "title": "Background and foreground colors do not have a sufficient contrast ratio.", "description": "Low-contrast text is difficult to read.", "score": 0, "scoreDisplayMode": "binary" },
+      "video-caption": { "id": "video-caption", "title": "`<video>` elements contain a `<track>` element", "score": null, "scoreDisplayMode": "notApplicable" },
+      "meta-description": { "id": "meta-description", "title": "Document has a meta description", "score": 1, "scoreDisplayMode": "binary" }
+    }
+  }
+}

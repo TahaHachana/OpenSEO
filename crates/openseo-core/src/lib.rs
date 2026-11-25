@@ -10,6 +10,7 @@
 pub mod fetch;
 pub mod html;
 pub mod keywords;
+pub mod pagespeed;
 pub mod review;
 pub mod rules;
 pub mod source;
