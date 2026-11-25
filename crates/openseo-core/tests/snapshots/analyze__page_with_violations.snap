@@ -1,0 +1,165 @@
+---
+source: crates/openseo-core/tests/analyze.rs
+expression: a
+---
+{
+  "title": "Shop",
+  "metaDescription": "A very long description that keeps going on and on about everything the shop sells, every product, every category, every promotion and every season of the year.",
+  "metaKeywords": null,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Welcome"
+    },
+    {
+      "level": 1,
+      "text": "To the shop"
+    }
+  ],
+  "textHtmlRatio": 1.86,
+  "keywords": [
+    {
+      "words": 1,
+      "combination": "shop",
+      "occurrence": 2,
+      "density": 28.57
+    },
+    {
+      "words": 1,
+      "combination": "cart",
+      "occurrence": 2,
+      "density": 28.57
+    },
+    {
+      "words": 1,
+      "combination": "back",
+      "occurrence": 1,
+      "density": 14.29
+    },
+    {
+      "words": 1,
+      "combination": "top",
+      "occurrence": 1,
+      "density": 14.29
+    },
+    {
+      "words": 1,
+      "combination": "email",
+      "occurrence": 1,
+      "density": 14.29
+    }
+  ],
+  "links": [
+    {
+      "url": "https://shop.example/cart",
+      "anchor": "Cart",
+      "kind": "Internal",
+      "rel": "Follow"
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    {
+      "code": "AltMissing",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "The \"alt\" attribute of the <img> tag is missing.",
+      "description": "The \"alt\" attribute is used to provide relevant information about the image to search engines.",
+      "recommendation": "Add an \"alt\" attribute that describes the image.",
+      "position": {
+        "line": 93,
+        "column": 1
+      }
+    },
+    {
+      "code": "AltEmpty",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "The \"alt\" attribute of the <img> tag is empty.",
+      "description": "The \"alt\" attribute is used to provide relevant information about the image to search engines.",
+      "recommendation": "Add content to the \"alt\" attribute.",
+      "position": {
+        "line": 94,
+        "column": 1
+      }
+    },
+    {
+      "code": "DescriptionLong",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "The meta description is too long.",
+      "description": "The content of the meta description tag is too long (160 characters). The description must not exceed 150 characters.",
+      "recommendation": "The description must be between 25 and 150 characters long, human readable, actionable, and rich in keywords.",
+      "position": {
+        "line": 6,
+        "column": 1
+      }
+    },
+    {
+      "code": "H1Multiple",
+      "category": "Standards",
+      "level": "Warning",
+      "heading": "The page contains multiple <h1> tags.",
+      "description": "The <h1> heading summarizes the page’s topic. Search engines diminish the value of a page that contains multiple <h1> tags.",
+      "recommendation": "Use the <h1> tag once per page.",
+      "position": null
+    },
+    {
+      "code": "LargeInlineCss",
+      "category": "Performance",
+      "level": "Warning",
+      "heading": "The page contains a large number of CSS definitions.",
+      "description": "The page contains a large block of embedded Cascading Style Sheet (CSS) code (1201 characters). Search engines will ignore CSS code, but large quantities of CSS code that precede the actual text content of the page will force the text content further down in the HTML.",
+      "recommendation": "Move large blocks of CSS code to externally linked CSS files.",
+      "position": {
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "code": "LargeInlineScript",
+      "category": "Performance",
+      "level": "Warning",
+      "heading": "The page contains a large amount of script code.",
+      "description": "The page contains a large block of embedded script code (1251 characters). Search engines will ignore script code, but large quantities of script will force the actual text content of the page further down in the HTML.",
+      "recommendation": "Move all inline script code to externally linked script files.",
+      "position": {
+        "line": 97,
+        "column": 1
+      }
+    },
+    {
+      "code": "QueryParameterCount",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "The URL contains too many query string parameters.",
+      "description": "The URL contains 5 query string parameters. Most search engines will analyze up to four URL parameters and ignore any additional parameters.",
+      "recommendation": "Consider reducing the number of query string parameters, or use a URL Rewrite Module to simplify the URL structure.",
+      "position": null
+    },
+    {
+      "code": "TitleShort",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "The title is too short.",
+      "description": "The text in the <title> tag is too short (4 characters). The title must contain at least 5 characters. A title that is too short can affect how the content of the page is indexed, ranked, and presented by search engines.",
+      "recommendation": "The title must be between 5 and 65 characters long.",
+      "position": {
+        "line": 4,
+        "column": 1
+      }
+    },
+    {
+      "code": "RefreshToRedirect",
+      "category": "Standards",
+      "level": "Warning",
+      "heading": "The page uses a refresh definition instead of using redirection.",
+      "description": "The page uses a meta refresh tag to implement redirection. Using meta refresh syntax is discouraged by the W3C, because unexpected refresh may confuse users and may impair the \"back\" button functionality in some browsers.",
+      "recommendation": "Use HTTP Redirection instead of using HTTP Refresh headers or meta refresh tags.",
+      "position": {
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}

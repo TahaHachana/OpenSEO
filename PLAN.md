@@ -6,6 +6,16 @@ WebSharper site and SEOLib 0.7, then going beyond it where free APIs allow.
 
 Branch: `rust-rewrite`
 
+## Status
+
+- [x] Phase 0: scaffolding (Tauri system packages still to install before Phase 3)
+- [x] Phase 1: core parity with SEOLib, minus PageSpeed (Phase 4)
+- [x] Phase 2: CLI (`openseo report <url> [--json] [-v] [--top N] [--googlebot]`)
+- [ ] Phase 3: Tauri app MVP
+
+Deliberate deviations from SEOLib (bugs fixed while porting) are listed in the
+module docs of `keywords.rs`, `rules.rs` and `html.rs`.
+
 ## 1. What we are porting
 
 The analysis lives in [SEOLib](https://github.com/TahaHachana/SEOLib) (~1,200 lines

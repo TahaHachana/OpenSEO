@@ -1,0 +1,80 @@
+---
+source: crates/openseo-core/tests/analyze.rs
+expression: a
+---
+{
+  "title": null,
+  "metaDescription": null,
+  "metaKeywords": null,
+  "headings": [
+    {
+      "level": 2,
+      "text": "Just a subheading"
+    }
+  ],
+  "textHtmlRatio": 58.04,
+  "keywords": [
+    {
+      "words": 1,
+      "combination": "just",
+      "occurrence": 1,
+      "density": 20.0
+    },
+    {
+      "words": 1,
+      "combination": "subheading",
+      "occurrence": 1,
+      "density": 20.0
+    },
+    {
+      "words": 1,
+      "combination": "title",
+      "occurrence": 1,
+      "density": 20.0
+    },
+    {
+      "words": 1,
+      "combination": "description",
+      "occurrence": 1,
+      "density": 20.0
+    },
+    {
+      "words": 1,
+      "combination": "h1",
+      "occurrence": 1,
+      "density": 20.0
+    }
+  ],
+  "links": [],
+  "errors": [
+    {
+      "code": "TitleMissing",
+      "category": "SEO",
+      "level": "Error",
+      "heading": "The title is missing.",
+      "description": "The page markup does not contain the <title> tag. An inaccurate or irrelevant title can affect how the content of the page is indexed, ranked, and presented by search engines.",
+      "recommendation": "Add the <title> tag inside the <head> section of the page.",
+      "position": null
+    }
+  ],
+  "warnings": [
+    {
+      "code": "DescriptionMissing",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "The meta description is missing.",
+      "description": "The page's markup does not contain the meta description tag.",
+      "recommendation": "Add a meta description tag to the <head> section of the page.",
+      "position": null
+    },
+    {
+      "code": "H1Missing",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "The <h1> tag is missing.",
+      "description": "The <h1> heading summarizes the page’s topic.",
+      "recommendation": "Add an <h1> tag to the <body> section of the page.",
+      "position": null
+    }
+  ]
+}

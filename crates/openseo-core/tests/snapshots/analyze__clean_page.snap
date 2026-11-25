@@ -1,0 +1,306 @@
+---
+source: crates/openseo-core/tests/analyze.rs
+expression: a
+---
+{
+  "title": "Fresh Roasted Coffee Beans | Acme Roasters",
+  "metaDescription": "Single-origin coffee beans roasted to order and shipped within 48 hours. Free shipping on orders over $40.",
+  "metaKeywords": "coffee, beans, roastery",
+  "headings": [
+    {
+      "level": 1,
+      "text": "Fresh roasted coffee beans"
+    },
+    {
+      "level": 2,
+      "text": "Single-origin coffee"
+    },
+    {
+      "level": 2,
+      "text": "Brewing guides"
+    }
+  ],
+  "textHtmlRatio": 28.41,
+  "keywords": [
+    {
+      "words": 1,
+      "combination": "coffee",
+      "occurrence": 6,
+      "density": 15.38
+    },
+    {
+      "words": 1,
+      "combination": "roasted",
+      "occurrence": 5,
+      "density": 12.82
+    },
+    {
+      "words": 1,
+      "combination": "beans",
+      "occurrence": 5,
+      "density": 12.82
+    },
+    {
+      "words": 1,
+      "combination": "fresh",
+      "occurrence": 3,
+      "density": 7.69
+    },
+    {
+      "words": 1,
+      "combination": "guide",
+      "occurrence": 2,
+      "density": 5.13
+    },
+    {
+      "words": 1,
+      "combination": "acme",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "roasters",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "shop",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "instagram",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "small",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "batches",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "taste",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "better",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "single",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "origin",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "ethiopian",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "colombian",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "weekly",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "brewing",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "guides",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "read",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "pour",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 1,
+      "combination": "espresso",
+      "occurrence": 1,
+      "density": 2.56
+    },
+    {
+      "words": 2,
+      "combination": "coffee beans",
+      "occurrence": 5,
+      "density": 25.64
+    },
+    {
+      "words": 2,
+      "combination": "fresh roasted",
+      "occurrence": 3,
+      "density": 15.38
+    },
+    {
+      "words": 2,
+      "combination": "roasted coffee",
+      "occurrence": 3,
+      "density": 15.38
+    },
+    {
+      "words": 2,
+      "combination": "acme roasters",
+      "occurrence": 1,
+      "density": 5.13
+    },
+    {
+      "words": 2,
+      "combination": "small batches",
+      "occurrence": 1,
+      "density": 5.13
+    },
+    {
+      "words": 2,
+      "combination": "beans taste",
+      "occurrence": 1,
+      "density": 5.13
+    },
+    {
+      "words": 2,
+      "combination": "taste better",
+      "occurrence": 1,
+      "density": 5.13
+    },
+    {
+      "words": 2,
+      "combination": "origin coffee",
+      "occurrence": 1,
+      "density": 5.13
+    },
+    {
+      "words": 2,
+      "combination": "colombian coffee",
+      "occurrence": 1,
+      "density": 5.13
+    },
+    {
+      "words": 2,
+      "combination": "roasted weekly",
+      "occurrence": 1,
+      "density": 5.13
+    },
+    {
+      "words": 2,
+      "combination": "brewing guides",
+      "occurrence": 1,
+      "density": 5.13
+    },
+    {
+      "words": 2,
+      "combination": "espresso guide",
+      "occurrence": 1,
+      "density": 5.13
+    },
+    {
+      "words": 3,
+      "combination": "fresh roasted coffee",
+      "occurrence": 3,
+      "density": 23.08
+    },
+    {
+      "words": 3,
+      "combination": "roasted coffee beans",
+      "occurrence": 3,
+      "density": 23.08
+    },
+    {
+      "words": 3,
+      "combination": "coffee beans taste",
+      "occurrence": 1,
+      "density": 7.69
+    },
+    {
+      "words": 3,
+      "combination": "beans taste better",
+      "occurrence": 1,
+      "density": 7.69
+    },
+    {
+      "words": 3,
+      "combination": "colombian coffee beans",
+      "occurrence": 1,
+      "density": 7.69
+    }
+  ],
+  "links": [
+    {
+      "url": "https://acme.example/",
+      "anchor": "Acme Roasters",
+      "kind": "Internal",
+      "rel": "Follow"
+    },
+    {
+      "url": "https://acme.example/shop",
+      "anchor": "Shop",
+      "kind": "Internal",
+      "rel": "Follow"
+    },
+    {
+      "url": "https://acme.example/about",
+      "anchor": "About us",
+      "kind": "Internal",
+      "rel": "Follow"
+    },
+    {
+      "url": "https://instagram.com/acme",
+      "anchor": "Instagram",
+      "kind": "External",
+      "rel": "NoFollow"
+    },
+    {
+      "url": "https://acme.example/guides/pour-over",
+      "anchor": "pour-over guide",
+      "kind": "Internal",
+      "rel": "Follow"
+    },
+    {
+      "url": "https://acme.example/guides/espresso",
+      "anchor": "espresso guide",
+      "kind": "Internal",
+      "rel": "Follow"
+    }
+  ],
+  "errors": [],
+  "warnings": []
+}
