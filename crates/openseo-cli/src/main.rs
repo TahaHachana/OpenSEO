@@ -118,6 +118,12 @@ async fn main() -> ExitCode {
                 eprintln!("error: {url:?} is not a valid http(s) URL");
                 return ExitCode::FAILURE;
             };
+            // Test the URL the site redirects to (`example.com` → `https://www.example.com/`).
+            // Lighthouse on the pre-redirect http:// URL warns and fails the HTTPS audit.
+            let page = match openseo_core::fetch::fetch(&page, &FetchOptions::default()).await {
+                Ok(fetched) => fetched.final_url,
+                Err(_) => page, // let PageSpeed report the problem
+            };
             let psi = match PageSpeed::new(api_key) {
                 Ok(psi) => psi,
                 Err(e) => {
