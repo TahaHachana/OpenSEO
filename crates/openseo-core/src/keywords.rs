@@ -19,7 +19,7 @@ use ego_tree::NodeRef;
 use scraper::{Html, Node};
 use serde::Serialize;
 
-use crate::text::{is_hidden, round2};
+use crate::text::{INLINE, is_hidden, round2};
 
 static STOP_WORDS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     include_str!("../data/english-stopwords.txt")
@@ -28,12 +28,6 @@ static STOP_WORDS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
         .filter(|w| !w.is_empty())
         .collect()
 });
-
-/// Elements that do not start a new block of text. `<a>` is deliberately absent.
-const INLINE: &[&str] = &[
-    "abbr", "b", "bdi", "bdo", "cite", "code", "data", "dfn", "em", "font", "i", "kbd", "mark",
-    "q", "s", "samp", "small", "span", "strong", "sub", "sup", "time", "u", "var",
-];
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]

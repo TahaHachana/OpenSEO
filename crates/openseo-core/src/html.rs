@@ -153,16 +153,23 @@ fn base_url(doc: &Html, page_url: &Url) -> Url {
         .unwrap_or_else(|| page_url.clone())
 }
 
-/// Anchor text; for image links, the image's `alt` (what search engines use).
+/// Anchor text. For links without text: the image's `alt` (what search engines
+/// use for image links), then `aria-label`, then `title` (icon-only links).
 fn anchor_text(el: ElementRef<'_>) -> String {
     let text = visible_text(*el);
     if !text.is_empty() {
         return text;
     }
-    el.select(&IMG_ALT)
-        .filter_map(|img| img.value().attr("alt"))
+    let img_alts = el
+        .select(&IMG_ALT)
+        .filter_map(|img| img.value().attr("alt"));
+    let labels = ["aria-label", "title"]
+        .into_iter()
+        .filter_map(|a| el.value().attr(a));
+    img_alts
+        .chain(labels)
         .map(crate::text::collapse_whitespace)
-        .find(|alt| !alt.is_empty())
+        .find(|t| !t.is_empty())
         .unwrap_or_default()
 }
 
@@ -303,6 +310,7 @@ mod tests {
             <a href="javascript:void(0)">JS</a>
             <a href="">Empty</a>
             <a href="/img"><img src="x.png" alt="Logo"></a>
+            <a href="/home" aria-label="Homepage"><svg></svg></a>
             <a>No href</a>
             "##);
         let links = hyperlinks(&d, &page());
@@ -340,6 +348,12 @@ mod tests {
                 (
                     "https://example.com/img",
                     "Logo",
+                    LinkKind::Internal,
+                    LinkRel::Follow
+                ),
+                (
+                    "https://example.com/home",
+                    "Homepage",
                     LinkKind::Internal,
                     LinkRel::Follow
                 ),
