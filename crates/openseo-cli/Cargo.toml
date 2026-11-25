@@ -1,0 +1,19 @@
+[package]
+name = "openseo-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+anyhow = "1.0.105"
+clap = { version = "4.6.10", features = ["derive"] }
+openseo-core = { version = "0.1.0", path = "../openseo-core" }
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "openseo"
+path = "src/main.rs"
