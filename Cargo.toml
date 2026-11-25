@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/openseo-core", "crates/openseo-cli"]
+members = ["crates/openseo-core", "crates/openseo-cli", "app/src-tauri"]
 
 [workspace.package]
 version = "0.1.0"

@@ -1,0 +1,400 @@
+"use strict";
+
+// Everything shown here comes from arbitrary web pages, so text is only ever
+// inserted with textContent (via `h`), never as HTML.
+
+const { invoke } = window.__TAURI__.core;
+const { openUrl } = window.__TAURI__.opener;
+
+const $ = (id) => document.getElementById(id);
+
+/** Creates an element. `attrs` keys starting with "on" become listeners. */
+function h(tag, attrs = {}, ...children) {
+  const el = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (value == null || value === false) continue;
+    if (key.startsWith("on")) el.addEventListener(key.slice(2), value);
+    else if (key === "class") el.className = value;
+    else if (key === "style") Object.assign(el.style, value);
+    else el.setAttribute(key, value === true ? "" : value);
+  }
+  for (const child of children.flat(Infinity)) {
+    if (child == null || child === false) continue;
+    el.append(child instanceof Node ? child : String(child));
+  }
+  return el;
+}
+
+const fmt = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
+
+/** A link that opens in the system browser instead of navigating the app. */
+function extLink(url, text = url, cls = "ext") {
+  return h("a", {
+    class: cls,
+    href: url,
+    title: url,
+    onclick: (e) => {
+      e.preventDefault();
+      openUrl(url).catch((err) => console.error("openUrl failed", err));
+    },
+  }, text);
+}
+
+// ───────────────────────────── State & view switching ─────────────────────────────
+
+const state = {
+  review: null,
+  kw: { words: 1, filter: "", sort: "occurrence", dir: "desc" },
+  links: { kind: "all", filter: "" },
+};
+
+let requestId = 0;
+
+function show(id) {
+  for (const s of ["empty", "loading", "failure", "report"]) $(s).hidden = s !== id;
+}
+
+$("review-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const url = $("url").value.trim();
+  if (!url) return;
+
+  const id = ++requestId; // a newer request makes this one's result stale
+  $("loading-url").textContent = url;
+  $("submit").disabled = true;
+  show("loading");
+
+  let result;
+  try {
+    result = await invoke("review", { url, options: { googlebot: $("googlebot").checked } });
+  } catch (err) {
+    result = { result: "fetchFailed", url, reason: String(err) };
+  }
+  if (id !== requestId) return;
+  $("submit").disabled = false;
+  render(result);
+});
+
+// Ctrl/Cmd+L focuses the URL field, like a browser.
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "l") {
+    e.preventDefault();
+    $("url").select();
+  }
+});
+
+function render(result) {
+  switch (result.result) {
+    case "success":
+      state.review = result;
+      renderReport(result);
+      return show("report");
+    case "invalidUrl":
+      return failure("Not a valid URL", `"${result.input}" can't be read as an http or https address.`);
+    case "fetchFailed":
+      return failure("Could not fetch the page", result.reason, null, result.url);
+    case "httpError":
+      return failure(
+        `The server answered ${result.http.status}`,
+        "Only pages that return 200 OK are analyzed.",
+        result.http,
+      );
+    case "notHtml":
+      return failure(
+        "Not an HTML page",
+        `The response is ${result.http.mediaType ?? "of an unknown type"}, so there is no markup to analyze.`,
+        result.http,
+      );
+    default:
+      return failure("Unexpected response", JSON.stringify(result));
+  }
+}
+
+function failure(title, message, http = null, url = null) {
+  $("failure-title").textContent = title;
+  $("failure-message").textContent = message;
+  const box = $("failure-http");
+  box.replaceChildren();
+  if (url) box.append(h("p", {}, extLink(url, url)));
+  if (http) box.append(httpSummary(http));
+  show("failure");
+}
+
+// ───────────────────────────── Summary ─────────────────────────────
+
+function fact(label, value, cls) {
+  return h("div", { class: `fact ${cls ?? ""}` }, h("dt", {}, label), h("dd", {}, value));
+}
+
+function redirectChain(http) {
+  if (!http.redirects.length) return null;
+  return h("div", { class: "redirects" },
+    "Redirected: ",
+    http.redirects.map((r, i) => [
+      i ? " → " : "",
+      h("span", { class: "hop" }, r.url),
+      ` (${r.status})`,
+    ]),
+    " → ",
+    h("span", { class: "hop" }, http.finalUrl),
+  );
+}
+
+function httpSummary(http) {
+  return h("div", { class: "summary" },
+    h("div", { class: "summary-url" }, extLink(http.finalUrl), redirectChain(http)),
+    h("dl", { class: "facts" },
+      fact("Status", http.status, http.status === 200 ? "ok" : "error"),
+      fact("Response", `${fmt.format(http.elapsedMs)} ms`),
+      fact("Type", http.mediaType ?? "—"),
+    ),
+  );
+}
+
+function renderReport(r) {
+  const { http, content: c } = r;
+
+  const finalUrl = $("final-url");
+  finalUrl.replaceWith(Object.assign(extLink(http.finalUrl), { id: "final-url" }));
+  $("redirects").replaceChildren(...(redirectChain(http)?.childNodes ?? []));
+
+  $("facts").replaceChildren(
+    fact("Status", http.status, "ok"),
+    fact("Response", `${fmt.format(http.elapsedMs)} ms`),
+    fact("Size", `${fmt.format(http.sizeKb)} KB`),
+    fact("Errors", c.errors.length, c.errors.length ? "error" : "ok"),
+    fact("Warnings", c.warnings.length, c.warnings.length ? "warn" : "ok"),
+    fact("Links", c.links.length),
+    fact("Text/HTML", `${fmt.format(c.textHtmlRatio)} %`),
+  );
+
+  const issues = c.errors.length + c.warnings.length;
+  const issuesCount = $("issues-count");
+  issuesCount.textContent = issues;
+  issuesCount.className = `count ${c.errors.length ? "error" : issues ? "warn" : ""}`;
+  $("links-count").textContent = c.links.length;
+  $("headers-count").textContent = http.headers.length;
+
+  renderOverview(c);
+  renderIssues(c);
+  renderKeywords();
+  renderLinks();
+  renderHeaders(http);
+}
+
+// ───────────────────────────── Tabs ─────────────────────────────
+
+document.querySelectorAll(".tabs button").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tabs button").forEach((t) => {
+      const selected = t === tab;
+      t.setAttribute("aria-selected", selected);
+      $(`tab-${t.dataset.tab}`).hidden = !selected;
+    });
+  });
+});
+
+// ───────────────────────────── Overview ─────────────────────────────
+
+/** Length meter with the recommended range shaded (thresholds match the core rules). */
+function lengthMeter(length, min, max) {
+  const scale = Math.max(max * 1.25, length);
+  const pct = (n) => `${Math.min(100, (n / scale) * 100)}%`;
+  const ok = length >= min && length <= max;
+  return h("div", { class: "meter" },
+    h("div", { class: "meter-track" },
+      h("div", { class: "meter-range", style: { left: pct(min), width: `calc(${pct(max)} - ${pct(min)})` } }),
+      h("div", { class: `meter-fill ${ok ? "" : "out"}`, style: { width: pct(length) } }),
+    ),
+    h("div", { class: "meter-label" },
+      h("span", {}, `${length} characters`),
+      h("span", { class: `status ${ok ? "ok" : "out"}` },
+        ok ? `within ${min}–${max}` : length < min ? `shorter than ${min}` : `longer than ${max}`),
+    ),
+  );
+}
+
+function textCard(title, value, range) {
+  return h("div", { class: "card" },
+    h("h3", {}, title),
+    value
+      ? [h("div", { class: "value" }, value), range && lengthMeter([...value].length, ...range)]
+      : h("div", { class: "value none" }, "Missing"),
+  );
+}
+
+function renderOverview(c) {
+  const levels = [1, 2, 3, 4, 5, 6]
+    .map((l) => [l, c.headings.filter((x) => x.level === l).length])
+    .filter(([, n]) => n);
+
+  $("tab-overview").replaceChildren(
+    h("div", { class: "grid" },
+      textCard("Title", c.title, [5, 65]),
+      textCard("Meta description", c.metaDescription, [25, 150]),
+      h("div", { class: "card" },
+        h("h3", {}, "Text / HTML ratio"),
+        h("div", { class: "big-number" }, `${fmt.format(c.textHtmlRatio)} %`),
+        h("div", { class: "muted small" }, "Share of the HTML source that is visible text."),
+      ),
+      h("div", { class: "card" },
+        h("h3", {}, "Meta keywords"),
+        c.metaKeywords
+          ? h("div", { class: "value" }, c.metaKeywords)
+          : h("div", { class: "value none" }, "None (search engines ignore this tag)"),
+      ),
+      h("div", { class: "card wide" },
+        h("h3", {}, `Headings (${c.headings.length})`,
+          levels.length ? h("span", { class: "muted" }, " · ", levels.map(([l, n]) => `H${l}×${n}`).join("  ")) : null),
+        c.headings.length
+          ? h("ul", { class: "outline" },
+              c.headings.map((x) =>
+                h("li", { style: { paddingLeft: `${(x.level - 1) * 18}px` } },
+                  h("span", { class: "hl" }, `H${x.level}`),
+                  x.text ? h("span", {}, x.text) : h("span", { class: "empty" }, "(empty)"),
+                )))
+          : h("div", { class: "value none" }, "No headings"),
+      ),
+    ),
+  );
+}
+
+// ───────────────────────────── Issues ─────────────────────────────
+
+function issueCard(v) {
+  const isError = v.level === "Error";
+  return h("article", { class: `issue ${isError ? "error" : ""}` },
+    h("div", { class: "issue-head" },
+      h("span", { class: `badge ${isError ? "error" : "warn"}` }, v.level),
+      h("span", { class: "badge" }, v.category),
+      h("strong", {}, v.heading),
+      v.position ? h("span", { class: "where" }, `line ${v.position.line}, col ${v.position.column}`) : null,
+    ),
+    h("p", {}, v.description),
+    h("p", { class: "fix" }, v.recommendation),
+  );
+}
+
+function renderIssues(c) {
+  const all = [...c.errors, ...c.warnings];
+  $("tab-issues").replaceChildren(
+    all.length
+      ? h("div", { class: "issues" }, all.map(issueCard))
+      : h("div", { class: "card all-clear" },
+          h("span", { class: "badge ok" }, "All clear"),
+          h("p", {}, "No markup issues found by the current rules.")),
+  );
+}
+
+// ───────────────────────────── Keywords ─────────────────────────────
+
+function setPressed(group, button) {
+  group.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b === button));
+}
+
+$("kw-words").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  setPressed($("kw-words"), b);
+  state.kw.words = Number(b.dataset.words);
+  renderKeywords();
+});
+
+$("kw-filter").addEventListener("input", (e) => {
+  state.kw.filter = e.target.value.trim().toLowerCase();
+  renderKeywords();
+});
+
+document.querySelectorAll("#kw-table th[data-sort]").forEach((th) => {
+  th.addEventListener("click", () => {
+    const key = th.dataset.sort;
+    state.kw.dir = state.kw.sort === key && state.kw.dir === "desc" ? "asc" : "desc";
+    if (state.kw.sort !== key) state.kw.dir = key === "combination" ? "asc" : "desc";
+    state.kw.sort = key;
+    renderKeywords();
+  });
+});
+
+const KEYWORD_ROWS = 200;
+
+function renderKeywords() {
+  if (!state.review) return;
+  const { words, filter, sort, dir } = state.kw;
+  const sign = dir === "asc" ? 1 : -1;
+  const list = state.review.content.keywords
+    .filter((k) => k.words === words && (!filter || k.combination.includes(filter)))
+    .sort((a, b) => {
+      const x = a[sort], y = b[sort];
+      return (typeof x === "string" ? x.localeCompare(y) : x - y) * sign;
+    });
+
+  document.querySelectorAll("#kw-table th[data-sort]").forEach((th) => {
+    th.setAttribute("aria-sort", th.dataset.sort === sort ? (dir === "asc" ? "ascending" : "descending") : "none");
+  });
+
+  const maxDensity = Math.max(...list.map((k) => k.density), 1);
+  const rows = list.slice(0, KEYWORD_ROWS).map((k) =>
+    h("tr", {},
+      h("td", {}, k.combination),
+      h("td", { class: "num" }, k.occurrence),
+      h("td", { class: "num" },
+        h("span", { class: "density" },
+          h("span", { class: "density-bar" }, h("span", { style: { width: `${(k.density / maxDensity) * 100}%` } })),
+          `${fmt.format(k.density)} %`)),
+    ));
+  if (list.length > KEYWORD_ROWS) {
+    rows.push(h("tr", { class: "empty-row" }, h("td", { colspan: 3 }, `${list.length - KEYWORD_ROWS} more; use the filter to narrow down.`)));
+  }
+  if (!rows.length) rows.push(h("tr", { class: "empty-row" }, h("td", { colspan: 3 }, "No keywords")));
+  $("kw-table").tBodies[0].replaceChildren(...rows);
+}
+
+// ───────────────────────────── Links ─────────────────────────────
+
+$("link-kind").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  setPressed($("link-kind"), b);
+  state.links.kind = b.dataset.kind;
+  renderLinks();
+});
+
+$("link-filter").addEventListener("input", (e) => {
+  state.links.filter = e.target.value.trim().toLowerCase();
+  renderLinks();
+});
+
+function renderLinks() {
+  if (!state.review) return;
+  const { kind, filter } = state.links;
+  const list = state.review.content.links.filter((l) =>
+    (kind === "all" || l.kind === kind || l.rel === kind) &&
+    (!filter || l.url.toLowerCase().includes(filter) || l.anchor.toLowerCase().includes(filter)));
+
+  const rows = list.map((l) =>
+    h("tr", {},
+      h("td", {}, l.anchor || h("span", { class: "muted" }, "(no text)")),
+      h("td", { class: "url" }, extLink(l.url)),
+      h("td", {}, l.kind),
+      h("td", {}, l.rel === "NoFollow" ? h("span", { class: "badge warn" }, "nofollow") : "follow"),
+    ));
+  if (!rows.length) rows.push(h("tr", { class: "empty-row" }, h("td", { colspan: 4 }, "No links")));
+  $("link-table").tBodies[0].replaceChildren(...rows);
+}
+
+// ───────────────────────────── Headers ─────────────────────────────
+
+function renderHeaders(http) {
+  const rows = http.headers.flatMap((hd) =>
+    hd.values.map((v) => h("tr", {}, h("td", { class: "header-name" }, hd.name), h("td", { class: "header-value" }, v))));
+  if (!rows.length) rows.push(h("tr", { class: "empty-row" }, h("td", { colspan: 2 }, "No headers")));
+  $("header-table").tBodies[0].replaceChildren(...rows);
+}
+
+// ───────────────────────────── Startup ─────────────────────────────
+
+invoke("initial_url").then((url) => {
+  if (!url) return;
+  $("url").value = url;
+  $("review-form").requestSubmit();
+});

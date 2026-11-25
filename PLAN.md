@@ -11,7 +11,7 @@ Branch: `rust-rewrite`
 - [x] Phase 0: scaffolding (Tauri system packages still to install before Phase 3)
 - [x] Phase 1: core parity with SEOLib, minus PageSpeed (Phase 4)
 - [x] Phase 2: CLI (`openseo report <url> [--json] [-v] [--top N] [--googlebot]`)
-- [ ] Phase 3: Tauri app MVP
+- [x] Phase 3: Tauri app MVP (`cargo run -p openseo-app [-- <url>]`)
 
 Deliberate deviations from SEOLib (bugs fixed while porting) are listed in the
 module docs of `keywords.rs`, `rules.rs` and `html.rs`.
@@ -113,6 +113,9 @@ except speed.
 - Report the **raw vs rendered** difference: title/description/h1/canonical changed by
   JS, links that only exist after rendering. This catches problems on SPA sites.
 - Optional live preview pane showing the page.
+- Use the rendered DOM's `innerText` for anchor and heading text. In raw HTML,
+  sibling `<span>`s that CSS displays as blocks run together ("GitHubRepository
+  hosting" on github.com); only a CSS-aware renderer can separate them.
 
 ### Phase 6: New checks and modernized rules
 - Update outdated thresholds: title ~30–60 chars (or ~580px), description ~70–160 chars,

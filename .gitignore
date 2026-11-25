@@ -164,3 +164,6 @@ pip-log.txt
 
 # Rust
 /target/
+
+# Tauri generated schemas
+/app/src-tauri/gen/

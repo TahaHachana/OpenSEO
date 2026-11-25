@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenSEO</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="logo.png" alt="" width="28" height="28">
+      <span>OpenSEO</span>
+    </div>
+    <form id="review-form" class="url-form" autocomplete="off">
+      <input id="url" name="url" type="text" inputmode="url" spellcheck="false"
+             placeholder="Enter a URL, e.g. example.com" aria-label="Page URL" required autofocus>
+      <button id="submit" type="submit">Analyze</button>
+    </form>
+    <label class="option" title="Send Googlebot's User-Agent. Some sites block or treat fake Googlebot requests differently.">
+      <input id="googlebot" type="checkbox"> Googlebot UA
+    </label>
+  </header>
+
+  <main id="view">
+    <section id="empty" class="state">
+      <h1>SEO report for any web page</h1>
+      <p>Enter a URL to check its title, description, headings, keywords, links and markup issues.</p>
+      <p class="muted">Pages are fetched from your computer. Nothing is sent anywhere else.</p>
+    </section>
+
+    <section id="loading" class="state" hidden>
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Analyzing <span id="loading-url" class="mono"></span>…</p>
+    </section>
+
+    <section id="failure" class="state" hidden>
+      <h2 id="failure-title"></h2>
+      <p id="failure-message"></p>
+      <div id="failure-http"></div>
+    </section>
+
+    <section id="report" hidden>
+      <div class="summary">
+        <div class="summary-url">
+          <a id="final-url" class="ext" href="#"></a>
+          <div id="redirects" class="redirects"></div>
+        </div>
+        <dl id="facts" class="facts"></dl>
+      </div>
+
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-tab="overview" aria-selected="true">Overview</button>
+        <button role="tab" data-tab="issues">Issues <span id="issues-count" class="count"></span></button>
+        <button role="tab" data-tab="keywords">Keywords</button>
+        <button role="tab" data-tab="links">Links <span id="links-count" class="count"></span></button>
+        <button role="tab" data-tab="headers">HTTP headers <span id="headers-count" class="count"></span></button>
+      </nav>
+
+      <div class="panel" id="tab-overview" role="tabpanel"></div>
+      <div class="panel" id="tab-issues" role="tabpanel" hidden></div>
+      <div class="panel" id="tab-keywords" role="tabpanel" hidden>
+        <div class="toolbar">
+          <div class="segmented" id="kw-words" role="group" aria-label="Words per combination">
+            <button data-words="1" aria-pressed="true">1 word</button>
+            <button data-words="2" aria-pressed="false">2 words</button>
+            <button data-words="3" aria-pressed="false">3 words</button>
+          </div>
+          <input id="kw-filter" type="search" placeholder="Filter keywords" aria-label="Filter keywords">
+        </div>
+        <table class="data" id="kw-table">
+          <thead><tr>
+            <th data-sort="combination">Keyword</th>
+            <th data-sort="occurrence" class="num">Occurrences</th>
+            <th data-sort="density" class="num">Density</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="muted small">Density = occurrences × words in the combination ÷ words on the page (stop words excluded).</p>
+      </div>
+      <div class="panel" id="tab-links" role="tabpanel" hidden>
+        <div class="toolbar">
+          <div class="segmented" id="link-kind" role="group" aria-label="Link type">
+            <button data-kind="all" aria-pressed="true">All</button>
+            <button data-kind="Internal" aria-pressed="false">Internal</button>
+            <button data-kind="External" aria-pressed="false">External</button>
+            <button data-kind="NoFollow" aria-pressed="false">Nofollow</button>
+          </div>
+          <input id="link-filter" type="search" placeholder="Filter by URL or anchor" aria-label="Filter links">
+        </div>
+        <table class="data" id="link-table">
+          <thead><tr><th>Anchor text</th><th>URL</th><th>Type</th><th>Rel</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="panel" id="tab-headers" role="tabpanel" hidden>
+        <table class="data" id="header-table">
+          <thead><tr><th>Name</th><th>Value</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissions for the main window: core APIs and opening links in the system browser.",
+  "windows": ["main"],
+  "permissions": ["core:default", "opener:default"]
+}

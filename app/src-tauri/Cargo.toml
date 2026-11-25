@@ -1,0 +1,20 @@
+[package]
+name = "openseo-app"
+description = "OpenSEO desktop app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+openseo-core = { version = "0.1.0", path = "../../crates/openseo-core" }
+serde = { version = "1.0.229", features = ["derive"] }
+tauri = "2"
+tauri-plugin-opener = "2"
+
+[build-dependencies]
+tauri-build = "2"
