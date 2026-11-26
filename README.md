@@ -2,19 +2,20 @@
 
 <h1 align="center">OpenSEO</h1>
 
-<p align="center">Enter a URL, get an SEO report. A free desktop app and command-line tool for
-Linux, Windows and macOS. No account, no server, nothing to host.</p>
+<p align="center">Checks a single web page for common technical and on-page SEO problems.
+A desktop app and command-line tool for Linux, Windows and macOS that runs on your
+computer.</p>
 
 ![OpenSEO overview of github.com: title and description length, indexing status, page setup and social tags](docs/screenshots/overview.png)
 
 ## What the report covers
 
-- **Page basics**: title and meta description with recommended lengths, headings
+- **Page basics**: title and meta description with common length guidelines, headings
   outline, text-to-HTML ratio, meta keywords.
 - **Indexing**: meta robots and `X-Robots-Tag`, canonical URL, whether robots.txt lets
   Googlebot crawl the page (and which rule decides), whether the page is listed in
   the site's XML sitemaps.
-- **Issues**: 57 checks grouped as errors, warnings and notices, with line
+- **Issues**: 57 rule-based checks grouped as errors, warnings and notices, with line
   and column in the source. They cover titles, descriptions, headings, image `alt`
   text and dimensions, HTTPS, mixed content, HSTS, redirect chains, canonical and
   hreflang mistakes, viewport, language, Open Graph and Twitter cards, JSON-LD
@@ -24,13 +25,30 @@ Linux, Windows and macOS. No account, no server, nothing to host.</p>
   robots, H1, and links added or removed. Every tab can switch between the source
   HTML and the rendered page.
 - **Keywords**: one-, two- and three-word phrases with occurrences and density
-  (English stop words are ignored).
+  (English stop words are ignored). Density is a descriptive count, not a target.
 - **Links**: internal and external, follow and nofollow, with anchor text.
 - **Speed**: Lighthouse scores, Core Web Vitals from real Chrome users (when Google
   has enough data) and improvement tips, from Google PageSpeed Insights.
 - **HTTP**: status, redirect chain, response time and headers.
 
 ![The JavaScript tab: source HTML compared with the page after its scripts ran](docs/screenshots/javascript.png)
+
+## What it can and can't tell you
+
+OpenSEO checks a page against search engines' published guidelines and common
+practice: whether it can be crawled and indexed, whether its metadata and markup are
+in order, and whether scripts change what crawlers see. These are technical
+prerequisites. They are not what decides rankings.
+
+- **It doesn't measure** content quality, relevance to a search, links from other
+  sites, competition or actual rankings. Those matter more for where a page ranks.
+- **Many checks are rules of thumb.** Length ranges are approximations (Google
+  truncates by pixel width and often rewrites titles and snippets), notices are
+  suggestions, and some warnings can be deliberate choices.
+- **A clean report doesn't mean a page will rank,** and fixing a reported issue may
+  not change its position. Errors such as `noindex` or a robots.txt block do keep a
+  page out of search results.
+- **It looks at one page at a time,** as fetched from your computer, at one moment.
 
 ## Install
 
@@ -127,8 +145,8 @@ app/ui                Its interface: plain HTML, CSS and JavaScript, no build st
 OpenSEO started in 2012 as a website built with F# and WebSharper, on top of
 [SEOLib](https://github.com/TahaHachana/SEOLib). The hosted site is gone and the
 project was unmaintained for years. This is a rewrite in Rust as a desktop app, so
-it runs without hosting. It started from SEOLib's checks and updated them for
-today's search engines. The F# code is in the git history.
+it runs without hosting. It started from SEOLib's checks, with thresholds updated
+and checks added based on current search engine documentation. The F# code is in the git history.
 
 ## License
 
