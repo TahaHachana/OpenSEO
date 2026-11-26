@@ -4,7 +4,7 @@ Goal: revive OpenSEO as a free, hosting-free desktop app. Enter a URL, get an SE
 report. Built with Rust + Tauri v2, reaching feature parity with the original
 WebSharper site and SEOLib 0.7, then going beyond it where free APIs allow.
 
-Branch: `rust-rewrite`
+Developed on the `rust-rewrite` branch, merged into `master` and released as v0.1.0 (November 2026).
 
 ## Status
 

@@ -10,7 +10,7 @@ name: Release
 on:
   push:
     tags: ["v*"]
-    branches: [master, rust-rewrite]
+    branches: [master]
     paths:
       - .github/workflows/release.yml
       - app/src-tauri/tauri.conf.json
