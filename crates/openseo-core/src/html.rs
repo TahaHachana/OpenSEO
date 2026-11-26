@@ -199,7 +199,7 @@ pub fn text_html_ratio(doc: &Html, source: &str) -> f64 {
 }
 
 /// The URL relative links resolve against: `<base href>` if present, else the page URL.
-fn base_url(doc: &Html, page_url: &Url) -> Url {
+pub(crate) fn base_url(doc: &Html, page_url: &Url) -> Url {
     doc.select(&BASE)
         .next()
         .and_then(|el| el.value().attr("href"))

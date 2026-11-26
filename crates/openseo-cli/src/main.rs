@@ -2,10 +2,11 @@ use std::process::ExitCode;
 use std::time::Duration;
 
 use clap::{Parser, Subcommand, ValueEnum};
+use openseo_core::crawl::{Crawl, RobotsStatus};
 use openseo_core::fetch::Fetched;
 use openseo_core::html::{LinkKind, LinkRel};
 use openseo_core::pagespeed::{PageSpeed, Rating, SpeedReport, Strategy, Unit};
-use openseo_core::rules::Violation;
+use openseo_core::rules::{Level, Violation};
 use openseo_core::{FetchOptions, Review, ReviewResult, UserAgent};
 use serde::Serialize;
 
@@ -38,6 +39,9 @@ enum Command {
         /// Request timeout in seconds.
         #[arg(long, default_value_t = 30)]
         timeout: u64,
+        /// Skip the robots.txt and sitemap checks (they need extra requests).
+        #[arg(long)]
+        no_crawl: bool,
     },
     /// Run PageSpeed Insights (Lighthouse + Chrome UX Report) for a page.
     ///
@@ -86,6 +90,7 @@ async fn main() -> ExitCode {
             top,
             user_agent,
             timeout,
+            no_crawl,
         } => {
             let options = FetchOptions {
                 user_agent,
@@ -93,13 +98,28 @@ async fn main() -> ExitCode {
                 ..FetchOptions::default()
             };
             let result = openseo_core::review(&url, &options).await;
+            let crawl = match &result {
+                ReviewResult::Success(r) if !no_crawl => Some(
+                    openseo_core::crawl::crawl(
+                        &r.http.final_url,
+                        r.content.canonical.as_deref(),
+                        &options,
+                    )
+                    .await,
+                ),
+                _ => None,
+            };
             let success = matches!(result, ReviewResult::Success(_));
             if json {
-                if !print_json(&result) {
+                let report = JsonReport {
+                    result: &result,
+                    crawl: crawl.as_ref(),
+                };
+                if !print_json(&report) {
                     return ExitCode::FAILURE;
                 }
             } else {
-                print_result(&result, verbose, top);
+                print_result(&result, crawl.as_ref(), verbose, top);
             }
             if success {
                 ExitCode::SUCCESS
@@ -151,6 +171,15 @@ async fn main() -> ExitCode {
             }
         }
     }
+}
+
+/// `report --json` output: the review result, plus `crawl` when it ran.
+#[derive(Serialize)]
+struct JsonReport<'a> {
+    #[serde(flatten)]
+    result: &'a ReviewResult,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    crawl: Option<&'a Crawl>,
 }
 
 fn print_json(value: &impl Serialize) -> bool {
@@ -239,7 +268,7 @@ fn print_speed(r: &SpeedReport, top: usize) {
     }
 }
 
-fn print_result(result: &ReviewResult, verbose: bool, top: usize) {
+fn print_result(result: &ReviewResult, crawl: Option<&Crawl>, verbose: bool, top: usize) {
     match result {
         ReviewResult::InvalidUrl { input } => {
             eprintln!("error: {input:?} is not a valid http(s) URL")
@@ -259,7 +288,7 @@ fn print_result(result: &ReviewResult, verbose: bool, top: usize) {
             let media = http.media_type.as_deref().unwrap_or("no content type");
             eprintln!("\nerror: the page is not HTML ({media})");
         }
-        ReviewResult::Success(review) => print_review(review, verbose, top),
+        ReviewResult::Success(review) => print_review(review, crawl, verbose, top),
     }
 }
 
@@ -294,7 +323,60 @@ fn with_length(value: Option<&str>) -> String {
     }
 }
 
-fn print_review(review: &Review, verbose: bool, top: usize) {
+fn or_none(value: Option<&str>) -> &str {
+    value.unwrap_or("(none)")
+}
+
+fn print_indexing(review: &Review, crawl: Option<&Crawl>) {
+    let c = &review.content;
+    section("Indexing");
+    println!("Meta robots      {}", or_none(c.robots.as_deref()));
+    let x_robots: Vec<&str> = review
+        .http
+        .headers
+        .iter()
+        .filter(|h| h.name.eq_ignore_ascii_case("x-robots-tag"))
+        .flat_map(|h| h.values.iter().map(String::as_str))
+        .collect();
+    if !x_robots.is_empty() {
+        println!("X-Robots-Tag     {}", x_robots.join(" | "));
+    }
+    let Some(crawl) = crawl else {
+        println!("robots.txt       (not checked)");
+        return;
+    };
+    let r = &crawl.robots;
+    let robots = match &r.status {
+        RobotsStatus::Found => {
+            let verdict = if r.allowed { "allows" } else { "BLOCKS" };
+            let rule = match (&r.rule, r.rule_line) {
+                (Some(rule), Some(line)) => format!(" (\"{rule}\", line {line})"),
+                _ => String::new(),
+            };
+            format!("{verdict} {}{rule}", openseo_core::crawl::CRAWLER)
+        }
+        RobotsStatus::Missing { http_status } => format!("none (HTTP {http_status}): all allowed"),
+        RobotsStatus::ServerError { http_status } => {
+            format!("HTTP {http_status}: Google treats the site as blocked")
+        }
+        RobotsStatus::Unreachable { reason } => format!("unreachable ({reason})"),
+    };
+    println!("robots.txt       {robots}");
+    let s = &crawl.sitemaps;
+    let sitemap = match (&s.listed_in, s.files.iter().any(|f| f.kind.is_some())) {
+        (Some(file), _) => format!("listed in {file}"),
+        (None, true) => format!(
+            "not listed ({} URLs in {} files checked{})",
+            s.urls_checked,
+            s.files.len(),
+            if s.truncated { ", stopped early" } else { "" }
+        ),
+        (None, false) => "no readable sitemap found".into(),
+    };
+    println!("Sitemap          {sitemap}");
+}
+
+fn print_review(review: &Review, crawl: Option<&Crawl>, verbose: bool, top: usize) {
     let c = &review.content;
     print_http(&review.http, verbose);
 
@@ -307,11 +389,43 @@ fn print_review(review: &Review, verbose: bool, top: usize) {
     if let Some(k) = &c.meta_keywords {
         println!("Meta keywords    {k}");
     }
-    println!(
-        "Canonical        {}",
-        c.canonical.as_deref().unwrap_or("(none)")
-    );
+    println!("Canonical        {}", or_none(c.canonical.as_deref()));
+    println!("Language         {}", or_none(c.lang.as_deref()));
+    println!("Viewport         {}", or_none(c.viewport.as_deref()));
+    println!("Favicon          {}", or_none(c.favicon.as_deref()));
     println!("Text/HTML ratio  {} %", c.text_html_ratio);
+    if !c.hreflang.is_empty() {
+        let langs: Vec<&str> = c.hreflang.iter().map(|h| h.lang.as_str()).collect();
+        println!("hreflang         {}", langs.join(", "));
+    }
+    let social: Vec<&str> = c.social.iter().map(|t| t.name.as_str()).collect();
+    println!(
+        "Social tags      {}",
+        if social.is_empty() {
+            "(none)".into()
+        } else {
+            social.join(", ")
+        }
+    );
+    let types: Vec<String> = c
+        .structured_data
+        .iter()
+        .map(|d| match &d.error {
+            Some(_) => "(invalid JSON)".to_owned(),
+            None if d.types.is_empty() => "(no @type)".to_owned(),
+            None => d.types.join(", "),
+        })
+        .collect();
+    println!(
+        "Structured data  {}",
+        if types.is_empty() {
+            "(none)".into()
+        } else {
+            types.join("; ")
+        }
+    );
+
+    print_indexing(review, crawl);
 
     section(&format!("Headings ({})", c.headings.len()));
     for h in &c.headings {
@@ -327,8 +441,16 @@ fn print_review(review: &Review, verbose: bool, top: usize) {
         );
     }
 
-    print_violations("Errors", &c.errors);
-    print_violations("Warnings", &c.warnings);
+    let all: Vec<&Violation> = review
+        .http_issues
+        .iter()
+        .chain(crawl.into_iter().flat_map(|c| &c.issues))
+        .chain(c.errors.iter().chain(&c.warnings).chain(&c.notices))
+        .collect();
+    let of = |level| all.iter().copied().filter(move |v| v.level == level);
+    print_violations("Errors", of(Level::Error), true);
+    print_violations("Warnings", of(Level::Warning), true);
+    print_violations("Notices", of(Level::Notice), verbose);
 
     section("Keywords");
     for n in 1..=3u8 {
@@ -381,7 +503,9 @@ fn print_review(review: &Review, verbose: bool, top: usize) {
     }
 }
 
-fn print_violations(title: &str, list: &[Violation]) {
+/// Lists violations; without `detailed`, only their headings.
+fn print_violations<'a>(title: &str, list: impl Iterator<Item = &'a Violation>, detailed: bool) {
+    let list: Vec<_> = list.collect();
     section(&format!("{title} ({})", list.len()));
     for v in list {
         let at = v
@@ -389,7 +513,9 @@ fn print_violations(title: &str, list: &[Violation]) {
             .map(|p| format!("  (line {}, col {})", p.line, p.column))
             .unwrap_or_default();
         println!("• {}{at}", v.heading);
-        println!("    {}", v.description);
-        println!("    → {}", v.recommendation);
+        if detailed {
+            println!("    {}", v.description);
+            println!("    → {}", v.recommendation);
+        }
     }
 }

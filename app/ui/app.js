@@ -51,6 +51,9 @@ const state = {
   source: "raw",
   /** The rendered-page run for the current review. `token` identifies the run. */
   render: { status: "idle" },
+  /** robots.txt and sitemap checks for the current review, like `render`. */
+  crawl: { status: "idle" },
+  issues: { level: "all" },
   /** User-Agent label of the review on screen (settings may change afterwards). */
   reviewUserAgent: "",
   /** PageSpeed runs for the current review's URL, keyed by strategy. */
@@ -70,6 +73,7 @@ $("review-form").addEventListener("submit", async (e) => {
 
   const id = ++requestId; // a newer request makes this one's result stale
   state.render = { status: "idle" };
+  state.crawl = { status: "idle" };
   const userAgent = userAgentLabel(state.settings.userAgent);
   $("loading-url").textContent = url;
   $("submit").disabled = true;
@@ -101,8 +105,10 @@ function render(result) {
       state.review = result;
       state.source = "raw";
       state.render = { status: state.settings.renderJavascript ? "idle" : "off" };
+      state.crawl = { status: "idle" };
       renderReport(result);
       show("report");
+      startCrawl();
       if (state.settings.renderJavascript) startRender();
       return;
     case "invalidUrl":
@@ -193,11 +199,28 @@ function renderReport(r) {
   renderSpeed();
 }
 
-/** Facts and tabs that depend on which HTML is analyzed. */
+/**
+ * Every finding on screen: the HTTP response's and the crawl's (which don't
+ * depend on the HTML analyzed), then the analyzed HTML's. Each is tagged with
+ * whether its position refers to the rendered DOM.
+ */
+function allIssues() {
+  const c = currentContent();
+  const rendered = c !== state.review.content;
+  const page = [...c.errors, ...c.warnings, ...c.notices].map((v) => ({ ...v, rendered }));
+  const crawl = state.crawl.status === "done" ? state.crawl.result.issues : [];
+  const order = { Error: 0, Warning: 1, Notice: 2 };
+  return [...state.review.httpIssues, ...crawl, ...page].sort((a, b) => order[a.level] - order[b.level]);
+}
+
+/** Facts and tabs that depend on which HTML is analyzed (or on the crawl). */
 function renderContent() {
   const { http } = state.review;
   const c = currentContent();
   const rendered = c !== state.review.content;
+  const issues = allIssues();
+  const errors = issues.filter((v) => v.level === "Error").length;
+  const warnings = issues.filter((v) => v.level === "Warning").length;
 
   $("facts").replaceChildren(
     fact("Status", http.status, "ok"),
@@ -205,21 +228,20 @@ function renderContent() {
     rendered
       ? fact("Rendered size", `${fmt.format(state.render.result.sizeKb)} KB`)
       : fact("Size", `${fmt.format(http.sizeKb)} KB`),
-    fact("Errors", c.errors.length, c.errors.length ? "error" : "ok"),
-    fact("Warnings", c.warnings.length, c.warnings.length ? "warn" : "ok"),
+    fact("Errors", errors, errors ? "error" : "ok"),
+    fact("Warnings", warnings, warnings ? "warn" : "ok"),
     fact("Links", c.links.length),
     fact("Text/HTML", `${fmt.format(c.textHtmlRatio)} %`),
     fact("User-Agent", state.reviewUserAgent),
   );
 
-  const issues = c.errors.length + c.warnings.length;
   const issuesCount = $("issues-count");
-  issuesCount.textContent = issues;
-  issuesCount.className = `count ${c.errors.length ? "error" : issues ? "warn" : ""}`;
+  issuesCount.textContent = errors + warnings;
+  issuesCount.className = `count ${errors ? "error" : warnings ? "warn" : ""}`;
   $("links-count").textContent = c.links.length;
 
   renderOverview(c);
-  renderIssues(c, rendered);
+  renderIssues(issues);
   renderKeywords();
   renderLinks();
 }
@@ -272,8 +294,12 @@ function renderOverview(c) {
 
   $("tab-overview").replaceChildren(
     h("div", { class: "grid" },
-      textCard("Title", c.title, [5, 65]),
-      textCard("Meta description", c.metaDescription, [25, 150]),
+      textCard("Title", c.title, [30, 60]),
+      textCard("Meta description", c.metaDescription, [70, 160]),
+      indexingCard(c),
+      pageSetupCard(c),
+      socialCard(c),
+      structuredDataCard(c),
       h("div", { class: "card" },
         h("h3", {}, "Text / HTML ratio"),
         h("div", { class: "big-number" }, `${fmt.format(c.textHtmlRatio)} %`),
@@ -301,13 +327,125 @@ function renderOverview(c) {
   );
 }
 
+/** A label/value row; `tone` (ok, warn, error) colors a status dot. */
+function row(label, value, tone) {
+  return [
+    h("dt", {}, label),
+    h("dd", {}, tone ? h("span", { class: `dot ${tone}`, "aria-hidden": "true" }) : null, value),
+  ];
+}
+
+const none = (text = "None") => h("span", { class: "none" }, text);
+
+function headerValues(name) {
+  return state.review.http.headers
+    .filter((hd) => hd.name.toLowerCase() === name)
+    .flatMap((hd) => hd.values);
+}
+
+function robotsTxtRow() {
+  const run = state.crawl;
+  if (run.status === "loading") return row("robots.txt", none("Checking…"));
+  if (run.status !== "done") return row("robots.txt", none("Not checked"));
+  const r = run.result.robots;
+  switch (r.status.status) {
+    case "found":
+      return r.allowed
+        ? row("robots.txt", "Allows Googlebot", "ok")
+        : row("robots.txt", [`Blocks Googlebot: `, h("code", {}, r.rule ?? "?"), r.ruleLine ? ` (line ${r.ruleLine})` : ""], "error");
+    case "missing":
+      return row("robots.txt", `None (HTTP ${r.status.httpStatus}): everything allowed`, "ok");
+    case "serverError":
+      return row("robots.txt", `HTTP ${r.status.httpStatus}: Google treats the site as blocked`, "error");
+    default:
+      return row("robots.txt", `Unreachable: ${r.status.reason}`, "warn");
+  }
+}
+
+function sitemapRow() {
+  const run = state.crawl;
+  if (run.status === "loading") return row("Sitemap", none("Searching…"));
+  if (run.status !== "done") return row("Sitemap", none("Not checked"));
+  const s = run.result.sitemaps;
+  if (s.listedIn) return row("Sitemap", ["Listed in ", extLink(s.listedIn)], "ok");
+  if (!s.files.some((f) => f.kind)) return row("Sitemap", "No readable sitemap found", "warn");
+  return row("Sitemap",
+    `Not listed (${fmt.format(s.urlsChecked)} URLs in ${s.files.length} files${s.truncated ? ", stopped early" : ""})`, "warn");
+}
+
+function indexingCard(c) {
+  const finalUrl = state.review.http.finalUrl.split("#")[0];
+  const noindex = (v) => /\b(noindex|none)\b/i.test(v ?? "");
+  const xRobots = headerValues("x-robots-tag");
+  let canonical;
+  if (!c.canonical) canonical = row("Canonical", none("Missing"), "warn");
+  else if (c.canonical.split("#")[0] === finalUrl) canonical = row("Canonical", "This page", "ok");
+  else canonical = row("Canonical", ["Another URL: ", extLink(c.canonical)], "warn");
+  return h("div", { class: "card" },
+    h("h3", {}, "Indexing"),
+    h("dl", { class: "kv" },
+      row("Meta robots", c.robots ?? none(), noindex(c.robots) ? "error" : "ok"),
+      xRobots.length ? row("X-Robots-Tag", xRobots.join(" | "), xRobots.some(noindex) ? "error" : "ok") : null,
+      canonical,
+      robotsTxtRow(),
+      sitemapRow(),
+    ));
+}
+
+function pageSetupCard(c) {
+  const responsive = /width\s*=\s*device-width/i.test(c.viewport ?? "");
+  return h("div", { class: "card" },
+    h("h3", {}, "Page setup"),
+    h("dl", { class: "kv" },
+      row("Language", c.lang ?? none("Missing"), c.lang ? "ok" : "warn"),
+      row("Viewport", c.viewport ?? none("Missing"), responsive ? "ok" : "warn"),
+      row("Favicon", c.favicon ? extLink(c.favicon) : none("Not declared"), c.favicon ? "ok" : null),
+      row("HTTPS", state.review.http.finalUrl.startsWith("https:") ? "Yes" : "No", state.review.http.finalUrl.startsWith("https:") ? "ok" : "error"),
+      c.hreflang.length
+        ? row("hreflang", c.hreflang.map((x) => x.lang).join(", "))
+        : row("hreflang", none()),
+    ));
+}
+
+function socialCard(c) {
+  const tag = (name) => c.social.find((t) => t.name === name)?.content;
+  const og = c.social.some((t) => t.name.startsWith("og:"));
+  const image = tag("og:image") ?? tag("twitter:image");
+  return h("div", { class: "card" },
+    h("h3", {}, "Social sharing"),
+    og || tag("twitter:card")
+      ? h("dl", { class: "kv" },
+          row("og:title", tag("og:title") ?? none("Missing")),
+          row("og:description", tag("og:description") ?? none("Missing")),
+          row("Image", image ? extLink(image, image) : none("Missing")),
+          row("twitter:card", tag("twitter:card") ?? none("Missing")))
+      : h("div", { class: "value none" }, "No Open Graph or Twitter card tags: shares show a guessed preview."));
+}
+
+function structuredDataCard(c) {
+  return h("div", { class: "card" },
+    h("h3", {}, `Structured data (${c.structuredData.length})`),
+    c.structuredData.length
+      ? h("ul", { class: "plain" },
+          c.structuredData.map((d) =>
+            h("li", {},
+              d.error
+                ? [h("span", { class: "dot error", "aria-hidden": "true" }), "Invalid JSON: ", h("span", { class: "muted" }, d.error)]
+                : [h("span", { class: `dot ${d.hasContext ? "ok" : "warn"}`, "aria-hidden": "true" }),
+                   d.types.length ? d.types.join(", ") : none("No @type"),
+                   d.hasContext ? null : h("span", { class: "muted" }, " (no @context)")])))
+      : h("div", { class: "value none" }, "No JSON-LD on this page."));
+}
+
 // ───────────────────────────── Issues ─────────────────────────────
 
-function issueCard(v, rendered) {
-  const isError = v.level === "Error";
-  return h("article", { class: `issue ${isError ? "error" : ""}` },
+const LEVEL_CLASS = { Error: "error", Warning: "warn", Notice: "notice" };
+
+function issueCard(v) {
+  const { rendered } = v;
+  return h("article", { class: `issue ${LEVEL_CLASS[v.level]}` },
     h("div", { class: "issue-head" },
-      h("span", { class: `badge ${isError ? "error" : "warn"}` }, v.level),
+      h("span", { class: `badge ${LEVEL_CLASS[v.level]}` }, v.level),
       h("span", { class: "badge" }, v.category),
       h("strong", {}, v.heading),
       v.position
@@ -320,14 +458,27 @@ function issueCard(v, rendered) {
   );
 }
 
-function renderIssues(c, rendered) {
-  const all = [...c.errors, ...c.warnings];
+function renderIssues(issues) {
+  const count = (level) => issues.filter((v) => v.level === level).length;
+  const { level } = state.issues;
+  const shown = level === "all" ? issues : issues.filter((v) => v.level === level);
+  const filter = h("div", { class: "segmented", role: "group", "aria-label": "Level" },
+    [["all", `All ${issues.length}`], ["Error", `Errors ${count("Error")}`],
+     ["Warning", `Warnings ${count("Warning")}`], ["Notice", `Notices ${count("Notice")}`]]
+      .map(([value, label]) => h("button", {
+        "aria-pressed": String(value === level),
+        onclick: () => { state.issues.level = value; renderIssues(allIssues()); },
+      }, label)));
+  const pending = state.crawl.status === "loading"
+    ? h("span", { class: "muted small" }, "robots.txt and sitemap checks are running…")
+    : null;
   $("tab-issues").replaceChildren(
-    all.length
-      ? h("div", { class: "issues" }, all.map((v) => issueCard(v, rendered)))
+    h("div", { class: "toolbar" }, filter, pending),
+    shown.length
+      ? h("div", { class: "issues" }, shown.map(issueCard))
       : h("div", { class: "card all-clear" },
           h("span", { class: "badge ok" }, "All clear"),
-          h("p", {}, "No markup issues found by the current rules.")),
+          h("p", {}, level === "all" ? "No issues found by the current rules." : "Nothing at this level.")),
   );
 }
 
@@ -715,6 +866,21 @@ async function startRender() {
   renderJs();
 }
 
+async function startCrawl() {
+  const url = state.review.http.finalUrl;
+  const token = {};
+  state.crawl = { status: "loading", token };
+  let next;
+  try {
+    next = { status: "done", result: await invoke("crawl", { url }) };
+  } catch (err) {
+    next = { status: "error", error: typeof err === "object" ? err : { message: String(err) } };
+  }
+  if (state.crawl.token !== token || state.review?.http.finalUrl !== url) return;
+  Object.assign(state.crawl, next);
+  renderContent();
+}
+
 function openPreview(url) {
   invoke("open_preview", { url }).catch((err) => console.error("preview failed", err));
 }
@@ -724,6 +890,7 @@ const FIELD_LABELS = {
   title: "Title",
   metaDescription: "Meta description",
   canonical: "Canonical",
+  robots: "Meta robots",
   h1: "H1",
 };
 
@@ -781,7 +948,7 @@ function renderedReport(r) {
         `${fmt.format(state.review.http.sizeKb)} KB as sent · User-Agent: ${state.reviewUserAgent}`),
       h("button", { class: "secondary", type: "button", onclick: () => openPreview(r.url) }, "Open preview"),
       h("button", { class: "secondary", type: "button", onclick: startRender }, "Render again")),
-    r.settled ? null : h("div", { class: "notice" },
+    r.settled ? null : h("div", { class: "callout" },
       "The page was still loading or changing after 20 seconds. Content that arrives later is missing from this capture."),
     h("section", { class: "js-section" },
       h("h3", {}, "Key elements"),

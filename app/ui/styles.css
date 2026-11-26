@@ -280,6 +280,7 @@ a.ext:hover { text-decoration: underline; }
 .badge.error { color: var(--error); background: var(--error-soft); }
 .badge.warn { color: var(--warn); background: var(--warn-soft); }
 .badge.ok { color: var(--ok); background: var(--accent-soft); }
+.badge.notice { color: var(--muted); background: var(--surface-2); }
 .where { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--muted); }
 
 .all-clear { padding: 32px; text-align: center; }
@@ -515,9 +516,24 @@ code { font-family: var(--mono); font-size: 0.9em; padding: 0 3px; background: v
 .js-section { margin-top: 20px; }
 .js-section h3 { margin: 0 0 8px; font-size: 14px; }
 .js-section > p { margin: 0 0 8px; }
-.notice { padding: 10px 14px; border-radius: var(--radius); background: var(--warn-soft); color: var(--text); margin-bottom: 12px; }
+.callout { padding: 10px 14px; border-radius: var(--radius); background: var(--warn-soft); color: var(--text); margin-bottom: 12px; }
 .compare td.value-cell { word-break: break-word; }
 .compare td.value-cell div + div { margin-top: 4px; }
 .compare tr.changed td:first-child { box-shadow: inset 3px 0 0 var(--warn); }
 .compare .none { color: var(--muted); font-style: italic; }
 .compare th.label, .compare td.label { white-space: nowrap; width: 1%; }
+
+/* ───────── Overview key/value cards and issue levels ───────── */
+
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; font-size: 14px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; word-break: break-word; }
+.kv code, .plain code { font-family: var(--mono); font-size: 12.5px; }
+.none { color: var(--muted); font-style: italic; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; background: var(--muted); }
+.dot.ok { background: var(--ok); }
+.dot.warn { background: var(--warn); }
+.dot.error { background: var(--error); }
+.plain { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+.plain li + li { margin-top: 6px; }
+.issue.notice { border-left-color: var(--border); }

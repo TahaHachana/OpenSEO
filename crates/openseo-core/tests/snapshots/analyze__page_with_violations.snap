@@ -4,9 +4,27 @@ expression: a
 ---
 {
   "title": "Shop",
-  "metaDescription": "A very long description that keeps going on and on about everything the shop sells, every product, every category, every promotion and every season of the year.",
+  "metaDescription": "A very long description that keeps going on and on about everything the shop sells, every product, every category, every promotion, every season of the year, and every gift idea we could think of.",
   "metaKeywords": null,
-  "canonical": null,
+  "canonical": "https://shop.example/shop",
+  "robots": "noindex",
+  "lang": null,
+  "viewport": null,
+  "favicon": null,
+  "hreflang": [
+    {
+      "lang": "en_US",
+      "url": "https://shop.example/shop"
+    }
+  ],
+  "social": [],
+  "structuredData": [
+    {
+      "types": [],
+      "hasContext": false,
+      "error": "trailing comma at line 1 column 19"
+    }
+  ],
   "headings": [
     {
       "level": 1,
@@ -17,7 +35,7 @@ expression: a
       "text": "To the shop"
     }
   ],
-  "textHtmlRatio": 1.86,
+  "textHtmlRatio": 1.68,
   "keywords": [
     {
       "words": 1,
@@ -58,29 +76,66 @@ expression: a
       "rel": "Follow"
     }
   ],
-  "errors": [],
+  "errors": [
+    {
+      "code": "CanonicalMultiple",
+      "category": "SEO",
+      "level": "Error",
+      "heading": "The page declares several canonical URLs.",
+      "description": "The page has 2 canonical links pointing to different URLs. Google ignores all of them when they conflict.",
+      "recommendation": "Keep a single canonical link.",
+      "position": {
+        "line": 6,
+        "column": 1
+      }
+    },
+    {
+      "code": "Noindex",
+      "category": "SEO",
+      "level": "Error",
+      "heading": "The page asks search engines not to index it.",
+      "description": "<meta name=\"robots\" content=\"noindex\"> keeps the page out of search results.",
+      "recommendation": "Remove noindex if the page should appear in search results.",
+      "position": {
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "code": "StructuredDataInvalid",
+      "category": "SEO",
+      "level": "Error",
+      "heading": "A JSON-LD block is not valid JSON.",
+      "description": "Search engines ignore structured data they can't parse (trailing comma at line 1 column 19).",
+      "recommendation": "Fix the JSON syntax, then check the page with Google's Rich Results Test.",
+      "position": {
+        "line": 9,
+        "column": 1
+      }
+    },
+    {
+      "code": "MixedContentActive",
+      "category": "Security",
+      "level": "Error",
+      "heading": "A script, stylesheet or frame loads over http.",
+      "description": "<script> loads http://cdn.shop.example/legacy.js over http on an https page. Browsers block it, which can break the page.",
+      "recommendation": "Load the resource over https.",
+      "position": {
+        "line": 10,
+        "column": 1
+      }
+    }
+  ],
   "warnings": [
     {
       "code": "AltMissing",
       "category": "SEO",
       "level": "Warning",
-      "heading": "The \"alt\" attribute of the <img> tag is missing.",
-      "description": "The \"alt\" attribute is used to provide relevant information about the image to search engines.",
-      "recommendation": "Add an \"alt\" attribute that describes the image.",
+      "heading": "An image has no \"alt\" attribute.",
+      "description": "The image /banner.jpg has no alt text. Search engines and screen readers rely on it to understand images.",
+      "recommendation": "Add an \"alt\" attribute that describes the image, or alt=\"\" if it is purely decorative.",
       "position": {
-        "line": 93,
-        "column": 1
-      }
-    },
-    {
-      "code": "AltEmpty",
-      "category": "SEO",
-      "level": "Warning",
-      "heading": "The \"alt\" attribute of the <img> tag is empty.",
-      "description": "The \"alt\" attribute is used to provide relevant information about the image to search engines.",
-      "recommendation": "Add content to the \"alt\" attribute.",
-      "position": {
-        "line": 94,
+        "line": 99,
         "column": 1
       }
     },
@@ -89,62 +144,20 @@ expression: a
       "category": "SEO",
       "level": "Warning",
       "heading": "The meta description is too long.",
-      "description": "The content of the meta description tag is too long (160 characters). The description must not exceed 150 characters.",
-      "recommendation": "The description must be between 25 and 150 characters long, human readable, actionable, and rich in keywords.",
+      "description": "The meta description has 196 characters. Google truncates snippets after about 160 characters (around 920 pixels on desktop).",
+      "recommendation": "Write a 70–160 character summary of the page that makes people want to click.",
       "position": {
-        "line": 6,
+        "line": 12,
         "column": 1
       }
-    },
-    {
-      "code": "H1Multiple",
-      "category": "Standards",
-      "level": "Warning",
-      "heading": "The page contains multiple <h1> tags.",
-      "description": "The <h1> heading summarizes the page’s topic. Search engines diminish the value of a page that contains multiple <h1> tags.",
-      "recommendation": "Use the <h1> tag once per page.",
-      "position": null
-    },
-    {
-      "code": "LargeInlineCss",
-      "category": "Performance",
-      "level": "Warning",
-      "heading": "The page contains a large number of CSS definitions.",
-      "description": "The page contains a large block of embedded Cascading Style Sheet (CSS) code (1201 characters). Search engines will ignore CSS code, but large quantities of CSS code that precede the actual text content of the page will force the text content further down in the HTML.",
-      "recommendation": "Move large blocks of CSS code to externally linked CSS files.",
-      "position": {
-        "line": 7,
-        "column": 1
-      }
-    },
-    {
-      "code": "LargeInlineScript",
-      "category": "Performance",
-      "level": "Warning",
-      "heading": "The page contains a large amount of script code.",
-      "description": "The page contains a large block of embedded script code (1251 characters). Search engines will ignore script code, but large quantities of script will force the actual text content of the page further down in the HTML.",
-      "recommendation": "Move all inline script code to externally linked script files.",
-      "position": {
-        "line": 97,
-        "column": 1
-      }
-    },
-    {
-      "code": "QueryParameterCount",
-      "category": "SEO",
-      "level": "Warning",
-      "heading": "The URL contains too many query string parameters.",
-      "description": "The URL contains 5 query string parameters. Most search engines will analyze up to four URL parameters and ignore any additional parameters.",
-      "recommendation": "Consider reducing the number of query string parameters, or use a URL Rewrite Module to simplify the URL structure.",
-      "position": null
     },
     {
       "code": "TitleShort",
       "category": "SEO",
       "level": "Warning",
       "heading": "The title is too short.",
-      "description": "The text in the <title> tag is too short (4 characters). The title must contain at least 5 characters. A title that is too short can affect how the content of the page is indexed, ranked, and presented by search engines.",
-      "recommendation": "The title must be between 5 and 65 characters long.",
+      "description": "The title has 4 characters. Short titles miss the chance to describe the page, and Google is more likely to rewrite them.",
+      "recommendation": "Keep titles between 30 and 60 characters, with the most important words first.",
       "position": {
         "line": 4,
         "column": 1
@@ -154,13 +167,138 @@ expression: a
       "code": "RefreshToRedirect",
       "category": "Standards",
       "level": "Warning",
-      "heading": "The page uses a refresh definition instead of using redirection.",
-      "description": "The page uses a meta refresh tag to implement redirection. Using meta refresh syntax is discouraged by the W3C, because unexpected refresh may confuse users and may impair the \"back\" button functionality in some browsers.",
-      "recommendation": "Use HTTP Redirection instead of using HTTP Refresh headers or meta refresh tags.",
+      "heading": "The page redirects with a meta refresh.",
+      "description": "The page uses <meta http-equiv=\"refresh\">. It breaks the back button, is slower than a server redirect, and search engines may not treat it as a permanent move.",
+      "recommendation": "Use an HTTP 301 redirect instead.",
       "position": {
-        "line": 5,
+        "line": 11,
         "column": 1
       }
+    },
+    {
+      "code": "LangMissing",
+      "category": "Standards",
+      "level": "Warning",
+      "heading": "The page doesn't declare its language.",
+      "description": "The <html> element has no lang attribute. Screen readers use it to pick a pronunciation, and browsers and search engines use it as a language hint.",
+      "recommendation": "Add a lang attribute to the <html> element, e.g. <html lang=\"en\">.",
+      "position": {
+        "line": 2,
+        "column": 1
+      }
+    },
+    {
+      "code": "ViewportMissing",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "The page has no viewport meta tag.",
+      "description": "Without <meta name=\"viewport\">, phones render the page at desktop width and shrink it. Google indexes the mobile version of pages.",
+      "recommendation": "Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">.",
+      "position": null
+    },
+    {
+      "code": "HreflangInvalid",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "An hreflang annotation is invalid.",
+      "description": "hreflang \"en_US\" is not a language code (use en or en-GB, with a hyphen).",
+      "recommendation": "Use a language code (en), optionally with a region (en-GB), or x-default, with an absolute URL.",
+      "position": null
+    },
+    {
+      "code": "HreflangMissingSelf",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "The hreflang annotations don't include this page.",
+      "description": "The page lists 1 language alternates, but none points to the page itself. Google may ignore annotations that aren't confirmed both ways.",
+      "recommendation": "Add an hreflang link for this page's own language that points to its own URL.",
+      "position": null
+    },
+    {
+      "code": "ImageNoDimensions",
+      "category": "Performance",
+      "level": "Warning",
+      "heading": "Images lack width and height attributes.",
+      "description": "3 of 3 images have no width and height attributes. The browser can't reserve their space, so the layout jumps as they load (Cumulative Layout Shift).",
+      "recommendation": "Set width and height attributes (or a CSS aspect-ratio) on images so the browser can reserve their space.",
+      "position": {
+        "line": 99,
+        "column": 1
+      }
+    },
+    {
+      "code": "LazyFirstImage",
+      "category": "Performance",
+      "level": "Warning",
+      "heading": "The first image is lazy-loaded.",
+      "description": "The first image on the page has loading=\"lazy\". If it shows in the first screen, lazy loading delays it and hurts Largest Contentful Paint.",
+      "recommendation": "Load images in the first screen eagerly; lazy-load only those further down.",
+      "position": {
+        "line": 99,
+        "column": 1
+      }
+    }
+  ],
+  "notices": [
+    {
+      "code": "AltEmpty",
+      "category": "SEO",
+      "level": "Notice",
+      "heading": "An image has an empty \"alt\" attribute.",
+      "description": "1 image is marked as decorative (alt=\"\"): screen readers skip them and search engines get no text for them. The position is the first one's.",
+      "recommendation": "Keep alt=\"\" for decorative images; describe images that carry meaning (product photos, charts, image links).",
+      "position": {
+        "line": 100,
+        "column": 1
+      }
+    },
+    {
+      "code": "H1Multiple",
+      "category": "Standards",
+      "level": "Notice",
+      "heading": "The page has several <h1> headings.",
+      "description": "The page has 2 <h1> elements. Google handles several fine, but one main heading keeps the outline clear for users and assistive technology.",
+      "recommendation": "Consider one <h1> for the main topic and <h2>–<h6> for sections.",
+      "position": {
+        "line": 98,
+        "column": 1
+      }
+    },
+    {
+      "code": "QueryParameterCount",
+      "category": "SEO",
+      "level": "Notice",
+      "heading": "The URL has many query parameters.",
+      "description": "The URL has 5 query parameters. Parameter combinations create many URLs for the same content, which wastes crawl budget and splits ranking signals.",
+      "recommendation": "Prefer short, descriptive paths, and point parameter variants to one URL with a canonical link.",
+      "position": null
+    },
+    {
+      "code": "OpenGraphMissing",
+      "category": "Social",
+      "level": "Notice",
+      "heading": "The page has no Open Graph tags.",
+      "description": "When the page is shared on Facebook, LinkedIn, Slack and the like, the preview's title, image and description are guessed from the page.",
+      "recommendation": "Add og:title, og:type, og:image and og:url meta tags.",
+      "position": null
+    },
+    {
+      "code": "TwitterCardMissing",
+      "category": "Social",
+      "level": "Notice",
+      "heading": "The page has no Twitter card tag.",
+      "description": "Without twitter:card, X shows a small summary preview. (It falls back to Open Graph for the title, description and image.)",
+      "recommendation": "Add <meta name=\"twitter:card\" content=\"summary_large_image\"> for a large image preview.",
+      "position": null
+    },
+    {
+      "code": "FaviconMissing",
+      "category": "Standards",
+      "level": "Notice",
+      "heading": "The page doesn't declare a favicon.",
+      "description": "Browsers and Google then fall back to /favicon.ico, which may not exist. Google shows the favicon next to the page in search results.",
+      "recommendation": "Add <link rel=\"icon\" href=\"/favicon.ico\">. Google wants a square icon of at least 48×48 pixels.",
+      "position": null
     }
   ]
 }

@@ -82,6 +82,8 @@ pub enum Field {
     Title,
     MetaDescription,
     Canonical,
+    /// Robots meta directives: a noindex added or removed by scripts.
+    Robots,
     H1,
 }
 
@@ -129,11 +131,7 @@ fn same(a: &[String], b: &[String]) -> bool {
     squash(a) == squash(b)
 }
 
-fn without_fragment(url: &Url) -> String {
-    let mut url = url.clone();
-    url.set_fragment(None);
-    url.into()
-}
+use crate::rules::without_fragment;
 
 /// What scripts changed between the raw page (`raw`, served at `raw_url`) and
 /// the rendered one.
@@ -184,6 +182,7 @@ pub fn compare(
                 opt(&raw.canonical),
                 opt(&rendered.canonical),
             ),
+            field(Field::Robots, opt(&raw.robots), opt(&rendered.robots)),
             field(Field::H1, h1s(raw), h1s(rendered)),
         ],
         links_added: links_diff(&rendered.links, &raw.links),

@@ -5,6 +5,7 @@ mod render;
 
 use std::sync::Mutex;
 
+use openseo_core::crawl::Crawl;
 use openseo_core::pagespeed::{PageSpeed, SpeedReport, Strategy};
 use openseo_core::render::RenderedReview;
 use openseo_core::{Analysis, FetchOptions, ReviewResult, UserAgent};
@@ -144,6 +145,26 @@ async fn render(app: AppHandle, url: String) -> Result<RenderedReview, CommandEr
     })
 }
 
+/// Checks robots.txt and the sitemaps for `url`, the final URL of the last
+/// review. Its canonical URL also counts as listed in a sitemap.
+#[tauri::command]
+async fn crawl(app: AppHandle, url: String) -> Result<Crawl, CommandError> {
+    let url = web_url(&url)?;
+    let canonical = app
+        .state::<LastReview>()
+        .0
+        .lock()
+        .ok()
+        .and_then(|slot| slot.clone())
+        .filter(|(reviewed, _)| *reviewed == url)
+        .and_then(|(_, analysis)| analysis.canonical);
+    let options = FetchOptions {
+        user_agent: load_settings(&app).user_agent,
+        ..FetchOptions::default()
+    };
+    Ok(openseo_core::crawl::crawl(&url, canonical.as_deref(), &options).await)
+}
+
 /// Opens `url` in a visible preview window, with the saved User-Agent.
 #[tauri::command]
 fn open_preview(app: AppHandle, url: String) -> Result<(), CommandError> {
@@ -191,6 +212,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             review,
             render,
+            crawl,
             open_preview,
             pagespeed,
             get_settings,

@@ -2933,7 +2933,9 @@ name = "openseo-core"
 version = "0.1.0"
 dependencies = [
  "ego-tree",
+ "flate2",
  "insta",
+ "quick-xml",
  "reqwest",
  "scraper",
  "serde",

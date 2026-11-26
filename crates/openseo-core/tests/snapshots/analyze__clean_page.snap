@@ -7,6 +7,42 @@ expression: a
   "metaDescription": "Single-origin coffee beans roasted to order and shipped within 48 hours. Free shipping on orders over $40.",
   "metaKeywords": "coffee, beans, roastery",
   "canonical": "https://acme.example/",
+  "robots": null,
+  "lang": "en",
+  "viewport": "width=device-width, initial-scale=1",
+  "favicon": "https://acme.example/favicon.png",
+  "hreflang": [],
+  "social": [
+    {
+      "name": "og:title",
+      "content": "Fresh Roasted Coffee Beans"
+    },
+    {
+      "name": "og:type",
+      "content": "website"
+    },
+    {
+      "name": "og:url",
+      "content": "https://acme.example/"
+    },
+    {
+      "name": "og:image",
+      "content": "https://acme.example/beans.jpg"
+    },
+    {
+      "name": "twitter:card",
+      "content": "summary_large_image"
+    }
+  ],
+  "structuredData": [
+    {
+      "types": [
+        "Organization"
+      ],
+      "hasContext": true,
+      "error": null
+    }
+  ],
   "headings": [
     {
       "level": 1,
@@ -21,7 +57,7 @@ expression: a
       "text": "Brewing guides"
     }
   ],
-  "textHtmlRatio": 27.57,
+  "textHtmlRatio": 18.05,
   "keywords": [
     {
       "words": 1,
@@ -303,5 +339,6 @@ expression: a
     }
   ],
   "errors": [],
-  "warnings": []
+  "warnings": [],
+  "notices": []
 }

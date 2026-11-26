@@ -7,13 +7,17 @@
 //! - [`review`]: normalize a URL, fetch it, analyze it.
 //! - [`analyze`]: analyze HTML you already have (no network).
 //! - [`render`]: analyze a page a browser rendered, and compare it with the raw HTML.
+//! - [`crawl::crawl`]: robots.txt and sitemap checks for a page (extra requests).
 
+pub mod crawl;
 pub mod fetch;
+pub mod head;
 pub mod html;
 pub mod keywords;
 pub mod pagespeed;
 pub mod render;
 pub mod review;
+pub mod robots;
 pub mod rules;
 pub mod source;
 mod text;

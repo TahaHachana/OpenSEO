@@ -14,9 +14,10 @@ Branch: `rust-rewrite`
 - [x] Phase 3: Tauri app MVP (`cargo run -p openseo-app [-- <url>]`)
 - [x] Phase 4: PageSpeed Insights + CrUX field data, settings (User-Agent presets, API key)
 - [x] Phase 5: rendered-DOM mode (app only; verified on Linux X11 and Wayland, not yet on Windows/macOS)
+- [x] Phase 6: modernized rules, new page/response checks, robots.txt + sitemap crawl checks (external validators not done)
 
-Deliberate deviations from SEOLib (bugs fixed while porting) are listed in the
-module docs of `keywords.rs`, `rules.rs` and `html.rs`.
+Deliberate deviations from SEOLib (bugs fixed while porting, modernized rules) are
+listed in the module docs of `keywords.rs`, `rules/mod.rs` and `html.rs`.
 
 ## 1. What we are porting
 
@@ -163,6 +164,32 @@ except speed.
   presence and parse validity, favicon, image dimensions/lazy loading.
 - Optional external: W3C Nu HTML validator, Google Safe Browsing (needs a free key).
 
+**As built:**
+- Rules engine in `rules/` (content, head, resources, response); a new `Notice`
+  level for best practices and facts, so warnings stay meaningful; new
+  categories Security and Social.
+- Modernized: title 30–60, description 70–160, links notice above 1,000, multiple
+  H1 / many URL parameters / `alt=""` as notices, inline CSS/JS above 20,000
+  characters (JSON blocks excluded).
+- Page checks: HTTPS, mixed content (active/passive), canonical (missing,
+  conflicting, invalid, elsewhere, http), meta robots, `lang`, viewport (+ zoom),
+  hreflang (codes, self-reference, duplicates), Open Graph / Twitter card, JSON-LD
+  validity and `@context`, favicon, image dimensions, lazy-loaded first image.
+- Response checks: `X-Robots-Tag` (Google-applicable values), HSTS, redirect chains,
+  temporary redirects.
+- `crawl` module (separate call, extra requests): own RFC 9309 robots.txt matcher
+  (Googlebot token, reports the deciding rule and line), Google's 4xx/5xx
+  semantics, sitemap discovery (robots.txt, else `/sitemap.xml`), indexes and
+  `.gz`, matching the page or its canonical URL; sitemaps naming the page's path
+  segments are read first, 20 files at most.
+- Meta robots is part of the raw/rendered diff.
+- App: Indexing / Page setup / Social / Structured data cards, Issues tab merging
+  page, response and crawl findings with a level filter. CLI: same data, crawl on
+  by default (`--no-crawl`), JSON gains `crawl`.
+
+**Not done:** W3C Nu validator and Safe Browsing (optional external services);
+image byte sizes and favicon reachability (would need more requests).
+
 ### Phase 7: Packaging and release
 - Tauri bundler: AppImage + .deb (Linux), .msi (Windows), .dmg (macOS) via a GitHub
   Actions matrix on tag push → GitHub Releases. Free hosting for binaries.
@@ -178,7 +205,7 @@ except speed.
 |---|---|---|
 | D1 | Frontend tech | **Decided:** plain HTML/CSS/JS, no build step. Node isn't installed, and the UI is mostly tables and tabs. Alternatives: Leptos (all-Rust, via `trunk`), or Svelte/TS (needs Node). |
 | D2 | User-Agent | **Decided:** honest `OpenSEO/<version>` default; presets (Chrome desktop/mobile, Googlebot) and custom live in Settings, not the toolbar (Phase 4). Fake Googlebot is often blocked by reverse-DNS checks, so it's a preset, not a headline option. Revisit a browser default if 403s from bot protection turn out to be common. |
-| D3 | Rule fidelity | Port verbatim first (Phase 1), modernize later (Phase 6), so parity is verifiable. |
+| D3 | Rule fidelity | **Done:** ported verbatim (Phase 1), then modernized (Phase 6); the changes are listed in `rules/mod.rs`. |
 | D4 | Keyword language | English stop words only, as before; consider detecting `<html lang>` and adding stop word lists later. |
 | D5 | License | The repo has none. Pick one (MIT/Apache-2.0 is the Rust norm) before the first release. |
 

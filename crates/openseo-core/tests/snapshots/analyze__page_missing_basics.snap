@@ -7,6 +7,13 @@ expression: a
   "metaDescription": null,
   "metaKeywords": null,
   "canonical": null,
+  "robots": null,
+  "lang": null,
+  "viewport": null,
+  "favicon": null,
+  "hreflang": [],
+  "social": [],
+  "structuredData": [],
   "headings": [
     {
       "level": 2,
@@ -53,8 +60,8 @@ expression: a
       "category": "SEO",
       "level": "Error",
       "heading": "The title is missing.",
-      "description": "The page markup does not contain the <title> tag. An inaccurate or irrelevant title can affect how the content of the page is indexed, ranked, and presented by search engines.",
-      "recommendation": "Add the <title> tag inside the <head> section of the page.",
+      "description": "The page has no <title>. Search engines show the title as the headline of the result, and browsers show it in tabs and bookmarks.",
+      "recommendation": "Add a <title> inside the <head> of the page.",
       "position": null
     }
   ],
@@ -64,17 +71,85 @@ expression: a
       "category": "SEO",
       "level": "Warning",
       "heading": "The meta description is missing.",
-      "description": "The page's markup does not contain the meta description tag.",
-      "recommendation": "Add a meta description tag to the <head> section of the page.",
+      "description": "Without a meta description, search engines build the result snippet from page text, which may not represent the page well.",
+      "recommendation": "Add a <meta name=\"description\"> tag with a 70–160 character summary of the page.",
       "position": null
     },
     {
       "code": "H1Missing",
       "category": "SEO",
       "level": "Warning",
-      "heading": "The <h1> tag is missing.",
-      "description": "The <h1> heading summarizes the page’s topic.",
-      "recommendation": "Add an <h1> tag to the <body> section of the page.",
+      "heading": "The page has no <h1> heading.",
+      "description": "The main heading tells users and search engines what the page is about.",
+      "recommendation": "Add one <h1> that summarizes the page's topic.",
+      "position": null
+    },
+    {
+      "code": "CanonicalMissing",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "The page has no canonical URL.",
+      "description": "Without <link rel=\"canonical\">, search engines decide which variant of the URL (with or without parameters, http or https, trailing slash) to index.",
+      "recommendation": "Add a <link rel=\"canonical\"> pointing to the preferred URL of this page, usually the page itself.",
+      "position": null
+    },
+    {
+      "code": "LangMissing",
+      "category": "Standards",
+      "level": "Warning",
+      "heading": "The page doesn't declare its language.",
+      "description": "The <html> element has no lang attribute. Screen readers use it to pick a pronunciation, and browsers and search engines use it as a language hint.",
+      "recommendation": "Add a lang attribute to the <html> element, e.g. <html lang=\"en\">.",
+      "position": {
+        "line": 1,
+        "column": 1
+      }
+    },
+    {
+      "code": "ViewportMissing",
+      "category": "SEO",
+      "level": "Warning",
+      "heading": "The page has no viewport meta tag.",
+      "description": "Without <meta name=\"viewport\">, phones render the page at desktop width and shrink it. Google indexes the mobile version of pages.",
+      "recommendation": "Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">.",
+      "position": null
+    }
+  ],
+  "notices": [
+    {
+      "code": "OpenGraphMissing",
+      "category": "Social",
+      "level": "Notice",
+      "heading": "The page has no Open Graph tags.",
+      "description": "When the page is shared on Facebook, LinkedIn, Slack and the like, the preview's title, image and description are guessed from the page.",
+      "recommendation": "Add og:title, og:type, og:image and og:url meta tags.",
+      "position": null
+    },
+    {
+      "code": "TwitterCardMissing",
+      "category": "Social",
+      "level": "Notice",
+      "heading": "The page has no Twitter card tag.",
+      "description": "Without twitter:card, X shows a small summary preview. (It falls back to Open Graph for the title, description and image.)",
+      "recommendation": "Add <meta name=\"twitter:card\" content=\"summary_large_image\"> for a large image preview.",
+      "position": null
+    },
+    {
+      "code": "StructuredDataMissing",
+      "category": "SEO",
+      "level": "Notice",
+      "heading": "The page has no structured data.",
+      "description": "JSON-LD structured data (schema.org) helps search engines understand the page and can earn rich results: ratings, prices, breadcrumbs, events…",
+      "recommendation": "Add JSON-LD for the page type, e.g. Article, Product, Organization or BreadcrumbList.",
+      "position": null
+    },
+    {
+      "code": "FaviconMissing",
+      "category": "Standards",
+      "level": "Notice",
+      "heading": "The page doesn't declare a favicon.",
+      "description": "Browsers and Google then fall back to /favicon.ico, which may not exist. Google shows the favicon next to the page in search results.",
+      "recommendation": "Add <link rel=\"icon\" href=\"/favicon.ico\">. Google wants a square icon of at least 48×48 pixels.",
       "position": null
     }
   ]

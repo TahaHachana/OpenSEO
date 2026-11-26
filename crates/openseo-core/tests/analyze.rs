@@ -20,6 +20,8 @@ fn clean_page() {
     let a = fixture("clean.html", "https://acme.example/");
     assert!(a.errors.is_empty(), "{:#?}", a.errors);
     assert!(a.warnings.is_empty(), "{:#?}", a.warnings);
+    assert!(a.notices.is_empty(), "{:#?}", a.notices);
+    assert_eq!(a.structured_data[0].types, ["Organization"]);
     assert_eq!(
         a.title.as_deref(),
         Some("Fresh Roasted Coffee Beans | Acme Roasters")
@@ -37,24 +39,44 @@ fn page_with_violations() {
         "violations.html",
         "https://shop.example/?a=1&b=2&c=3&d=4&e=5",
     );
-    assert_eq!(codes(&a.errors), vec![]);
+    assert_eq!(
+        codes(&a.errors),
+        vec![
+            CanonicalMultiple,
+            Noindex,
+            StructuredDataInvalid,
+            MixedContentActive
+        ]
+    );
     assert_eq!(
         codes(&a.warnings),
         vec![
             AltMissing,
-            AltEmpty,
             DescriptionLong,
-            H1Multiple,
-            LargeInlineCss,
-            LargeInlineScript,
-            QueryParameterCount,
             TitleShort,
             RefreshToRedirect,
+            LangMissing,
+            ViewportMissing,
+            HreflangInvalid,
+            HreflangMissingSelf,
+            ImageNoDimensions,
+            LazyFirstImage,
+        ]
+    );
+    assert_eq!(
+        codes(&a.notices),
+        vec![
+            AltEmpty,
+            H1Multiple,
+            QueryParameterCount,
+            OpenGraphMissing,
+            TwitterCardMissing,
+            FaviconMissing,
         ]
     );
     // The commented-out <img> must not shift positions of the real ones.
     let alt_missing = a.warnings[0].position.unwrap();
-    assert_eq!((alt_missing.line, alt_missing.column), (93, 1));
+    assert_eq!((alt_missing.line, alt_missing.column), (99, 1));
     insta::assert_json_snapshot!(a);
 }
 
@@ -62,6 +84,15 @@ fn page_with_violations() {
 fn page_missing_basics() {
     let a = fixture("missing.html", "https://bare.example/");
     assert_eq!(codes(&a.errors), vec![TitleMissing]);
-    assert_eq!(codes(&a.warnings), vec![DescriptionMissing, H1Missing]);
+    assert_eq!(
+        codes(&a.warnings),
+        vec![
+            DescriptionMissing,
+            H1Missing,
+            CanonicalMissing,
+            LangMissing,
+            ViewportMissing
+        ]
+    );
     insta::assert_json_snapshot!(a);
 }
