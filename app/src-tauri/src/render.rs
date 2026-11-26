@@ -7,7 +7,7 @@
 //! them would be captured unfinished (and would look settled). Instead, the
 //! webview is a child of the main window placed outside its visible area. On
 //! Linux, where Tauri packs child webviews into the window's layout instead of
-//! positioning them, it is moved into a zero-size container.
+//! positioning them, it is moved into a zero-size container (see `prepare_linux`).
 //!
 //! The page is untrusted. Its webview has no IPC capability (capabilities only
 //! name the `main` webview, and Tauri refuses commands from remote origins
@@ -163,42 +163,54 @@ fn preview_window<'a>(
         .on_download(|_, _| false)
 }
 
-/// Tauri packs a child webview into the main window's vertical box, where it
-/// takes half the window. This moves its widget into a zero-size `GtkFixed` in
-/// that box, at negative coordinates: the widget stays mapped in a real window
-/// (so WebKit treats the page as visible and can composite with the GPU), takes
-/// no space, and everything it draws is clipped away.
+/// Readies the renderer on Linux, before it loads the page:
 ///
-/// (A `GtkOffscreenWindow` would be the textbook choice, but it has no GL
-/// context on Wayland and WebKit aborts the process when it needs one.)
+/// - Tauri packs a child webview into the main window's vertical box, where it
+///   takes half the window. Its widget moves into a zero-size `GtkFixed` in
+///   that box, at negative coordinates: it stays mapped in a real window (so
+///   WebKit treats the page as visible and can composite with the GPU), takes
+///   no space, and everything it draws is clipped away. (A `GtkOffscreenWindow`
+///   would be the textbook choice, but it has no GL context on Wayland and
+///   WebKit aborts the process when it needs one.)
+/// - Media is turned off. The analysis doesn't need it, and WebKit's web
+///   process crashes on pages with video when GStreamer plugins are missing
+///   (minimal systems, or an AppImage without its media framework).
 #[cfg(target_os = "linux")]
-fn move_offscreen(webview: &Webview, width: f64, height: f64) {
+async fn prepare_linux(webview: &Webview, width: f64, height: f64) {
     use gtk::prelude::*;
+    use webkit2gtk::{SettingsExt, WebViewExt};
 
     let (width, height) = (width as i32, height as i32);
-    let moved = webview.with_webview(move |platform| {
+    let (done, ready) = tokio::sync::oneshot::channel();
+    let dispatched = webview.with_webview(move |platform| {
         let view = platform.inner();
-        let Some(parent) = view.parent().and_then(|p| p.downcast::<gtk::Box>().ok()) else {
-            return;
-        };
-        parent.remove(&view);
-        let stage = gtk::Fixed::new();
-        view.set_size_request(width, height);
-        stage.put(&view, -(width + 100), -(height + 100));
-        parent.pack_end(&stage, false, false, 0);
-        stage.show_all();
-        // Closing the Tauri webview destroys the widget; take its stage along.
-        view.connect_destroy(move |_| {
-            if let Some(container) = stage
-                .parent()
-                .and_then(|p| p.downcast::<gtk::Container>().ok())
-            {
-                container.remove(&stage);
-            }
-        });
+        if let Some(settings) = WebViewExt::settings(&view) {
+            settings.set_enable_media(false);
+        }
+        if let Some(parent) = view.parent().and_then(|p| p.downcast::<gtk::Box>().ok()) {
+            parent.remove(&view);
+            let stage = gtk::Fixed::new();
+            view.set_size_request(width, height);
+            stage.put(&view, -(width + 100), -(height + 100));
+            parent.pack_end(&stage, false, false, 0);
+            stage.show_all();
+            // Closing the Tauri webview destroys the widget; take its stage along.
+            view.connect_destroy(move |_| {
+                if let Some(container) = stage
+                    .parent()
+                    .and_then(|p| p.downcast::<gtk::Container>().ok())
+                {
+                    container.remove(&stage);
+                }
+            });
+        }
+        let _ = done.send(());
     });
-    if let Err(e) = moved {
-        eprintln!("renderer: could not move the webview out of sight: {e}");
+    match dispatched {
+        Ok(()) => {
+            let _ = ready.await;
+        }
+        Err(e) => eprintln!("renderer: could not prepare the webview: {e}"),
     }
 }
 
@@ -241,9 +253,15 @@ pub async fn capture(
         .get_window("main")
         .ok_or_else(|| RenderFailure::Webview("the main window is gone".into()))?;
     let (width, height) = viewport(user_agent);
+    // On Linux the webview must be configured before the page loads, so it
+    // starts blank and navigates once ready.
+    #[cfg(target_os = "linux")]
+    let first_url = Url::parse("about:blank").expect("about:blank is a valid URL");
+    #[cfg(not(target_os = "linux"))]
+    let first_url = url.clone();
     let builder = WebviewBuilder::new(
         format!("render-{generation}"),
-        WebviewUrl::External(url.clone()),
+        WebviewUrl::External(first_url),
     )
     .incognito(true)
     .user_agent(&user_agent.header_value())
@@ -256,9 +274,15 @@ pub async fn capture(
     let webview = main
         .add_child(builder, position, LogicalSize::new(width, height))
         .map_err(|e| RenderFailure::Webview(format!("could not open a webview: {e}")))?;
-    #[cfg(target_os = "linux")]
-    move_offscreen(&webview, width, height);
     let webview = CloseOnDrop(webview);
+    #[cfg(target_os = "linux")]
+    {
+        prepare_linux(&webview.0, width, height).await;
+        webview
+            .0
+            .navigate(url.clone())
+            .map_err(|e| RenderFailure::Webview(format!("could not load the page: {e}")))?;
+    }
 
     let mut last = None;
     let settled = loop {

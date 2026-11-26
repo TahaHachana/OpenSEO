@@ -15,6 +15,7 @@ Branch: `rust-rewrite`
 - [x] Phase 4: PageSpeed Insights + CrUX field data, settings (User-Agent presets, API key)
 - [x] Phase 5: rendered-DOM mode (app only; verified on Linux X11 and Wayland, not yet on Windows/macOS)
 - [x] Phase 6: modernized rules, new page/response checks, robots.txt + sitemap crawl checks (external validators not done)
+- [x] Phase 7: release workflow, licenses (Linux bundles verified locally; Windows/macOS built by CI only; no updater yet)
 
 Deliberate deviations from SEOLib (bugs fixed while porting, modernized rules) are
 listed in the module docs of `keywords.rs`, `rules/mod.rs` and `html.rs`.
@@ -195,6 +196,24 @@ image byte sizes and favicon reachability (would need more requests).
   Actions matrix on tag push → GitHub Releases. Free hosting for binaries.
 - Optional: Tauri updater plugin pointed at GitHub Releases.
 
+**As built** (`.github/workflows/release.yml`):
+- A `v*` tag builds the app on Ubuntu 22.04 (AppImage, .deb, .rpm), Windows (.msi,
+  NSIS .exe) and macOS (universal .dmg, ad-hoc signed) with `tauri-action`, plus
+  `openseo` CLI archives for Linux, Windows and macOS (arm64, x86_64), all
+  attached to a **draft** release. Manual runs, and pushes that change the
+  packaging files, build the same files as workflow artifacts.
+- No code signing (needs paid certificates): the release notes explain the macOS
+  quarantine and Windows SmartScreen workarounds.
+- The AppImage bundles GStreamer (159 MB instead of 88 MB): without it, pages
+  with video crash the web process. The renderer also runs with media off.
+- Updater plugin: deferred (needs a signing key stored as a repository secret).
+
+**Releasing:**
+1. Bump `version` in the root `Cargo.toml` (`[workspace.package]`), run
+   `cargo build` to update `Cargo.lock`, commit.
+2. `git tag v0.1.0 && git push origin v0.1.0`.
+3. When the workflow finishes, review the draft on GitHub Releases and publish it.
+
 ### Phase 8: Cleanup
 - Remove the .NET solution, WebSharper scripts and `.nuget/` (git history keeps them).
 - New README: screenshots, install, build-from-source, data sources and their limits.
@@ -207,7 +226,7 @@ image byte sizes and favicon reachability (would need more requests).
 | D2 | User-Agent | **Decided:** honest `OpenSEO/<version>` default; presets (Chrome desktop/mobile, Googlebot) and custom live in Settings, not the toolbar (Phase 4). Fake Googlebot is often blocked by reverse-DNS checks, so it's a preset, not a headline option. Revisit a browser default if 403s from bot protection turn out to be common. |
 | D3 | Rule fidelity | **Done:** ported verbatim (Phase 1), then modernized (Phase 6); the changes are listed in `rules/mod.rs`. |
 | D4 | Keyword language | English stop words only, as before; consider detecting `<html lang>` and adding stop word lists later. |
-| D5 | License | The repo has none. Pick one (MIT/Apache-2.0 is the Rust norm) before the first release. |
+| D5 | License | **Decided:** MIT OR Apache-2.0 (`LICENSE-MIT`, `LICENSE-APACHE`). |
 
 ## 5. Out of scope
 Backlinks, domain authority, keyword search volume, rank tracking: no viable free APIs.

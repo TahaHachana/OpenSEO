@@ -25,13 +25,27 @@
     "active": true,
     "targets": "all",
     "category": "DeveloperTool",
+    "publisher": "Taha Hachana",
+    "copyright": "Copyright (c) Taha Hachana and OpenSEO contributors",
+    "license": "MIT OR Apache-2.0",
+    "homepage": "https://github.com/TahaHachana/OpenSEO",
     "shortDescription": "Desktop SEO report for any web page",
+    "longDescription": "Enter a URL, get an SEO report: title and description, headings, keywords, links, markup issues, indexing (robots.txt, sitemaps, canonical, robots directives), what JavaScript changes on the page, and PageSpeed Insights scores. Runs on your computer, no account needed.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "signingIdentity": "-",
+      "minimumSystemVersion": "10.15"
+    },
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": true
+      }
+    }
   }
 }

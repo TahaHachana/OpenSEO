@@ -1,0 +1,177 @@
+name: Release
+
+# Pushing a tag like `v0.1.0` builds the desktop installers and CLI binaries
+# for Linux, Windows and macOS and attaches them to a *draft* GitHub release,
+# to be reviewed and published by hand.
+#
+# Without a tag (a manual run, or a push that changes the packaging setup) the
+# same files are built as downloadable workflow artifacts, without a release.
+
+on:
+  push:
+    tags: ["v*"]
+    branches: [master, rust-rewrite]
+    paths:
+      - .github/workflows/release.yml
+      - app/src-tauri/tauri.conf.json
+      - app/src-tauri/Cargo.toml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  IS_TAG: ${{ github.ref_type == 'tag' }}
+
+jobs:
+  app:
+    name: App (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # 22.04 rather than latest: an older glibc lets the AppImage and .deb
+          # run on more distributions.
+          - name: Linux
+            os: ubuntu-22.04
+            args: ""
+            bundles: |
+              target/release/bundle/deb/*.deb
+              target/release/bundle/rpm/*.rpm
+              target/release/bundle/appimage/*.AppImage
+          - name: Windows
+            os: windows-latest
+            args: ""
+            bundles: |
+              target/release/bundle/msi/*.msi
+              target/release/bundle/nsis/*.exe
+          - name: macOS
+            os: macos-latest
+            rust-targets: aarch64-apple-darwin,x86_64-apple-darwin
+            args: --target universal-apple-darwin
+            bundles: |
+              target/universal-apple-darwin/release/bundle/dmg/*.dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Tauri system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          # patchelf and the GStreamer plugins are bundled into the AppImage.
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev librsvg2-dev libayatana-appindicator3-dev patchelf \
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release
+
+      # Only to run the Tauri CLI (the frontend has no build step).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build installers
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: app
+          tauriScript: npx --yes @tauri-apps/cli@2
+          args: ${{ matrix.args }}
+          # Empty for manual runs: build only, no release.
+          tagName: ${{ env.IS_TAG == 'true' && github.ref_name || '' }}
+          releaseName: OpenSEO ${{ github.ref_name }}
+          releaseDraft: true
+          releaseBody: |
+            Desktop app installers for Linux (AppImage, .deb, .rpm), Windows (.msi, setup .exe)
+            and macOS (universal .dmg), plus the `openseo` command-line tool.
+
+            These builds are not code-signed:
+            - **macOS**: if the app "is damaged" or "can't be opened", run
+              `xattr -cr /Applications/OpenSEO.app`, or right-click the app and choose Open.
+            - **Windows**: if SmartScreen warns, choose *More info* → *Run anyway*.
+            - **Linux AppImage**: `chmod +x OpenSEO_*.AppImage`, then run it.
+
+      - name: Upload installers (manual runs)
+        if: env.IS_TAG != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: openseo-app-${{ matrix.name }}
+          path: ${{ matrix.bundles }}
+          if-no-files-found: error
+          # Test builds only; release files live on the GitHub release.
+          retention-days: 14
+
+  cli:
+    name: CLI (${{ matrix.target }})
+    # The app jobs create the draft release the binaries are attached to.
+    needs: app
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macos-latest
+            target: aarch64-apple-darwin
+          - os: macos-latest
+            target: x86_64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: cli-${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release --locked -p openseo-cli --target ${{ matrix.target }}
+
+      - name: Package
+        id: package
+        shell: bash
+        run: |
+          name="openseo-${GITHUB_REF_NAME}-${{ matrix.target }}"
+          dir="target/${{ matrix.target }}/release"
+          mkdir "$name"
+          cp LICENSE-MIT LICENSE-APACHE "$name/"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cp "$dir/openseo.exe" "$name/"
+            7z a "$name.zip" "$name" > /dev/null
+            echo "file=$name.zip" >> "$GITHUB_OUTPUT"
+          else
+            cp "$dir/openseo" "$name/"
+            tar czf "$name.tar.gz" "$name"
+            echo "file=$name.tar.gz" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Attach to the draft release
+        if: env.IS_TAG == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$GITHUB_REF_NAME" "${{ steps.package.outputs.file }}" --clobber
+
+      - name: Upload (manual runs)
+        if: env.IS_TAG != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.file }}
+          path: ${{ steps.package.outputs.file }}
+          if-no-files-found: error
+          # Test builds only; release files live on the GitHub release.
+          retention-days: 14

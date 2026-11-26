@@ -5,6 +5,7 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 repository.workspace = true
+license.workspace = true
 publish.workspace = true
 
 [lints]
@@ -21,8 +22,9 @@ tauri-plugin-store = "2"
 tokio = { version = "1.54.1", features = ["sync", "time"] }
 
 [build-dependencies]
-tauri-build = "2"
+tauri-build = { version = "2", features = [] }
 
-# Linux: moves the renderer webview out of sight (see src/render.rs).
+# Linux: moves the renderer webview out of sight and turns its media off (see src/render.rs).
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk = "0.18"
+webkit2gtk = { version = "2.0", features = ["v2_26"] }
