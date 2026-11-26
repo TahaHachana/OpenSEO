@@ -16,6 +16,7 @@ Branch: `rust-rewrite`
 - [x] Phase 5: rendered-DOM mode (app only; verified on Linux X11 and Wayland, not yet on Windows/macOS)
 - [x] Phase 6: modernized rules, new page/response checks, robots.txt + sitemap crawl checks (external validators not done)
 - [x] Phase 7: release workflow, licenses (Linux bundles verified locally; Windows/macOS built by CI only; no updater yet)
+- [x] Phase 8: .NET project removed, new README with screenshots
 
 Deliberate deviations from SEOLib (bugs fixed while porting, modernized rules) are
 listed in the module docs of `keywords.rs`, `rules/mod.rs` and `html.rs`.
@@ -23,8 +24,8 @@ listed in the module docs of `keywords.rs`, `rules/mod.rs` and `html.rs`.
 ## 1. What we are porting
 
 The analysis lives in [SEOLib](https://github.com/TahaHachana/SEOLib) (~1,200 lines
-of F#). This repo adds a thin `Review` aggregation and a WebSharper UI, which will be
-replaced entirely.
+of F#). This repo added a thin `Review` aggregation and a WebSharper UI, now replaced
+entirely (removed in Phase 8; the F# code remains in the git history).
 
 | SEOLib module | What it does | Rust destination |
 |---|---|---|
