@@ -90,6 +90,8 @@ jobs:
           tagName: ${{ env.IS_TAG == 'true' && github.ref_name || '' }}
           releaseName: OpenSEO ${{ github.ref_name }}
           releaseDraft: true
+          # 0.x versions and suffixed tags (v1.2.0-beta.1) are pre-releases.
+          prerelease: ${{ startsWith(github.ref_name, 'v0.') || contains(github.ref_name, '-') }}
           releaseBody: |
             Desktop app installers for Linux (AppImage, .deb, .rpm), Windows (.msi, setup .exe)
             and macOS (universal .dmg), plus the `openseo` command-line tool.
