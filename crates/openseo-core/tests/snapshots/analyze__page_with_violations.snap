@@ -6,6 +6,7 @@ expression: a
   "title": "Shop",
   "metaDescription": "A very long description that keeps going on and on about everything the shop sells, every product, every category, every promotion and every season of the year.",
   "metaKeywords": null,
+  "canonical": null,
   "headings": [
     {
       "level": 1,

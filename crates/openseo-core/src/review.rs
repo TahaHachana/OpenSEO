@@ -5,18 +5,20 @@ use serde::Serialize;
 use url::Url;
 
 use crate::fetch::{self, FetchOptions, Fetched};
-use crate::html::{self, Heading, Hyperlink};
+use crate::html::{self, ElementTexts, Heading, Hyperlink};
 use crate::keywords::{self, Keyword};
 use crate::rules::{self, Level, Violation};
 
 /// Everything derived from an HTML document. Independent of how it was obtained,
-/// so a rendered DOM (Phase 5) can be analyzed the same way as the raw response.
+/// so a rendered DOM is analyzed the same way as the raw response.
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Analysis {
     pub title: Option<String>,
     pub meta_description: Option<String>,
     pub meta_keywords: Option<String>,
+    /// `<link rel="canonical">`, resolved to an absolute URL.
+    pub canonical: Option<String>,
     pub headings: Vec<Heading>,
     pub text_html_ratio: f64,
     pub keywords: Vec<Keyword>,
@@ -27,6 +29,12 @@ pub struct Analysis {
 
 /// Analyzes an HTML document served at `url`.
 pub fn analyze(source: &str, url: &Url) -> Analysis {
+    analyze_with_text(source, url, &ElementTexts::default())
+}
+
+/// [`analyze`], with heading and anchor text a browser computed (see
+/// [`ElementTexts`]) in place of the DOM text where it is available.
+pub fn analyze_with_text(source: &str, url: &Url, text: &ElementTexts) -> Analysis {
     let doc = Html::parse_document(source);
     let (errors, warnings) = rules::review(&doc, source, url)
         .into_iter()
@@ -35,10 +43,11 @@ pub fn analyze(source: &str, url: &Url) -> Analysis {
         title: html::title(&doc),
         meta_description: html::meta_description(&doc),
         meta_keywords: html::meta_keywords(&doc),
-        headings: html::headings(&doc),
+        canonical: html::canonical(&doc, url),
+        headings: html::headings_with(&doc, &text.headings),
         text_html_ratio: html::text_html_ratio(&doc, source),
         keywords: keywords::analyze(&doc),
-        links: html::hyperlinks(&doc, url),
+        links: html::hyperlinks_with(&doc, url, &text.links),
         errors,
         warnings,
     }

@@ -6,11 +6,13 @@
 //! Entry points:
 //! - [`review`]: normalize a URL, fetch it, analyze it.
 //! - [`analyze`]: analyze HTML you already have (no network).
+//! - [`render`]: analyze a page a browser rendered, and compare it with the raw HTML.
 
 pub mod fetch;
 pub mod html;
 pub mod keywords;
 pub mod pagespeed;
+pub mod render;
 pub mod review;
 pub mod rules;
 pub mod source;
@@ -18,7 +20,7 @@ mod text;
 pub mod url;
 
 pub use fetch::{FetchOptions, UserAgent};
-pub use review::{Analysis, Review, ReviewResult, analyze, review};
+pub use review::{Analysis, Review, ReviewResult, analyze, analyze_with_text, review};
 
 /// The crate version, shown in the CLI and app.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -307,6 +307,10 @@ fn print_review(review: &Review, verbose: bool, top: usize) {
     if let Some(k) = &c.meta_keywords {
         println!("Meta keywords    {k}");
     }
+    println!(
+        "Canonical        {}",
+        c.canonical.as_deref().unwrap_or("(none)")
+    );
     println!("Text/HTML ratio  {} %", c.text_html_ratio);
 
     section(&format!("Headings ({})", c.headings.len()));

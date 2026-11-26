@@ -488,3 +488,36 @@ details.audits li .title { font-weight: 600; }
 details.audits li .savings { margin-left: auto; color: var(--warn); white-space: nowrap; font-size: 13px; }
 details.audits li p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
 code { font-family: var(--mono); font-size: 0.9em; padding: 0 3px; background: var(--surface-2); border-radius: 3px; }
+
+/* ───────── Rendered page ───────── */
+
+.tabs { align-items: flex-end; }
+.tabs-end { margin-left: auto; padding-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.segmented button:disabled { opacity: 0.5; cursor: default; }
+.segmented button.busy::after {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-left: 6px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: -1px;
+  animation: spin 0.8s linear infinite;
+}
+
+.field.check { display: flex; align-items: center; gap: 8px; }
+.field.check input { margin: 0; width: 16px; height: 16px; accent-color: var(--accent-strong); }
+
+.js-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+.js-head .grow { flex: 1; }
+.js-section { margin-top: 20px; }
+.js-section h3 { margin: 0 0 8px; font-size: 14px; }
+.js-section > p { margin: 0 0 8px; }
+.notice { padding: 10px 14px; border-radius: var(--radius); background: var(--warn-soft); color: var(--text); margin-bottom: 12px; }
+.compare td.value-cell { word-break: break-word; }
+.compare td.value-cell div + div { margin-top: 4px; }
+.compare tr.changed td:first-child { box-shadow: inset 3px 0 0 var(--warn); }
+.compare .none { color: var(--muted); font-style: italic; }
+.compare th.label, .compare td.label { white-space: nowrap; width: 1%; }

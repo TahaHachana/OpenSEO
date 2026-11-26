@@ -27,8 +27,9 @@
     <section id="empty" class="state">
       <h1>SEO report for any web page</h1>
       <p>Enter a URL to check its title, description, headings, keywords, links and markup issues.</p>
-      <p class="muted">Pages are fetched from your computer. PageSpeed tests run only when you
-        start one, and send the page URL to Google.</p>
+      <p class="muted">Pages are fetched from your computer, then rendered in a hidden browser to
+        see what JavaScript changes. PageSpeed tests run only when you start one, and send the
+        page URL to Google.</p>
     </section>
 
     <section id="loading" class="state" hidden>
@@ -58,6 +59,13 @@
         <button role="tab" data-tab="keywords">Keywords</button>
         <button role="tab" data-tab="links">Links <span id="links-count" class="count"></span></button>
         <button role="tab" data-tab="headers">HTTP headers <span id="headers-count" class="count"></span></button>
+        <button role="tab" data-tab="js">JavaScript <span id="js-count" class="count"></span></button>
+        <div class="tabs-end">
+          <div class="segmented" id="source" role="group" aria-label="HTML analyzed">
+            <button data-source="raw" aria-pressed="true" title="The HTML the server sent">Source HTML</button>
+            <button data-source="rendered" aria-pressed="false" title="The page after its JavaScript ran" disabled>Rendered</button>
+          </div>
+        </div>
       </nav>
 
       <div class="panel" id="tab-overview" role="tabpanel"></div>
@@ -111,6 +119,7 @@
           <tbody></tbody>
         </table>
       </div>
+      <div class="panel" id="tab-js" role="tabpanel" hidden></div>
     </section>
   </main>
 
@@ -129,6 +138,14 @@
       <input id="ua-custom" type="text" spellcheck="false" placeholder="Custom User-Agent string" hidden>
       <p class="hint">Some sites block unfamiliar bots. If a page returns 403, try a Chrome preset.
         Sites that verify Googlebot by IP address block fake Googlebot requests.</p>
+
+      <label class="field check">
+        <input id="render-js" type="checkbox">
+        Render pages with JavaScript
+      </label>
+      <p class="hint">Loads each page in a hidden browser too, and compares what its scripts
+        produce with the source HTML. The page's scripts, including ads and trackers, run on
+        your computer, as when you visit it.</p>
 
       <label class="field" for="psi-key">PageSpeed Insights API key</label>
       <div class="key-row">

@@ -46,7 +46,11 @@ const state = {
   review: null,
   kw: { words: 1, filter: "", sort: "occurrence", dir: "desc" },
   links: { kind: "all", filter: "" },
-  settings: { userAgent: { preset: "openSeo" }, pagespeedApiKey: null },
+  settings: { userAgent: { preset: "openSeo" }, pagespeedApiKey: null, renderJavascript: true },
+  /** Which HTML the content tabs analyze: "raw" (as served) or "rendered". */
+  source: "raw",
+  /** The rendered-page run for the current review. `token` identifies the run. */
+  render: { status: "idle" },
   /** User-Agent label of the review on screen (settings may change afterwards). */
   reviewUserAgent: "",
   /** PageSpeed runs for the current review's URL, keyed by strategy. */
@@ -65,6 +69,7 @@ $("review-form").addEventListener("submit", async (e) => {
   if (!url) return;
 
   const id = ++requestId; // a newer request makes this one's result stale
+  state.render = { status: "idle" };
   const userAgent = userAgentLabel(state.settings.userAgent);
   $("loading-url").textContent = url;
   $("submit").disabled = true;
@@ -94,8 +99,12 @@ function render(result) {
   switch (result.result) {
     case "success":
       state.review = result;
+      state.source = "raw";
+      state.render = { status: state.settings.renderJavascript ? "idle" : "off" };
       renderReport(result);
-      return show("report");
+      show("report");
+      if (state.settings.renderJavascript) startRender();
+      return;
     case "invalidUrl":
       return failure("Not a valid URL", `"${result.input}" can't be read as an http or https address.`);
     case "fetchFailed":
@@ -158,17 +167,44 @@ function httpSummary(http) {
   );
 }
 
+/** The analysis the content tabs show: of the source HTML or the rendered page. */
+function currentContent() {
+  return state.source === "rendered" && state.render.status === "done"
+    ? state.render.result.content
+    : state.review.content;
+}
+
 function renderReport(r) {
-  const { http, content: c } = r;
+  const { http } = r;
 
   const finalUrl = $("final-url");
   finalUrl.replaceWith(Object.assign(extLink(http.finalUrl), { id: "final-url" }));
   $("redirects").replaceChildren(...(redirectChain(http)?.childNodes ?? []));
+  $("headers-count").textContent = http.headers.length;
+  renderHeaders(http);
+
+  renderContent();
+  renderSourceSwitch();
+  renderJs();
+
+  // PageSpeed results belong to the previous page; start over for this one.
+  state.speed.url = http.finalUrl;
+  state.speed.runs = {};
+  renderSpeed();
+}
+
+/** Facts and tabs that depend on which HTML is analyzed. */
+function renderContent() {
+  const { http } = state.review;
+  const c = currentContent();
+  const rendered = c !== state.review.content;
 
   $("facts").replaceChildren(
     fact("Status", http.status, "ok"),
     fact("Response", `${fmt.format(http.elapsedMs)} ms`),
-    fact("Size", `${fmt.format(http.sizeKb)} KB`),
+    rendered
+      ? fact("Rendered size", `${fmt.format(state.render.result.sizeKb)} KB`)
+      : fact("Size", `${fmt.format(http.sizeKb)} KB`),
     fact("Errors", c.errors.length, c.errors.length ? "error" : "ok"),
     fact("Warnings", c.warnings.length, c.warnings.length ? "warn" : "ok"),
     fact("Links", c.links.length),
@@ -181,25 +217,18 @@ function renderReport(r) {
   issuesCount.textContent = issues;
   issuesCount.className = `count ${c.errors.length ? "error" : issues ? "warn" : ""}`;
   $("links-count").textContent = c.links.length;
-  $("headers-count").textContent = http.headers.length;
 
   renderOverview(c);
-  renderIssues(c);
+  renderIssues(c, rendered);
   renderKeywords();
   renderLinks();
-  renderHeaders(http);
-
-  // PageSpeed results belong to the previous page; start over for this one.
-  state.speed.url = http.finalUrl;
-  state.speed.runs = {};
-  renderSpeed();
 }
 
 // ───────────────────────────── Tabs ─────────────────────────────
 
-document.querySelectorAll(".tabs button").forEach((tab) => {
+document.querySelectorAll(".tabs [role=tab]").forEach((tab) => {
   tab.addEventListener("click", () => {
-    document.querySelectorAll(".tabs button").forEach((t) => {
+    document.querySelectorAll(".tabs [role=tab]").forEach((t) => {
       const selected = t === tab;
       t.setAttribute("aria-selected", selected);
       $(`tab-${t.dataset.tab}`).hidden = !selected;
@@ -274,25 +303,28 @@ function renderOverview(c) {
 
 // ───────────────────────────── Issues ─────────────────────────────
 
-function issueCard(v) {
+function issueCard(v, rendered) {
   const isError = v.level === "Error";
   return h("article", { class: `issue ${isError ? "error" : ""}` },
     h("div", { class: "issue-head" },
       h("span", { class: `badge ${isError ? "error" : "warn"}` }, v.level),
       h("span", { class: "badge" }, v.category),
       h("strong", {}, v.heading),
-      v.position ? h("span", { class: "where" }, `line ${v.position.line}, col ${v.position.column}`) : null,
+      v.position
+        ? h("span", { class: "where", title: rendered ? "Position in the serialized rendered DOM" : null },
+            `${rendered ? "rendered " : ""}line ${v.position.line}, col ${v.position.column}`)
+        : null,
     ),
     h("p", {}, v.description),
     h("p", { class: "fix" }, v.recommendation),
   );
 }
 
-function renderIssues(c) {
+function renderIssues(c, rendered) {
   const all = [...c.errors, ...c.warnings];
   $("tab-issues").replaceChildren(
     all.length
-      ? h("div", { class: "issues" }, all.map(issueCard))
+      ? h("div", { class: "issues" }, all.map((v) => issueCard(v, rendered)))
       : h("div", { class: "card all-clear" },
           h("span", { class: "badge ok" }, "All clear"),
           h("p", {}, "No markup issues found by the current rules.")),
@@ -334,7 +366,7 @@ function renderKeywords() {
   if (!state.review) return;
   const { words, filter, sort, dir } = state.kw;
   const sign = dir === "asc" ? 1 : -1;
-  const list = state.review.content.keywords
+  const list = currentContent().keywords
     .filter((k) => k.words === words && (!filter || k.combination.includes(filter)))
     .sort((a, b) => {
       const x = a[sort], y = b[sort];
@@ -380,7 +412,7 @@ $("link-filter").addEventListener("input", (e) => {
 function renderLinks() {
   if (!state.review) return;
   const { kind, filter } = state.links;
-  const list = state.review.content.links.filter((l) =>
+  const list = currentContent().links.filter((l) =>
     (kind === "all" || l.kind === kind || l.rel === kind) &&
     (!filter || l.url.toLowerCase().includes(filter) || l.anchor.toLowerCase().includes(filter)));
 
@@ -423,7 +455,8 @@ function syncCustomField() {
 }
 
 function openSettings() {
-  const { userAgent, pagespeedApiKey } = state.settings;
+  const { userAgent, pagespeedApiKey, renderJavascript } = state.settings;
+  $("render-js").checked = renderJavascript !== false;
   $("ua-preset").value = userAgent.preset in USER_AGENT_LABELS ? userAgent.preset : "openSeo";
   $("ua-custom").value = userAgent.preset === "custom" ? userAgent.value ?? "" : "";
   $("psi-key").value = pagespeedApiKey ?? "";
@@ -463,6 +496,7 @@ $("settings-form").addEventListener("submit", async (e) => {
   const settings = {
     userAgent: preset === "custom" ? { preset, value: custom } : { preset },
     pagespeedApiKey: $("psi-key").value.trim() || null,
+    renderJavascript: $("render-js").checked,
   };
   try {
     await invoke("save_settings", { settings });
@@ -474,6 +508,11 @@ $("settings-form").addEventListener("submit", async (e) => {
   state.settings = settings;
   $("settings").close();
   renderSpeed(); // the no-key hint may have changed
+  if (state.review && !$("report").hidden) {
+    if (settings.renderJavascript && state.render.status === "off") startRender();
+    else if (!settings.renderJavascript && state.render.status === "idle") state.render = { status: "off" };
+    renderJs();
+  }
 });
 
 // ───────────────────────────── Speed (PageSpeed Insights) ─────────────────────────────
@@ -633,6 +672,182 @@ function renderSpeed() {
   } else if (run.status === "error") body = speedError(run.error);
   else body = speedReport(run.report);
   $("speed-body").replaceChildren(...[body].flat(Infinity).filter(Boolean));
+}
+
+// ───────────────────────────── Rendered page (JavaScript) ─────────────────────────────
+
+$("source").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b || b.disabled || b.dataset.source === state.source) return;
+  state.source = b.dataset.source;
+  renderSourceSwitch();
+  renderContent();
+});
+
+function renderSourceSwitch() {
+  const rendered = $("source").querySelector('[data-source="rendered"]');
+  const { status } = state.render;
+  setPressed($("source"), $("source").querySelector(`[data-source="${state.source}"]`));
+  rendered.disabled = status !== "done";
+  rendered.classList.toggle("busy", status === "loading");
+  rendered.title = {
+    loading: "Rendering the page…",
+    error: "Rendering failed; see the JavaScript tab",
+    off: "Rendering is off; see the JavaScript tab",
+  }[status] ?? "The page after its JavaScript ran";
+}
+
+async function startRender() {
+  const url = state.review.http.finalUrl;
+  const token = {};
+  state.render = { status: "loading", token, url };
+  renderSourceSwitch();
+  renderJs();
+  let next;
+  try {
+    next = { status: "done", result: await invoke("render", { url }) };
+  } catch (err) {
+    next = { status: "error", error: typeof err === "object" ? err : { kind: "unknown", message: String(err) } };
+  }
+  if (state.render.token !== token) return; // a newer review or render replaced this one
+  Object.assign(state.render, next);
+  renderSourceSwitch();
+  renderJs();
+}
+
+function openPreview(url) {
+  invoke("open_preview", { url }).catch((err) => console.error("preview failed", err));
+}
+
+const FIELD_LABELS = {
+  url: "URL",
+  title: "Title",
+  metaDescription: "Meta description",
+  canonical: "Canonical",
+  h1: "H1",
+};
+
+const LINK_ROWS = 200;
+
+function changeCount(diff) {
+  return diff.fields.filter((f) => f.changed).length + diff.linksAdded.length + diff.linksRemoved.length;
+}
+
+function table(head, rows, cls = "data") {
+  return h("table", { class: cls },
+    h("thead", {}, h("tr", {}, head.map((t) => h("th", { class: t.cls }, t.text ?? t)))),
+    h("tbody", {}, rows));
+}
+
+function fieldValues(list) {
+  return list.length ? list.map((v) => h("div", {}, v)) : h("span", { class: "none" }, "(none)");
+}
+
+function linksSection(title, links, hint) {
+  const rows = links.slice(0, LINK_ROWS).map((l) =>
+    h("tr", {},
+      h("td", {}, l.anchor || h("span", { class: "muted" }, "(no text)")),
+      h("td", { class: "url" }, extLink(l.url)),
+      h("td", {}, l.kind),
+      h("td", {}, l.rel === "NoFollow" ? h("span", { class: "badge warn" }, "nofollow") : "follow")));
+  if (links.length > LINK_ROWS) {
+    rows.push(h("tr", { class: "empty-row" }, h("td", { colspan: 4 }, `${links.length - LINK_ROWS} more`)));
+  }
+  return h("section", { class: "js-section" },
+    h("h3", {}, `${title} (${links.length})`),
+    links.length
+      ? [h("p", { class: "muted small" }, hint), table(["Anchor text", "URL", "Type", "Rel"], rows)]
+      : h("p", { class: "muted small" }, "None."));
+}
+
+function renderedReport(r) {
+  const raw = state.review.content;
+  const ren = r.content;
+  const changed = r.diff.fields.filter((f) => f.changed);
+  const count = (c, kind) => c.links.filter((l) => l.kind === kind).length;
+  const totals = [
+    ["Links", raw.links.length, ren.links.length],
+    ["Internal links", count(raw, "Internal"), count(ren, "Internal")],
+    ["External links", count(raw, "External"), count(ren, "External")],
+    ["Headings", raw.headings.length, ren.headings.length],
+    ["Errors", raw.errors.length, ren.errors.length],
+    ["Warnings", raw.warnings.length, ren.warnings.length],
+    ["Text/HTML ratio", `${fmt.format(raw.textHtmlRatio)} %`, `${fmt.format(ren.textHtmlRatio)} %`],
+  ];
+  return [
+    h("div", { class: "js-head" },
+      h("div", { class: "grow muted" },
+        `Rendered in ${formatMs(r.elapsedMs)} · ${fmt.format(r.sizeKb)} KB of HTML after scripts ran, `,
+        `${fmt.format(state.review.http.sizeKb)} KB as sent · User-Agent: ${state.reviewUserAgent}`),
+      h("button", { class: "secondary", type: "button", onclick: () => openPreview(r.url) }, "Open preview"),
+      h("button", { class: "secondary", type: "button", onclick: startRender }, "Render again")),
+    r.settled ? null : h("div", { class: "notice" },
+      "The page was still loading or changing after 20 seconds. Content that arrives later is missing from this capture."),
+    h("section", { class: "js-section" },
+      h("h3", {}, "Key elements"),
+      h("p", { class: "muted small" }, changed.length
+        ? `JavaScript changes the ${changed.map((f) => FIELD_LABELS[f.field]).join(", ")}. Crawlers that don't run JavaScript see the source version.`
+        : "JavaScript doesn't change these."),
+      table(
+        [{ text: "", cls: "label" }, "Source HTML", "Rendered", { text: "", cls: "label" }],
+        r.diff.fields.map((f) =>
+          h("tr", { class: f.changed ? "changed" : "" },
+            h("td", { class: "label" }, FIELD_LABELS[f.field] ?? f.field),
+            h("td", { class: "value-cell" }, fieldValues(f.raw)),
+            h("td", { class: "value-cell" }, fieldValues(f.rendered)),
+            h("td", { class: "label" }, f.changed ? h("span", { class: "badge warn" }, "changed") : h("span", { class: "muted small" }, "same")))),
+        "data compare")),
+    h("section", { class: "js-section" },
+      h("h3", {}, "Totals"),
+      table(
+        ["", { text: "Source HTML", cls: "num" }, { text: "Rendered", cls: "num" }],
+        totals.map(([label, a, b]) =>
+          h("tr", { class: a === b ? "" : "changed" },
+            h("td", {}, label), h("td", { class: "num" }, a), h("td", { class: "num" }, b))),
+        "data compare")),
+    linksSection("Links added by JavaScript", r.diff.linksAdded,
+      "Crawlers that don't run JavaScript never see these. Google finds them only after rendering the page, which can happen well after crawling."),
+    linksSection("Links removed by JavaScript", r.diff.linksRemoved,
+      "In the source HTML, but gone from the rendered page."),
+    h("p", { class: "muted small" },
+      "Use the Source HTML / Rendered switch above the tabs to see the full analysis of either version."),
+  ];
+}
+
+function renderJs() {
+  const run = state.render;
+  const badge = $("js-count");
+  badge.textContent = "";
+  badge.className = "count";
+  let body = null;
+  switch (run.status) {
+    case "loading":
+      body = h("div", { class: "state" },
+        h("div", { class: "spinner", "aria-hidden": "true" }),
+        h("p", {}, "Running the page's JavaScript in a hidden browser…"),
+        h("p", { class: "muted small" }, "Waits until the page stops loading and changing, up to 20 seconds."));
+      break;
+    case "off":
+      body = h("div", { class: "card speed-start" },
+        h("p", {}, "See the page as browsers and Google see it after its JavaScript runs, and what the scripts change."),
+        h("p", { class: "muted small" }, "Automatic rendering is off in Settings. The page's scripts run on your computer."),
+        h("button", { class: "primary", type: "button", onclick: startRender }, "Render this page"));
+      break;
+    case "error":
+      body = h("div", { class: "card speed-error" },
+        h("h3", {}, "Rendering failed"),
+        h("p", {}, run.error.message),
+        h("button", { class: "secondary", type: "button", onclick: startRender }, "Try again"));
+      break;
+    case "done": {
+      body = renderedReport(run.result);
+      const n = changeCount(run.result.diff);
+      badge.textContent = n;
+      if (n) badge.className = "count warn";
+      break;
+    }
+  }
+  $("tab-js").replaceChildren(...[body].flat(Infinity).filter(Boolean));
 }
 
 // ───────────────────────────── Startup ─────────────────────────────

@@ -13,7 +13,7 @@ Branch: `rust-rewrite`
 - [x] Phase 2: CLI (`openseo report <url> [--json] [-v] [--top N] [--googlebot]`)
 - [x] Phase 3: Tauri app MVP (`cargo run -p openseo-app [-- <url>]`)
 - [x] Phase 4: PageSpeed Insights + CrUX field data, settings (User-Agent presets, API key)
-- [ ] Phase 5: rendered-DOM mode
+- [x] Phase 5: rendered-DOM mode (app only; verified on Linux X11 and Wayland, not yet on Windows/macOS)
 
 Deliberate deviations from SEOLib (bugs fixed while porting) are listed in the
 module docs of `keywords.rs`, `rules.rs` and `html.rs`.
@@ -129,9 +129,34 @@ except speed.
   sibling `<span>`s that CSS displays as blocks run together ("GitHubRepository
   hosting" on github.com); only a CSS-aware renderer can separate them.
 
+**As built:**
+- Core: `render::{RenderedPage, RenderedReview, compare}` (diff of URL, title,
+  description, canonical, H1s, links added/removed by JS); `Analysis.canonical`;
+  `ElementTexts` aligns browser text with parsed elements by `href`/tag name.
+- Text comes from a CSS-aware DOM walk (`display` decides word boundaries), not
+  `innerText`, which would apply `text-transform` (uppercase menus).
+- App: a child webview of the main window kept out of sight (off-window position;
+  on Linux a zero-size `GtkFixed`, since Tauri packs children into the layout and
+  `GtkOffscreenWindow` aborts on Wayland). Hidden windows don't work: WebKit
+  suspends their timers. Settles on 800 ms without DOM changes or fetch/XHR in
+  flight, 20 s cap. Incognito, web-only navigation, no popups/downloads/dialogs,
+  no IPC capability. Setting "Render pages with JavaScript" (default on).
+- UI: Source HTML / Rendered switch for all content tabs, JavaScript tab with the
+  diff, preview window.
+
+**Known gaps:**
+- The webview is never painted, so animation frames are shimmed with timers and
+  `IntersectionObserver` never fires: lazy-loaded content is missed. A tall
+  viewport plus scrolling (as Googlebot does) would help.
+- Shadow DOM content isn't serialized (`outerHTML`).
+- The CLI has no renderer (would need a headless browser).
+- Off-window child positioning is untested on Windows/macOS: check that pages
+  aren't throttled there (Phase 7 CI matrix is a good moment).
+
 ### Phase 6: New checks and modernized rules
 - Update outdated thresholds: title ~30–60 chars (or ~580px), description ~70–160 chars,
   and drop or soften the 250-link error (Google removed that guideline).
+- Add `meta robots` to the raw/rendered diff (a noindex injected by JS is a classic).
 - New checks: HTTP status and redirect chain, HTTPS/HSTS, mixed content, `robots.txt`
   (is this URL allowed?), sitemap discovery and inclusion, canonical, `meta robots` /
   `X-Robots-Tag`, `hreflang`, `lang`, viewport, Open Graph / Twitter cards, JSON-LD

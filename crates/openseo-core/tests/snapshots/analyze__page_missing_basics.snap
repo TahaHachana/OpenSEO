@@ -6,6 +6,7 @@ expression: a
   "title": null,
   "metaDescription": null,
   "metaKeywords": null,
+  "canonical": null,
   "headings": [
     {
       "level": 2,

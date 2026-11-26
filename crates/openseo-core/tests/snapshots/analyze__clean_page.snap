@@ -6,6 +6,7 @@ expression: a
   "title": "Fresh Roasted Coffee Beans | Acme Roasters",
   "metaDescription": "Single-origin coffee beans roasted to order and shipped within 48 hours. Free shipping on orders over $40.",
   "metaKeywords": "coffee, beans, roastery",
+  "canonical": "https://acme.example/",
   "headings": [
     {
       "level": 1,
@@ -20,7 +21,7 @@ expression: a
       "text": "Brewing guides"
     }
   ],
-  "textHtmlRatio": 28.41,
+  "textHtmlRatio": 27.57,
   "keywords": [
     {
       "words": 1,
